@@ -1,0 +1,17 @@
+/* Architectural drawing and an intentionally restrained bronze / ink palette. */
+body:not(.project-page):not(.mini-page) main>.hero{overflow:visible;min-height:calc(100svh - 84px);padding-top:clamp(55px,8vh,100px);padding-bottom:120px}
+body:not(.project-page):not(.mini-page) main>.hero:before{background:radial-gradient(ellipse at 79% 48%,#263f43 0%,#12262c 47%,#0c1a20 100%);animation:none}
+body:not(.project-page):not(.mini-page) main>.hero:after{color:#dacbb8}
+.architectural-stage{pointer-events:none;position:absolute;z-index:-1;right:-5vw;top:0;width:min(70vw,1000px);height:100%;display:grid;place-items:center;overflow:hidden;mask-image:linear-gradient(to right,transparent 0%,#000 20%)}
+.architectural-stage img{display:block;width:100%;height:100%;object-fit:contain;opacity:.92;transform:translateX(4%);animation:stage-in 1.8s ease both}
+body:not(.project-page):not(.mini-page) .hero h1{max-width:740px;font-size:clamp(58px,6.4vw,100px);line-height:1.03;text-shadow:0 3px 35px #071318}
+body:not(.project-page):not(.mini-page) .hero h1 em{color:#dcb395}body:not(.project-page):not(.mini-page) .hero p{max-width:460px;color:#d0d9d7}
+.hero .actions .btn{background:#dec6a9!important;color:#10262b!important;box-shadow:0 8px 25px #020b0d33}.hero .actions .btn:hover{background:#fff!important;transform:translateY(-3px)}
+.banner .scene{transition:transform .6s cubic-bezier(.2,.7,.2,1),filter .6s}.banner .scene:hover{filter:brightness(1.08)}.scene .label{transition:padding .35s}.scene:hover .label{padding-bottom:29px}
+@keyframes stage-in{from{opacity:0;transform:translate(8%,18px) scale(.95)}to{opacity:.92;transform:translate(4%,0) scale(1)}}
+@media(max-width:800px){.architectural-stage{right:-28%;top:8%;width:100%;height:80%;opacity:.55;mask-image:linear-gradient(to right,transparent,#000 35%)}body:not(.project-page):not(.mini-page) .hero h1{max-width:630px;font-size:clamp(48px,8vw,72px)}}
+@media(max-width:480px){body:not(.project-page):not(.mini-page) main>.hero{min-height:calc(100svh - 72px);padding:50px 0 95px}.architectural-stage{right:-55%;top:15%;width:145%;height:70%;opacity:.38}body:not(.project-page):not(.mini-page) .hero h1{font-size:clamp(43px,11.8vw,59px)}body:not(.project-page):not(.mini-page) .hero p{font-size:16px;max-width:300px}}
+@media(prefers-reduced-motion:reduce){.architectural-stage img{animation:none}}
+body{overflow-x:clip}
+@media(max-width:800px){.architectural-stage{right:0;width:100%}}
+@media(max-width:480px){.architectural-stage{right:0;width:100%;opacity:.32}}
