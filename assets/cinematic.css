@@ -11,3 +11,11 @@ body.project-page .caption{animation:caption-in 1s .7s both}.project-page .secti
 body.mini-page .hero:before{animation:mini-breathe 12s ease-in-out infinite alternate!important}.mini-page .tool:nth-child(1) .screen{background:#c6e1de}.mini-page .tool:nth-child(2) .screen{background:#e7c9ba}.mini-page .tool:nth-child(3) .screen{background:#cbd8e0}.mini-page .tool:nth-child(4) .screen{background:#d9cfe1}
 @keyframes project-light{0%,15%{transform:translateX(-100%)}70%,100%{transform:translateX(100%)}}@keyframes caption-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes mini-breathe{from{filter:brightness(.85)}to{filter:brightness(1.1)}}
 @media(prefers-reduced-motion:reduce){body.project-page .visual:after,body.mini-page .hero:before{animation:none!important}.tool .screen img{transition:none}}
+/* Distinct, directional motion across the project family. */
+body.project-page .hero .visual{box-shadow:0 26px 65px #10252a26}body.project-page .hero .visual img{animation:project-entry 1.8s cubic-bezier(.17,.65,.2,1) both}
+.js-reveal .project.reveal,.js-reveal .sections article.reveal{transform:translateY(38px)}.js-reveal .project.reveal.is-visible,.js-reveal .sections article.reveal.is-visible{transform:translateY(0)}
+.js-reveal .tool.reveal{transform:translateY(42px) scale(.975)}.js-reveal .tool.reveal.is-visible{transform:translateY(0) scale(1)}
+.scene img,.tool .screen img{transform-origin:center;transition:transform 1s cubic-bezier(.2,.7,.2,1),filter .8s}.scene:hover img,.tool:hover .screen img{transform:scale(1.06)}
+.project-page .hero h1,.project-page .hero .lead{animation:project-copy 1s cubic-bezier(.2,.7,.2,1) both}.project-page .hero .lead{animation-delay:.16s}.project-page .hero .btn{animation-delay:.3s}
+@keyframes project-entry{from{opacity:0;transform:scale(1.075) translateY(14px);filter:blur(4px)}to{opacity:1;transform:scale(1) translateY(0);filter:blur(0)}}@keyframes project-copy{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){body.project-page .hero .visual img,.project-page .hero h1,.project-page .hero .lead{animation:none}.js-reveal .tool.reveal,.js-reveal .project.reveal,.js-reveal .sections article.reveal{opacity:1;transform:none}}

@@ -15,3 +15,13 @@ body:not(.project-page):not(.mini-page) .hero h1 em{color:#dcb395}body:not(.proj
 body{overflow-x:clip}
 @media(max-width:800px){.architectural-stage{right:0;width:100%}}
 @media(max-width:480px){.architectural-stage{right:0;width:100%;opacity:.32}}
+/* Conceptual dusk pavilion: slowly reveal photographic material beneath the drawing. */
+body:not(.project-page):not(.mini-page) main>.hero:before{background:linear-gradient(90deg,rgba(7,19,25,.88) 0%,rgba(7,19,25,.65) 44%,rgba(7,19,25,.15) 100%),url('/assets/architectural-pavilion.webp') center center/cover no-repeat;animation:pavilion-reveal 3.2s ease both}
+.architectural-stage img{animation:drawing-overlay 9s ease both}
+@keyframes pavilion-reveal{from{filter:brightness(.36);opacity:.45}to{filter:brightness(.92);opacity:1}}
+@keyframes drawing-overlay{0%{opacity:0;transform:translate(4%,15px)}18%{opacity:.58}65%{opacity:.43}100%{opacity:.13;transform:translate(4%,0)}}
+@media(max-width:800px){body:not(.project-page):not(.mini-page) main>.hero:before{background-position:65% center}}
+@media(max-width:480px){body:not(.project-page):not(.mini-page) main>.hero:before{background-position:67% center;background-image:linear-gradient(90deg,rgba(7,19,25,.86),rgba(7,19,25,.56)),url('/assets/architectural-pavilion.webp')}}
+@media(prefers-reduced-motion:reduce){body:not(.project-page):not(.mini-page) main>.hero:before,.architectural-stage img{animation:none}.architectural-stage img{opacity:.13}}
+.hero-concept-note{position:absolute;right:0;bottom:34px;color:#dce3df;font-size:10px;letter-spacing:.12em;text-transform:uppercase;text-shadow:0 1px 8px #061318}
+@media(max-width:480px){.hero-concept-note{font-size:8px;bottom:35px}}
