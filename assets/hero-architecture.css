@@ -25,3 +25,9 @@ body:not(.project-page):not(.mini-page) main>.hero:before{background:linear-grad
 @media(prefers-reduced-motion:reduce){body:not(.project-page):not(.mini-page) main>.hero:before,.architectural-stage img{animation:none}.architectural-stage img{opacity:.13}}
 .hero-concept-note{position:absolute;right:0;bottom:34px;color:#dce3df;font-size:10px;letter-spacing:.12em;text-transform:uppercase;text-shadow:0 1px 8px #061318}
 @media(max-width:480px){.hero-concept-note{font-size:8px;bottom:35px}}
+/* Move the architectural image itself with a slow camera push. */
+body:not(.project-page):not(.mini-page) main>.hero{clip-path:inset(0 -80px)}
+body:not(.project-page):not(.mini-page) main>.hero:before{transform-origin:65% 50%;animation:camera-drift 18s ease-in-out infinite alternate;will-change:transform}
+@keyframes camera-drift{from{transform:scale(1.03) translateX(0);filter:brightness(.82)}to{transform:scale(1.14) translateX(-1.2%);filter:brightness(1)}}
+@media(prefers-reduced-motion:reduce){body:not(.project-page):not(.mini-page) main>.hero:before{animation:none;transform:none;filter:none}}
+html{overflow-x:clip}
