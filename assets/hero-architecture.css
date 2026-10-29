@@ -31,3 +31,12 @@ body:not(.project-page):not(.mini-page) main>.hero:before{transform-origin:65% 5
 @keyframes camera-drift{from{transform:scale(1.03) translateX(0);filter:brightness(.82)}to{transform:scale(1.14) translateX(-1.2%);filter:brightness(1)}}
 @media(prefers-reduced-motion:reduce){body:not(.project-page):not(.mini-page) main>.hero:before{animation:none;transform:none;filter:none}}
 html{overflow-x:clip}
+/* A restrained camera move and warm highlights, layered over the still concept image. */
+body:not(.project-page):not(.mini-page) main>.hero:before{animation:architectural-camera 24s ease-in-out infinite alternate;transform-origin:65% 52%}
+.hero .hero-light{position:absolute;inset:0 -80px;z-index:-1;pointer-events:none;overflow:hidden;mix-blend-mode:screen;animation:window-glow 7s ease-in-out infinite alternate;background:radial-gradient(ellipse 22% 28% at 75% 51%,rgba(255,185,105,.17),transparent 75%),radial-gradient(ellipse 15% 13% at 77% 73%,rgba(250,176,101,.13),transparent 75%)}
+.hero .hero-light:after{content:'';position:absolute;inset:-25% -30%;background:linear-gradient(112deg,transparent 42%,rgba(255,226,176,.055) 49%,transparent 55%);transform:translateX(-55%);animation:glass-glint 12s ease-in-out infinite}
+@keyframes architectural-camera{0%{transform:scale(1.035) translate3d(.7%,.25%,0);filter:brightness(.89)}50%{transform:scale(1.09) translate3d(-.1%,-.15%,0);filter:brightness(.98)}100%{transform:scale(1.15) translate3d(-.8%,-.45%,0);filter:brightness(.94)}}
+@keyframes window-glow{0%,100%{opacity:.38}50%{opacity:.88}}
+@keyframes glass-glint{0%,18%{transform:translateX(-55%);opacity:0}38%{opacity:.9}68%,100%{transform:translateX(55%);opacity:0}}
+@media(max-width:480px){.hero .hero-light{inset:0 -22px;background:radial-gradient(ellipse 30% 23% at 75% 52%,rgba(255,185,105,.13),transparent 75%)}}
+@media(prefers-reduced-motion:reduce){body:not(.project-page):not(.mini-page) main>.hero:before,.hero .hero-light,.hero .hero-light:after{animation:none!important}.hero .hero-light{opacity:.25}}
