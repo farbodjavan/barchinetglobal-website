@@ -17,3 +17,6 @@
 /* Final neutral palette: white, slate and deep teal, without a cream wash. */
 :root{--paper:#f7f9fb;--ink:#18373f;--muted:#536970;--line:#cdd9dd;--accent:#176878;--gold:#d3b78e;--dark:#102e39;background:#f7f9fb}
 body{background:#f7f9fb}.site-header{background:#fff}.band{background:#e9f0f3}.page-intro,.visual-page-intro{background:transparent}.notice{background:#e8f1f3;border-color:#6c9ca9}.tool-card{background:#fff}.contact-panel{background:#e7eff3}.site-footer{background:transparent}.three-layers article{border-color:#c4d4dc}.example{background:#f1f6f8}.quote{border-color:#9eb6c2}
+/* Tighter interior-page rhythm. */
+.section{padding-block:64px}.section-heading{margin-bottom:30px}.page-intro{padding-block:58px 36px}.page-intro h1{margin-bottom:22px}.founders{margin-top:40px}.contact-panel{margin-top:36px;padding:34px}.related{padding-block:42px}.site-footer{padding-block:32px}.people-figure{margin-bottom:32px}.editorial-story{margin-bottom:34px}.editorial-story img{max-height:420px}.section.tight{padding-top:12px}
+@media(max-width:600px){.section{padding-block:40px}.section-heading{margin-bottom:25px}.page-intro{padding-block:38px 24px}.related{padding-block:32px}.site-footer{padding-block:28px}.founders{margin-top:32px}.contact-panel{padding:25px;margin-top:28px}}
