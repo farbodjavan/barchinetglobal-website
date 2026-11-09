@@ -26,19 +26,19 @@ export const courtyardProject = {
   researchQuestion: 'How can a design record help a learner explain what changed, why it changed and what remains uncertain?',
   originalPreserved: true,
   originalAssetLabel: 'Read-only AI-generated base study',
-  preservationNotice: 'The base illustration stays unchanged while annotations are stored separately. No authentic student original has been supplied in this demo.',
+  preservationNotice: 'The base illustrations and prepared annotation layer are read-only. No authentic student original has been supplied in this demo.',
   illustrationNotice: 'AI-generated conceptual illustrations. They are not authenticated sketches, measured drawings, daylight analyses or build-ready documents.',
   reflectionNotice: 'The accompanying author reflections are fictional retrospective accounts, not observations or recordings of a real designer’s thoughts.',
   synthetic: true,
-  privacy: { defaultVisibility: 'private', automaticSharing: false, automaticTransfer: false, transferRequiresOptIn: true },
-  participation: 'Students may read, ask questions and join a local demonstration discussion without owning or uploading a project.',
+  privacy: { defaultVisibility: 'public-curated-demo', visitorSubmissions: false, automaticSharing: false, automaticTransfer: false, transferRequiresOptIn: true },
+  participation: 'Anyone may read the prepared studies and conversations without owning or uploading a project. This curated demonstration accepts no visitor submissions.',
 };
 
 const notices = [
   'Fictional project, fictional contributors and synthetic discussion.',
   'AI-generated illustrations are clearly identified; no authenticity claim is made.',
-  'Keep the base drawing unchanged. Add thinking on a separate annotation layer.',
-  'Private by default. Moving or sharing material between apps is a voluntary, explicit choice.',
+  'The base drawings and prepared annotation layer stay unchanged while you explore.',
+  'Public curated reading only. No visitor writing, uploads, automatic transfers or publishing.',
   'Conceptual learning only. No automatic CAD conversion, engineering certification or build-ready output.',
 ];
 
@@ -172,33 +172,54 @@ export const archProjects = [
   {
     id: 'sketch-story', title: 'Barchi Sketch Story', shortTitle: 'Sketch Story', kicker: '01 / A LIVING DESIGN STORY', imageKey: 'sketch-01', mediaKey: 'sketch-story',
     description: 'Keep the drawing. Reveal the decisions around it.',
-    mission: 'Read three conceptual courtyard studies, explore annotations and record an interpretation on a separate layer.',
+    mission: 'Read three conceptual courtyard studies, explore prepared annotations and compare the intentions and questions behind each alternative.',
     question: 'How can an annotated version story make design decisions and open questions easier to discuss?',
     roles: [{ name: 'Student', goal: 'Explain what changed and why, without replacing the base drawing.' }, { name: 'Tutor', goal: 'Ask a question tied to a visible design decision.' }, { name: 'Curious reader', goal: 'Follow the design story without needing a project of your own.' }],
-    stages, privacy: { ...courtyardProject.privacy }, notices: [...notices], maturity: maturity(),
-    optionalTransfer: { enabledByDefault: false, target: 'project-sketchbook', label: 'Choose studies for a sketchbook', explanation: 'A deliberate selection copies only the chosen demo studies. Nothing is published or transferred automatically.' },
+    stages, viewOnly: true, privacy: { ...courtyardProject.privacy }, notices: [...notices], maturity: maturity(),
+    filmDescription: 'A camera approaches an open sketchbook of a courtyard house as a page turns. This AI-generated concept film is separate from the three annotated illustrations.',
+    optionalTransfer: { enabledByDefault: false, target: 'project-sketchbook', label: 'Related project record', explanation: 'The related sketchbook is another curated view of the shared case. This demonstration does not copy, transfer or publish visitor material.' },
   },
   {
     id: 'project-sketchbook', title: 'Barchi Project Sketchbook', shortTitle: 'Project Sketchbook', kicker: '02 / A RECORD WORTH KEEPING', imageKey: 'sketch-02', mediaKey: 'project-sketchbook',
     description: 'Turn selected moments into an enduring project book.',
-    mission: 'Explore six editable chapter ideas and choose the sequence that best explains the fictional courtyard inquiry.',
+    mission: 'Explore six curated chapters connecting a brief, drawings, critique and reflection in the fictional courtyard inquiry.',
     question: 'What should a project book preserve so another reader can understand its questions, changes and limits?',
     roles: [{ name: 'Student', goal: 'Curate a learning record with reasons, questions and clear provenance.' }, { name: 'Tutor', goal: 'Read a coherent inquiry across drawings and reflections.' }, { name: 'Project reader', goal: 'Understand the context and unresolved questions, not just the final image.' }],
-    chapters, stages, privacy: { ...courtyardProject.privacy }, notices: [...notices], maturity: maturity(),
-    optionalTransfer: { enabledByDefault: false, target: 'sketch-community', label: 'Choose an excerpt for discussion', explanation: 'Only a voluntarily selected excerpt may be prepared for a discussion. The full book stays private unless its author chooses otherwise.' },
+    chapters, stages, viewOnly: true, privacy: { ...courtyardProject.privacy }, notices: [...notices], maturity: maturity(),
+    filmDescription: 'A camera moves across a project sketchbook containing a plan, a section and a courtyard perspective. The AI-generated film illustrates a record, rather than reproducing the selected chapter.',
+    optionalTransfer: { enabledByDefault: false, target: 'sketch-community', label: 'Related studio readings', explanation: 'The related studio exchange contains prepared fictional readings. No excerpts or visitor material are transferred or published.' },
   },
   {
     id: 'sketch-community', title: 'Barchi Sketch Community', shortTitle: 'Sketch Community', kicker: '03 / LEARN THROUGH DIALOGUE', imageKey: 'sketch-03', mediaKey: 'sketch-community',
     description: 'A place for thoughtful questions, shared learning and cultural conversation.',
-    mission: 'Read six fictional discussion starters and try a respectful local reply. Participation does not require a project.',
+    mission: 'Read six fictional studio exchanges, including observations, questions and responses. No project or visitor reply is required.',
     question: 'How can a community support thoughtful participation around sketches without turning learning into a popularity contest?',
-    roles: [{ name: 'Learner', goal: 'Join through observation or a question, with or without a project.' }, { name: 'Project author', goal: 'Invite specific feedback on an excerpt they choose to share.' }, { name: 'Tutor / facilitator', goal: 'Support respectful inquiry, context and different readings.' }],
-    posts, stages, privacy: { ...courtyardProject.privacy }, notices: [...notices, 'The gallery and its replies are synthetic examples. A local reply is a demonstration, not a message sent to real people.'], maturity: maturity(),
+    roles: [{ name: 'Learner', goal: 'Notice how a specific observation can become a useful question, with or without a project of your own.' }, { name: 'Project author', goal: 'Follow how the fictional author distinguishes a design intention from an observed effect.' }, { name: 'Tutor / facilitator', goal: 'Look for respectful inquiry, missing context and different readings of the work.' }],
+    posts, stages, viewOnly: true, privacy: { ...courtyardProject.privacy }, notices: [...notices, 'The studio exchanges and all participants are fictional, prepared examples. There is no live discussion or messaging.'], maturity: maturity(),
+    filmDescription: 'A camera moves over separate sheets showing different courtyard-house studies, linked by a terracotta thread. This AI-generated concept film does not depict real contributors or a live community.',
     participation: courtyardProject.participation,
     communityPrinciples: ['Observe before judging.', 'Ask about intention and context.', 'Discuss the work without ranking its author.', 'Welcome participants who have no project.', 'Share only material you choose and have the right to share.'],
     optionalTransfer: { enabledByDefault: false, target: null, label: 'Keep participation voluntary', explanation: 'No automatic import, publishing, ranking or transfer between apps.' },
   },
 ];
+
+export const archQuickStartByApp = {
+  'sketch-story': [
+    { title: 'Choose a study', text: 'Use the study list or the arrows below the drawing. Begin with the open courtyard.', label: 'Open Study 01', target: { selected: 0, pin: 0 }, focus: 'contents' },
+    { title: 'Read a numbered observation', text: 'Select a pin on the drawing to reveal its note in the reading panel. Try the entrance question.', label: 'Read the entry question', target: { selected: 0, pin: 1 }, focus: 'reading' },
+    { title: 'Compare two intentions', text: 'Compare studies places two alternatives side by side. Use the comparison selector to change the other study.', label: 'Compare Study 01 + 03', target: { selected: 2, pin: 0, compare: true, baseline: 0 }, focus: 'comparison' },
+  ],
+  'project-sketchbook': [
+    { title: 'Open a chapter', text: 'Use the chapter list or Previous and Next. The brief explains the question before the drawings.', label: 'Read the brief', target: { selected: 0 }, focus: 'canvas' },
+    { title: 'Follow what changed', text: 'Read the chapter, its reflection and the questions in the reading panel. The fourth chapter compares intentions.', label: 'Read what changed', target: { selected: 3 }, focus: 'reading' },
+    { title: 'Keep the whole record', text: 'Print record prepares all six chapters, their questions and references. You can review the print preview before saving or printing.', label: 'Print all six chapters', action: 'print' },
+  ],
+  'sketch-community': [
+    { title: 'Choose a design question', text: 'Select a topic in the question list. Begin with the proposed entrance and privacy.', label: 'Read the privacy question', target: { selected: 0, phase: 0 }, focus: 'reading' },
+    { title: 'Follow the exchange', text: 'Read the observation, question, peer reading and the author response. Each is a prepared fictional example.', label: 'Highlight the author response', target: { selected: 0, phase: 3 }, focus: 'reading' },
+    { title: 'Try another reading', text: 'Compare how the inquiry changes for daylight, culture or access. You can explore every reply without submitting anything.', label: 'Read the daylight exchange', target: { selected: 1, phase: 0 }, focus: 'reading' },
+  ],
+};
 
 const sketchProtocol = {
   type: 'Peer-reviewed research article',
@@ -253,3 +274,41 @@ export const archReferencesByApp = {
   'project-sketchbook': [{ ...sketchProtocol }, { ...reflection }, { ...studio }],
   'sketch-community': [{ ...participation }, { ...studio }, { ...reflection }],
 };
+
+const boundedIndex = (value, length) => Math.max(0, Math.min(length - 1, Number.isFinite(Number(value)) ? Math.trunc(Number(value)) : 0));
+
+/** Two distinct conceptual alternatives, never an overlay or measured difference. */
+export function archComparisonPair(selected, preferredBaseline) {
+  const current = boundedIndex(selected, stages.length);
+  const requested = preferredBaseline == null ? current - 1 : Number(preferredBaseline);
+  const baseline = Number.isInteger(requested) && requested >= 0 && requested < stages.length && requested !== current
+    ? requested : current === 0 ? 1 : current - 1;
+  return [baseline, current];
+}
+
+/** Preserve every prepared response, including the author's reply to a peer. */
+export function archExchangeReadings(post) {
+  return [
+    { label: 'Observation', text: post.text, author: post.author, role: post.role },
+    { label: 'Question', text: post.question, author: 'Curated prompt', role: 'Prepared discussion question' },
+    ...post.comments.map(comment => ({
+      label: comment.author === post.author ? 'Author response' : 'Peer reading',
+      text: comment.text, author: comment.author, role: comment.role,
+    })),
+  ];
+}
+
+/** One finite guided tour. A completed tour keeps its last reading on screen. */
+export function archPlaybackStep(appId, state = {}) {
+  const project = archProjects.find(item => item.id === appId);
+  if (!project) throw new RangeError('Unknown architecture app');
+  const list = appId === 'sketch-story' ? stages : appId === 'project-sketchbook' ? chapters : posts;
+  const selected = boundedIndex(state.selected, list.length);
+  const pin = appId === 'sketch-story' ? boundedIndex(state.pin, stages[selected].annotations.length) : 0;
+  const phase = appId === 'sketch-community' ? boundedIndex(state.phase, archExchangeReadings(posts[selected]).length) : 0;
+  const current = { selected, pin, phase, ended: false };
+  if (appId === 'sketch-story' && pin + 1 < stages[selected].annotations.length) return { ...current, pin: pin + 1 };
+  if (appId === 'sketch-community' && phase + 1 < archExchangeReadings(posts[selected]).length) return { ...current, phase: phase + 1 };
+  if (selected + 1 < list.length) return { selected: selected + 1, pin: 0, phase: 0, ended: false };
+  return { ...current, ended: true };
+}

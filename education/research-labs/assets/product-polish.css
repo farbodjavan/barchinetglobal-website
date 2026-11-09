@@ -1,0 +1,35 @@
+/* Shared application chrome; collection artwork and original study boards stay intact. */
+@media screen{
+ :root{color-scheme:light;--product-navy:#0c1c2d;--product-teal:#087f92;--product-line:#ccdde8}
+ button,a,input,select,summary{-webkit-tap-highlight-color:#37b9ca24}
+ button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #159eb1;outline-offset:3px}
+ .rural-body{--rural-ink:#193448;--rural-muted:#587385;--rural-line:#cfdee7;--rural-paper:#edf2f7;--rural-panel:#fff;--rural-accent:#087f92;--rural-copper:#27788e}
+ .rural-app-mode .rural-header{background:#0c1c2d;margin:0 -34px;padding:0 34px;border-color:#29485f;height:70px}
+ .rural-app-mode .rural-header .brand-logo{background:#fff;border-radius:6px;padding:6px 10px;gap:2px}
+ .rural-app-mode .rural-header .brand-logo img{width:156px}.rural-app-mode .rural-header .brand-logo small{font-size:6px;color:#526b7a}
+ .rural-app-mode .rural-back{color:#bdcedb}.rural-app-mode .rural-titlebar h1{color:#17364c;font-weight:650}
+ .rural-app-mode .rural-modules{background:#173248;border-color:#294b63}.rural-app-mode .rural-modules a{color:#a7bfce}.rural-app-mode .rural-modules a.active{background:#e6f8fc;color:#07566d;box-shadow:0 2px 5px #07172340}
+ .rural-app-mode .rural-status strong{background:#e4edf5;border-color:#c9dce9;color:#496d83}
+ .rural-app-mode .button.primary{background:#087f92;border-color:#087f92;color:#fff}
+ .rural-app-mode .rural-record{background:#fff;border-color:#d9e4eb;color:#315b70}.rural-app-mode .rural-record.active{background:#e2f3f8;border-color:#7bb9ca;box-shadow:inset 3px 0 #087f92}.rural-app-mode .rural-record .record-id{color:#4c7a91}.rural-app-mode .rural-record .record-category{color:#647f8d}
+ .rural-app-mode .rural-villages button.active{background:#13364c;color:#fff;border-color:#13364c}
+ .rural-app-mode .rural-study,.rural-app-mode .guide-study-board,.rural-app-mode .comparison-card{box-shadow:0 12px 30px #18374b0c}
+ .rural-app-mode .rural-board-toolbar{background:#173248;color:#d9e9f4;border-color:#31516a}.rural-app-mode .rural-board-tabs button{color:#b0c4d3}.rural-app-mode .rural-board-tabs button.active{color:#99ffff;border-color:#69dddf}.rural-app-mode .rural-focus-title{color:#adc4d5}
+ .rural-app-mode .rural-inspector{background:#fff;border-color:#cedfe9}.rural-app-mode .rural-inspector p{color:#496a7b}.rural-app-mode .rural-board-caption{background:#e6eff5;color:#526e80}
+ .rural-app-mode .rural-marker{background:#1d6680}.rural-app-mode .rural-marker.active{background:#067f92;box-shadow:0 0 0 5px #ffffffb3}.rural-app-mode .comparison-lenses button.active{background:#13364c;color:#fff;border-color:#13364c}
+ .rural-app-mode .guide-component-tools button.active{background:#13364c;color:#fff;border-color:#13364c}
+ .rural-app-mode .rural-board-canvas{background:#dce8ef}.rural-app-mode .rural-board-canvas>img{background:#edf3f7}
+ .product-header{background:#0c1c2d;border-color:#29485f;max-width:none;color:#d6e6f1;height:70px}
+ .product-header .identity>img{background:#fff;padding:7px 10px;border-radius:6px;width:174px}.product-header .identity>span{color:#adc6d6;border-color:#355164}.product-header .breadcrumbs{color:#a2bbcd}.product-header .breadcrumbs strong{color:#e3eff8}.product-header .plain{color:#bed2e2}
+ .app-nav{background:#e4edf4;max-width:none;border-color:#c7d9e5}.app-nav a[aria-current]{color:#065d74;border-color:#087f92}
+ .workbench{box-shadow:0 16px 38px #1a3d5310;border-color:#c9dbe6}
+ .workbench>.index-panel{background:#102a40;color:#c5dbe9;border-color:#315068}.workbench .panel-heading{color:#86a7bf}.workbench .index-item{color:#dbeaf5}.workbench .index-item .item-number{color:#89a8c0}.workbench .index-item small{color:#95b2c7}.workbench .index-item.selected{background:#1a4258;border-color:#335c74;box-shadow:inset 3px 0 #5bdcdb}.workbench .index-item.selected .item-arrow{color:#80eded}.workbench .context-note{border-color:#355168}.workbench .context-note p{color:#95b2c7}.workbench .context-note button{color:#99d9e4}
+ .workbench .canvas-toolbar{background:#173248;border-color:#31516a;color:#d8eaf5}.workbench .canvas-toolbar>.segmented{background:#0c2437}.workbench .canvas-toolbar .segmented button{color:#a0b9cb}.workbench .canvas-toolbar .segmented button[aria-selected=true]{background:#e6f9fb;color:#075b6d}.workbench .canvas-toolbar .tool{background:#1c3a50;border-color:#385b72;color:#d7eaf4}
+ .workbench .viewer-bottom{background:#e7f0f5;border-color:#ccdee7}.workbench .round{background:white;border-color:#bfd5e3;color:#16637e}
+ .quick-start{border-color:#c7dfe9;background:#edf7fb}.metric-value{font-variant-numeric:tabular-nums}
+ @media(min-width:761px) and (max-width:1200px){.rural-app-mode .rural-header{margin:0 -26px;padding:0 26px}}
+ @media(max-width:760px){.rural-app-mode .rural-guide:not(.is-walkthrough) .rural-guide-top p{display:none}.rural-app-mode .rural-guide:not(.is-walkthrough) .rural-guide-top{align-items:center}.rural-app-mode .rural-guide:not(.is-walkthrough) .rural-guide-top h2{font-size:12px;line-height:1.5}}
+ @media(hover:hover) and (pointer:fine){.tool:hover,.button:hover,.rural-record:hover,.index-item:hover,.rural-villages button:hover{border-color:#45a9bb;box-shadow:0 3px 10px #1a607a14;transform:translateY(-1px)}.tool:active,.button:active,.rural-record:active,.index-item:active{transform:translateY(0)}}
+ @media(prefers-reduced-motion:no-preference){.tool,.button,.rural-record,.index-item,.rural-villages button{transition:background .16s ease,border-color .16s ease,box-shadow .16s ease,transform .16s ease}}
+ @media(max-width:760px){.rural-app-mode .rural-header{margin:0 -16px;padding:0 16px;height:67px}.rural-app-mode .rural-header .brand-logo img{width:130px}.product-header{height:67px}.product-header .identity>img{width:151px}.workbench #index{padding-top:8px}.workbench .index-item{border-color:#36556d}.workbench .canvas-toolbar .tool{min-height:36px}.rural-app-mode .rural-back{font-size:10px}}
+}

@@ -12,10 +12,208 @@
 @media print{@page{size:A4;margin:17mm}.rural-shell,.rural-dialog,.rural-toast,.skip{display:none!important}.rural-print{display:block!important;color:#1b3325;background:white;font-family:Arial,sans-serif}.rural-print h1{font-size:24pt;margin:0 0 5mm}.rural-print h2{font-size:15pt;margin:7mm 0 3mm}.rural-print h3{font-size:12pt}.rural-print p,.rural-print li{font-size:10pt;line-height:1.65}.rural-print .print-eyebrow{font-size:9pt;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6mm}.rural-print .print-evidence{font-size:9pt;border-left:2px solid #a4b29a;padding-left:4mm}.rural-print .print-recommendation{break-inside:avoid;border-top:1px solid #d3dcca;padding-top:4mm;margin-top:5mm}.rural-print .print-references{break-before:page}.rural-print .print-reference{font-size:9pt;line-height:1.6;margin-bottom:5mm;overflow-wrap:anywhere}.rural-print img{width:42mm;height:auto;object-fit:contain;margin-bottom:8mm}body,html{background:#fff!important}}
 
 /* Contrast for readable evidence, captions and small labels. */
-.rural-launcher p,.rural-study-card p,.rural-source-note p,.rural-notes-grid p,.rural-notes-grid li,.rural-dialog p,.comparison-question p,.comparison-row>div,.design-active-prompt p,.design-evidence-record p{color:#596b52}.rural-study-card small,.rural-filter-summary,.rural-board-caption,.rural-board-caption .text-button,.rural-focus-title,.rural-record .record-id,.rural-record .record-category,.record-provenance dt,.rural-evidence-head span,.design-prompt-button span,.design-main-head span,.design-evidence h2 span,.design-evidence-record .record-id,.chain-box small,.comparison-reading .dimension-label,.comparison-row strong,.rural-collection-count,.rural-footer,.rural-guide-top p,.rural-guide-copy p,.rural-guide-step{color:#65755c}.design-reason p,.design-reason strong,.design-prompt-button strong,.chain-box strong{color:#536b43}.rural-dialog-head h2,.rural-titlebar h1,.rural-inspector h2,.comparison-village-head h2{overflow-wrap:break-word}.rural-map-pin text{paint-order:stroke;stroke:#edf1e5;stroke-width:3px;stroke-linejoin:round}.rural-paused .chain-arrow path{animation-play-state:paused!important}
+.rural-launcher p,.rural-study-card p,.rural-source-note p,.rural-notes-grid p,.rural-notes-grid li,.rural-dialog p,.comparison-question p,.comparison-row>div,.design-active-prompt p,.design-evidence-record p{color:#596b52}.rural-study-card small,.rural-filter-summary,.rural-board-caption,.rural-board-caption .text-button,.rural-focus-title,.rural-record .record-id,.rural-record .record-category,.record-provenance dt,.rural-evidence-head span,.design-prompt-button span,.design-main-head span,.design-evidence h2 span,.design-evidence-record .record-id,.chain-box small,.comparison-reading .dimension-label,.comparison-row strong,.rural-collection-count,.rural-footer,.rural-guide-top p,.rural-guide-copy p,.rural-guide-step{color:#586b4e}.design-reason p,.design-reason strong,.design-prompt-button strong,.chain-box strong{color:#536b43}.rural-dialog-head h2,.rural-titlebar h1,.rural-inspector h2,.comparison-village-head h2{overflow-wrap:break-word}.rural-map-pin text{paint-order:stroke;stroke:#edf1e5;stroke-width:3px;stroke-linejoin:round}.rural-paused .chain-arrow path{animation-play-state:paused!important}
 
 /* Physical-size map targets and labels stay legible when the board narrows. */
-.rural-index .rural-map{position:absolute;inset:0;pointer-events:none}.rural-index-stamp{position:absolute;left:17px;top:15px;font-size:10px;line-height:1.7;color:#526c46;letter-spacing:.03em}.rural-index-stamp span{font-size:10px;color:#65755c;letter-spacing:0}.rural-index-point{position:absolute;left:calc(var(--x)*1%);top:calc(var(--y)*1%);transform:translate(-50%,-50%);height:31px;width:31px;border:1px solid #edf3df;border-radius:50%;background:#718f60;display:grid;place-items:center;box-shadow:0 2px 7px #34502720}.rural-index-point.selected{background:#a56b42;box-shadow:0 0 0 5px #e4cfaa75}.index-point-dot{width:7px;height:7px;border:1px solid #fdfcf2;background:#dfe9ce;border-radius:50%}.index-point-label{position:absolute;left:50%;top:38px;transform:translateX(-50%);width:125px;text-align:center;line-height:1.5;pointer-events:none}.index-point-label strong{display:block;font-size:12px;font-weight:600;color:#4c673f;white-space:nowrap}.index-point-label small{display:block;font-size:10px;color:#697b5e;margin-top:3px}@media(max-width:760px){.rural-index-stamp{left:12px;top:12px;font-size:10px}.rural-index-stamp span{font-size:9px}.rural-index-point{height:29px;width:29px}.index-point-label{width:108px;top:35px}.index-point-label strong{font-size:11px}.index-point-label small{font-size:10px}}
+.rural-index .rural-map{position:absolute;inset:0;pointer-events:none}.rural-index-stamp{position:absolute;left:17px;top:15px;font-size:10px;line-height:1.7;color:#526c46;letter-spacing:.03em}.rural-index-stamp span{font-size:10px;color:#586b4e;letter-spacing:0}.rural-index-point{position:absolute;left:calc(var(--x)*1%);top:calc(var(--y)*1%);transform:translate(-50%,-50%);height:31px;width:31px;border:1px solid #edf3df;border-radius:50%;background:#718f60;display:grid;place-items:center;box-shadow:0 2px 7px #34502720}.rural-index-point.selected{background:#a56b42;box-shadow:0 0 0 5px #e4cfaa75}.index-point-dot{width:7px;height:7px;border:1px solid #fdfcf2;background:#dfe9ce;border-radius:50%}.index-point-label{position:absolute;left:50%;top:38px;transform:translateX(-50%);width:125px;text-align:center;line-height:1.5;pointer-events:none}.index-point-label strong{display:block;font-size:12px;font-weight:600;color:#4c673f;white-space:nowrap}.index-point-label small{display:block;font-size:10px;color:#586b4e;margin-top:3px}@media(max-width:760px){.rural-index-stamp{left:12px;top:12px;font-size:10px}.rural-index-stamp span{font-size:9px}.rural-index-point{height:29px;width:29px}.index-point-label{width:108px;top:35px}.index-point-label strong{font-size:11px}.index-point-label small{font-size:10px}}
 
 /* Walkthrough controls remain visible beside the changing workspace. */
 .rural-guide.is-walkthrough{position:fixed;left:34px;right:34px;bottom:18px;width:auto;max-width:1180px;max-height:255px;margin:0 auto;z-index:45;box-shadow:0 12px 55px #173d2833;border-color:#a5b895;overflow:auto}.rural-guide.is-walkthrough .rural-guide-top{padding-top:13px;padding-bottom:11px}.rural-guide.is-walkthrough .rural-guide-body{padding-bottom:15px}.rural-walkthrough-active{padding-bottom:280px}.rural-study,.comparison-scenes,.design-main{scroll-margin-top:20px}@media(max-width:760px){.rural-guide.is-walkthrough{left:12px;right:12px;bottom:12px;max-height:300px;max-height:min(300px,45vh)}.rural-guide.is-walkthrough .rural-guide-top{padding:12px 13px;gap:12px}.rural-guide.is-walkthrough .rural-guide-top p{display:none}.rural-guide.is-walkthrough .rural-guide-actions{flex-direction:row;align-items:center;gap:10px}.rural-guide.is-walkthrough .rural-guide-actions .rural-toolbar-button{font-size:10px;padding:7px 8px}.rural-guide.is-walkthrough .rural-guide-actions .rural-motion{font-size:9px;gap:4px}.rural-guide.is-walkthrough .rural-guide-actions .rural-motion input{height:12px;width:12px}.rural-guide.is-walkthrough .rural-guide-body{gap:12px;padding:0 13px 14px}.rural-guide.is-walkthrough .rural-guide-copy p{font-size:12px;line-height:1.75}.rural-guide.is-walkthrough .rural-guide-copy h3{font-size:16px}.rural-walkthrough-active{padding-bottom:330px}.rural-study,.comparison-scenes,.design-main{scroll-margin-top:12px}}
+
+/* Audit: explicit displays must not override hidden walkthroughs or failed images. */
+.rural-body [hidden]{display:none!important}
+.design-input-status{grid-column:1/-1;font-size:12px;line-height:1.7;color:#52654a;margin:0;overflow-wrap:anywhere}.design-input-status.pending{border-left:2px solid #a36b48;padding-left:10px;color:#735434}
+/* Small captions and evidence links retain readable contrast on their light surfaces. */
+.rural-body{--rural-copper:#8b5739}.rural-eyebrow{color:var(--rural-copper)}
+.rural-launcher-num,.rural-overlay-label span,.rural-motion,.comparison-village-head span,.comparison-question span,.rural-study-card a,.rural-launcher-bottom,.design-evidence-record a{color:#52654a}.evidence-chip{color:#4e653f}.design-boundary,.design-boundary .rural-toolbar-button{color:#725d39}
+/* Native browser printing is useful on every route, including before a preview. */
+@media print{
+ body.rural-body{padding-bottom:0!important}
+ .rural-body:not(.rural-design-print) .rural-shell{display:block!important;padding:0;max-width:none}
+ .rural-body:not(.rural-design-print) .rural-header,.rural-body:not(.rural-design-print) .rural-modulebar,.rural-body:not(.rural-design-print) .rural-title-actions,.rural-body:not(.rural-design-print) .record-filters,.rural-body:not(.rural-design-print) .rural-board-toolbar,.rural-body:not(.rural-design-print) .rural-board-caption,.rural-body:not(.rural-design-print) .rural-guide,.rural-body:not(.rural-design-print) .rural-footer,.rural-body:not(.rural-design-print) .comparison-controls,.rural-body:not(.rural-design-print) .comparison-lenses,.rural-body:not(.rural-design-print) .rural-marker,.rural-body:not(.rural-design-print) .focus-ring{display:none!important}
+ .rural-body:not(.rural-design-print) .rural-workspace,.rural-body:not(.rural-design-print) .comparison-layout{display:block}
+ .rural-body:not(.rural-design-print) .record-browser{display:block;position:static}
+ .rural-body:not(.rural-design-print) .record-list{max-height:none;overflow:visible;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .rural-body:not(.rural-design-print) .rural-study,.rural-body:not(.rural-design-print) .rural-inspector,.rural-body:not(.rural-design-print) .record-list-wrap{margin-top:12px}
+ .rural-body:not(.rural-design-print) .rural-inspector{display:block}
+ .rural-body:not(.rural-design-print) .rural-board-canvas{height:230px}
+ .rural-body:not(.rural-design-print) .rural-villages button:not(.active){display:none}
+ .rural-body:not(.rural-design-print) .rural-record,.rural-body:not(.rural-design-print) .comparison-village,.rural-body:not(.rural-design-print) .rural-study-card,.rural-body:not(.rural-design-print) .reference-entry{break-inside:avoid}
+ .rural-body:not(.rural-design-print) .rural-collection-studies,.rural-body:not(.rural-design-print) .rural-app-launchers{grid-template-columns:1fr}
+ .rural-body *{animation:none!important;transition:none!important;box-shadow:none!important}
+}
+
+/* Architectural workspaces: the board is primary; evidence stays in its inspector. */
+.rural-app-mode .rural-header{height:64px}
+.rural-app-mode .rural-titlebar{padding:12px 0;gap:18px}
+.rural-app-mode .rural-titlebar h1{font-size:26px;margin:3px 0 4px}
+.rural-app-mode .rural-titlebar p{font-size:12px;line-height:1.6;max-width:880px}
+.rural-app-mode .rural-eyebrow{font-size:9px}
+.rural-app-mode .rural-modulebar{margin-bottom:12px}
+.rural-app-mode .rural-guide:not(.is-walkthrough){margin:0 0 13px;background:#eef2e8;border-radius:7px}
+.rural-app-mode .rural-guide:not(.is-walkthrough) .rural-guide-top{padding:11px 14px}
+.rural-app-mode .rural-guide:not(.is-walkthrough) h2{font-size:14px}
+.rural-app-mode .rural-guide:not(.is-walkthrough) p{font-size:11px;line-height:1.6}
+.rural-app-mode .rural-context{padding:12px 15px;margin-bottom:12px}
+.rural-app-mode .design-controls{padding:11px 15px;gap:8px 16px;margin-bottom:12px}
+.rural-app-mode .design-controls .rural-field{font-size:10px}
+.rural-app-mode .design-controls .rural-select{margin-top:4px;padding:8px 10px;min-height:36px}
+.rural-app-mode .design-input-status{font-size:11px;line-height:1.5}
+.rural-app-mode .design-layout{grid-template-columns:minmax(0,1fr) 310px;gap:14px;align-items:stretch}
+.rural-app-mode .design-main{background:#f9faf5;border-radius:9px}
+.decision-board-head{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:12px 15px;border-bottom:1px solid var(--rural-line);background:#fffef8}
+.decision-board-head h2{font-size:20px;line-height:1.4;margin-top:3px;letter-spacing:-.035em}
+.decision-board-head h2 small{font-family:'DM Sans',Arial,sans-serif;font-size:11px;color:#63735e;letter-spacing:0;font-weight:400;margin-left:9px;white-space:nowrap}
+.decision-views{display:flex;gap:3px;background:#e9eee3;padding:3px;border:1px solid #d4ddcb;border-radius:5px;flex-shrink:0}
+.decision-views button{background:transparent;border:1px solid transparent;border-radius:3px;padding:7px 10px;font-size:11px;color:#586d52}
+.decision-views button.active{background:#fffef8;border-color:#cbd6c2;color:#294f3c;box-shadow:0 1px 3px #243c2910}
+.decision-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:9px 12px;gap:6px;border-bottom:1px solid #d5decd;background:#f5f7ef}
+.decision-tools button{display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;min-height:43px;border:1px solid #dce4d4;border-radius:5px;background:#fffef8;color:#64775c;font-size:12px}
+.decision-tools button svg{width:17px;height:17px}
+.decision-tools button.active{background:#254f43;border-color:#254f43;color:#f5fae9;box-shadow:0 2px 5px #193b2420}
+.decision-tool-number{font-size:9px;opacity:.7}
+.design-scene{position:relative;isolation:isolate;overflow:hidden;background:#e9eee2;min-width:0}
+.design-scene .rural-board-canvas{height:clamp(355px,calc(100dvh - 392px),610px)}
+.design-scene .rural-board-canvas>img{object-fit:contain;background:#edf0e6}
+.design-scene .rural-overlay-label{display:none}
+.design-scene .focus-ring{border:2px dashed #9a693e;background:#c7914e16;box-shadow:0 0 0 9px #e5cf9c20;width:100px;height:100px}
+.decision-detail-layer{position:absolute;right:14px;bottom:14px;width:230px;border:1px solid #93aa8d;border-radius:7px;overflow:hidden;background:#f9fcf3ee;box-shadow:0 7px 23px #24433020;pointer-events:none}
+.detail-layer-head{font-size:10px;display:flex;align-items:center;gap:7px;padding:9px 10px;color:#39593c;background:#f3f7ea;border-bottom:1px solid #cedbc3}
+.detail-layer-head svg{width:14px;height:14px}
+.decision-detail-layer>.rural-drawing{width:100%;height:140px;display:block}
+.decision-detail-layer .rural-drawing text{display:none}
+.decision-detail-layer .rural-drawing .component{opacity:.23}
+.decision-detail-layer .rural-drawing .component.focus{opacity:1;stroke:#a56a39!important;stroke-width:4!important;filter:drop-shadow(0 0 2px #b99b5d60)}
+.decision-detail-layer .rural-drawing .guide-line{display:none}
+.decision-scene-label{position:absolute;left:15px;top:14px;display:flex;align-items:center;gap:7px;font-size:10px;font-weight:600;letter-spacing:.06em;color:#33533a;border:1px solid #c2d1b4;border-radius:4px;background:#fffef4ed;padding:8px 10px;box-shadow:0 2px 7px #1c3d2410}
+.decision-live-dot{width:6px;height:6px;background:#a5713f;border-radius:50%;box-shadow:0 0 0 3px #e7d5aa80}
+.decision-scene-stamp{position:absolute;left:15px;bottom:14px;font-size:10px;line-height:1.5;color:#52664c;padding:7px 9px;background:#fffef4e6;border:1px solid #d5deca;border-radius:4px;max-width:calc(100% - 285px)}
+.diagram-view .rural-drawing .component:not(.focus){opacity:.32}
+.diagram-view .rural-drawing .component.focus{stroke:#956133!important;stroke-width:3.5!important}
+.diagram-view .rural-drawing .guide-line{stroke:#956133;stroke-width:2}
+.decision-pipeline{padding:12px 15px;display:grid;grid-template-columns:minmax(0,1fr) 23px minmax(0,1fr) 23px minmax(0,1fr);gap:10px;align-items:center;border-top:1px solid #cad7bf;background:#edf3e5}
+.decision-pipeline>div{min-width:0;border-left:2px solid #a5b78e;padding-left:10px}
+.decision-pipeline small{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.04em;line-height:1.6;color:#536a49;margin-bottom:3px}
+.decision-pipeline strong{display:block;font-size:11px;font-weight:600;line-height:1.6;color:#284b35;overflow-wrap:anywhere}
+.decision-pipeline .chain-arrow{width:22px;height:22px;color:#6f8c5c;transform:none}
+.rural-app-mode .design-evidence{grid-column:auto;display:block;padding:0;border-radius:9px;overflow:auto;max-height:calc(100dvh - 252px);min-height:510px;background:#fffef8}
+.decision-inspector-head{display:flex;justify-content:space-between;gap:8px;padding:14px 16px;background:#e8eee0;border-bottom:1px solid #cdd9c0;font-size:9px;letter-spacing:.06em;color:#4f6843}
+.decision-inspector-head strong{font-size:10px;letter-spacing:0}
+.decision-inspector-body{padding:18px 16px}
+.decision-inspector-type{font-size:9px;color:#80613f;line-height:1.6;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.decision-inspector-body>h2{display:block;font-size:22px;line-height:1.25;margin-bottom:13px;letter-spacing:-.04em;color:#263e2d}
+.decision-inspector-body .decision-action{font-size:13px;line-height:1.85;color:#435c3e}
+.decision-why{margin:17px 0 21px;border-left:2px solid #a8ba8d;padding:10px 12px;background:#f0f4e9}
+.decision-why h3{font:600 10px 'DM Sans',Arial,sans-serif;letter-spacing:.03em;color:#4c6640;margin-bottom:6px}
+.decision-why p,.decision-source p,.decision-source-note p{font-size:12px;line-height:1.8;color:#52694b}
+.decision-records>h2{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:10px;letter-spacing:0}
+.decision-records>h2 span{font-size:10px;font-weight:400;color:#617453}
+.decision-source{border:1px solid #d5dfcb;border-radius:5px;background:#f8fbf1;margin-top:7px;overflow:hidden}
+.decision-source summary{display:grid;grid-template-columns:1fr 14px;gap:4px 8px;list-style:none;cursor:pointer;padding:11px}
+.decision-source summary .record-id{grid-column:1;font-size:9px;color:#64794f;letter-spacing:.04em}
+.decision-source summary strong{font-size:12px;font-weight:550;color:#365031;line-height:1.5}
+.decision-source summary svg{width:12px;height:12px;grid-column:2;grid-row:1/3;align-self:center;transition:transform .2s}
+.decision-source[open] summary svg{transform:rotate(180deg)}
+.decision-source>div{border-top:1px solid #d8e3cd;padding:12px 11px;background:#fffef8}
+.decision-source small{font-size:9px;line-height:1.7;display:block;margin-top:9px;color:#617453}
+.decision-source a{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:#355f38;margin-top:9px;text-decoration:underline;text-underline-offset:3px}
+.decision-source a svg{width:12px;height:12px}
+.decision-source-note{padding:12px;border:1px dashed #cfdbc0;border-radius:5px}
+.decision-source-note strong{display:block;font-size:11px;margin-top:9px;color:#3d603b}
+.decision-next{margin-top:23px;padding-top:15px;border-top:1px solid #dbe3d1}
+.decision-next span{font-size:10px;color:#5f754e;font-weight:600}
+.decision-next p{font-size:11px;line-height:1.8;color:#5c7250;margin-top:4px}
+.rural-app-mode .design-boundary{margin-top:12px;padding:10px 14px;font-size:11px}
+.rural-board-canvas .rural-marker.active{width:auto;min-width:31px;max-width:140px;padding:0 10px;display:flex;gap:6px;border-radius:18px;background:#254f43;border:1px solid #f7fbe8;box-shadow:0 0 0 4px #f8fbe0bf,0 4px 12px #1b3d2535}
+.pin-label{font-size:10px;font-weight:600;white-space:nowrap}
+.rural-app-mode .comparison-layout{grid-template-columns:145px minmax(0,1fr);gap:13px}
+.rural-app-mode .comparison-lenses{padding:13px 10px}
+.rural-app-mode .comparison-lenses button{font-size:11px;gap:8px;padding:10px 8px}
+.rural-app-mode .comparison-lenses button.active{background:#254f43;color:#f4fae6;border-color:#254f43}
+.rural-app-mode .comparison-village .rural-board-canvas{height:clamp(310px,calc(100dvh - 375px),490px)}
+.rural-app-mode .comparison-village-head{padding:11px 14px}
+.rural-app-mode .comparison-village-head h2{font-size:19px}
+.comparison-focus-bar{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:11px;padding:11px 13px;border:1px solid #c8d6bf;border-radius:6px;background:#e5eddd;color:#355632;margin-bottom:10px}
+.comparison-focus-bar strong{font-size:12px}
+.comparison-focus-bar span{font-size:10px;color:#536c48}
+.rural-app-mode .comparison-reading h3{font-size:17px}
+@media(max-width:1100px){
+ .rural-app-mode .design-layout{grid-template-columns:minmax(0,1fr) 280px}
+ .decision-board-head{align-items:flex-start;flex-direction:column;gap:8px}
+ .decision-board-head h2 small{display:block;margin:4px 0 0}
+ .decision-tools button{gap:5px;font-size:11px}
+ .decision-tool-number{display:none}
+ .decision-detail-layer{width:190px}
+ .decision-detail-layer>.rural-drawing{height:120px}
+ .decision-scene-stamp{max-width:calc(100% - 235px)}
+ .decision-pipeline{gap:6px;padding:11px 12px;grid-template-columns:minmax(0,1fr) 16px minmax(0,1fr) 16px minmax(0,1fr)}
+ .decision-pipeline .chain-arrow{width:16px}
+}
+@media(max-width:900px){
+ .rural-app-mode .design-layout{grid-template-columns:1fr}
+ .rural-app-mode .design-evidence{min-height:0;max-height:none}
+ .decision-inspector-body{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+ .decision-inspector-type,.decision-inspector-body>h2{grid-column:1}
+ .decision-action,.decision-why{grid-column:1}
+ .decision-records{grid-column:2;grid-row:1/5}
+ .decision-next{grid-column:1/-1}
+ .decision-board-head{flex-direction:row;align-items:center}
+ .decision-board-head h2 small{display:inline;margin-left:8px}
+ .decision-detail-layer{width:230px}
+ .decision-detail-layer>.rural-drawing{height:140px}
+ .decision-scene-stamp{max-width:calc(100% - 285px)}
+ .rural-app-mode .comparison-layout{grid-template-columns:1fr}
+ .rural-app-mode .comparison-lenses{padding:10px}
+ .rural-app-mode .comparison-lenses button{width:auto}
+}
+@media(max-width:760px){
+ .rural-app-mode .rural-header{height:65px}
+ .rural-app-mode .rural-titlebar{padding:15px 0 12px}
+ .rural-app-mode .rural-titlebar h1{font-size:27px}
+ .rural-app-mode .rural-titlebar p{font-size:12px;line-height:1.7}
+ .rural-app-mode .rural-guide:not(.is-walkthrough) .rural-guide-top{padding:12px;gap:12px;align-items:flex-start}
+ .rural-app-mode .rural-guide:not(.is-walkthrough) h2{font-size:14px;line-height:1.4}
+ .rural-app-mode .rural-guide:not(.is-walkthrough) p{font-size:11px;line-height:1.7;margin-top:5px}
+ .rural-app-mode .design-controls{padding:12px;gap:11px}
+ .rural-app-mode .design-controls .rural-field{font-size:11px}
+ .rural-app-mode .design-controls>.button{grid-column:1/-1}
+ .rural-app-mode .design-input-status{font-size:11px}
+ .decision-board-head{padding:13px;display:block}
+ .decision-board-head h2{font-size:21px;margin-top:5px}
+ .decision-board-head h2 small{font-size:11px;margin-left:7px}
+ .decision-views{width:max-content;margin-top:10px}
+ .decision-views button{min-height:34px;font-size:11px;padding:6px 13px}
+ .decision-tools{padding:8px;gap:5px}
+ .decision-tools button{display:flex;flex-direction:column;gap:5px;font-size:10px;min-height:59px;padding:7px 2px}
+ .decision-tools button svg{width:17px;height:17px}
+ .design-scene .rural-board-canvas{height:360px}
+ .decision-detail-layer{width:145px;right:10px;bottom:10px}
+ .detail-layer-head{font-size:9px;padding:7px;gap:5px}
+ .detail-layer-head svg{width:11px;height:11px}
+ .decision-detail-layer>.rural-drawing{height:98px}
+ .decision-scene-label{left:10px;top:10px;font-size:9px;padding:7px 8px}
+ .decision-scene-stamp{left:10px;bottom:10px;max-width:calc(100% - 180px);font-size:9px;padding:6px 7px}
+ .decision-pipeline{padding:11px 9px;gap:4px;grid-template-columns:minmax(0,1fr) 12px minmax(0,1fr) 12px minmax(0,1fr)}
+ .decision-pipeline>div{padding-left:7px}
+ .decision-pipeline small{font-size:9px;letter-spacing:0;line-height:1.6}
+ .decision-pipeline strong{font-size:11px;line-height:1.6}
+ .decision-pipeline .chain-arrow{width:12px;height:18px}
+ .decision-inspector-body{display:block;padding:18px}
+ .decision-inspector-body>h2{font-size:24px}
+ .decision-inspector-body .decision-action{font-size:14px;line-height:1.8}
+ .decision-why p,.decision-source p,.decision-source-note p{font-size:13px}
+ .decision-records>h2{font-size:14px;margin-top:20px}
+ .decision-source summary strong{font-size:13px}
+ .decision-source summary .record-id{font-size:10px}
+ .decision-source small,.decision-source a{font-size:11px}
+ .decision-next p{font-size:12px}
+ .rural-app-mode .comparison-village .rural-board-canvas{height:300px}
+ .comparison-focus-bar{align-items:flex-start;gap:9px;padding:10px 12px}
+ .comparison-focus-bar strong{font-size:12px}
+ .comparison-focus-bar span{font-size:10px;text-align:right}
+ .rural-app-mode .comparison-lenses button{padding:9px 7px;font-size:10px}
+ .rural-board-canvas .rural-marker.active{min-width:30px;max-width:120px;padding:0 8px}
+}
+
+/* A project brief applies to the whole study; it is not evidence for one physical component. */
+.project-scope:after{content:'';position:absolute;inset:11px;border:1px dashed #9a7649;border-radius:5px;pointer-events:none}.project-scope .focus-ring,.project-scope .guide-line{display:none}.project-scope .rural-drawing .component,.project-scope .rural-drawing .component.focus{opacity:1;filter:none;stroke:#64785e!important;stroke-width:1.4!important}

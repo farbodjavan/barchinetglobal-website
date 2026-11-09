@@ -22,12 +22,12 @@ export const labs = [
     id: 'circularbuild', title: 'CircularBuild Lab', shortTitle: 'CircularBuild', kicker: '01 / MATERIAL RECOVERY',
     description: 'Give a building a second material life. Explore the trade-off between sorting effort, transport and recovery.',
     mission: 'Plan the material recovery of a fictional 2,000 m² renewal project. Can you reduce landfill without losing sight of cost?',
-    roles: [{ name: 'Student', goal: 'Explain why the preferred recovery plan changes when distance or sorting changes.' }, { name: 'Site manager', goal: 'Balance sorting effort, haulage and disposal costs.' }, { name: 'City planner', goal: 'Track landfill diversion and the boundaries of a carbon comparison.' }],
+    roles: [{ name: 'Student', goal: 'Explain how sorting changes recovery and how a shared haul distance changes both scenarios’ costs.' }, { name: 'Site manager', goal: 'Balance sorting effort, haulage and disposal costs.' }, { name: 'City planner', goal: 'Track landfill diversion and the boundaries of a carbon comparison.' }],
     controls: [range('area', 'Building floor area', 500, 5000, 100, 2000, 'm²'), range('demolition', 'Share removed', 20, 100, 5, 60, '%'), range('sorting', 'Material sorted on site', 0, 100, 5, 70, '%'), range('distance', 'Average haul distance', 5, 150, 5, 35, 'km')],
     defaults: { area: 2000, demolition: 60, sorting: 70, distance: 35 },
     sources: [refs.waste, refs.lca],
     assumptions: ['All masses, prices, yields and emission factors are invented teaching values; none are WARM factors.', 'One average haul distance applies to every tonne. The same transport assumption is used for the all-disposal baseline.', 'Only removed material is modelled. Hazardous materials, contamination, building safety and structural suitability are outside this model.', 'The carbon result is a simplified net scenario proxy including an assumed avoided-production credit; it is not a project LCA.'],
-    methods: ['Mass = floor area × removed share × material intensity.', 'Recovered mass = material mass × sorting share × recovery yield. Reuse and recycling divide recovered mass; the balance goes to landfill.', 'Net cost = sorting + haulage + disposal − assumed recovery revenue. Baseline = haulage + disposal of all material.'],
+    methods: ['Mass = floor area × removed share × material intensity.', 'Recovered mass = material mass × sorting share × recovery yield. Reuse and recycling divide recovered mass; the balance goes to landfill.', 'Net cost = sorting + haulage + disposal − assumed recovery revenue. Baseline = haulage + disposal of all material.', 'The same haul distance and rate apply to every tonne in both scenarios, so changing distance changes both totals equally; it cannot reverse their cost ranking in this model.'],
   },
   {
     id: 'panelbuild', title: 'PanelBuild Studio', shortTitle: 'PanelBuild', kicker: '02 / RAPID RECONSTRUCTION',
@@ -37,8 +37,8 @@ export const labs = [
     controls: [select('method', 'Construction strategy', 'panel', [['panel', 'Factory panels'], ['hybrid', 'Hybrid assembly'], ['masonry', 'Site-built masonry']]), range('units', 'Homes in programme', 10, 100, 10, 40, 'homes'), range('crews', 'Site crews', 1, 8, 1, 3, 'crews'), range('distance', 'Supplier distance', 20, 600, 20, 80, 'km')],
     defaults: { method: 'panel', units: 40, crews: 3, distance: 80 },
     sources: [refs.material, refs.lca],
-    assumptions: ['All productivity rates, prices and emission factors are invented; the comparison demonstrates a method rather than a market forecast.', 'Every home has 30 m² of floor area and is assumed to meet the same service requirements. Engineering compliance is not evaluated.', 'Factory, delivery and assembly stages run sequentially in this simplified schedule. Crew productivity is linear.', 'Carbon covers a synthetic production-and-haul proxy only. Operational energy, maintenance and end of life are excluded.'],
-    methods: ['Floor area = homes × 30 m². Site days = ceiling(floor area × labour hours per m² ÷ [crews × 8 hours]).', 'Programme days = factory + delivery + mobilisation + site days.', 'Cost = material + site labour + transport + plant. Compare all strategies using the same programme size, crew count and haul distance.'],
+    assumptions: ['All productivity rates, prices and emission factors are invented; the comparison demonstrates a method rather than a market forecast.', 'Every home has 30 m² of floor area and is assumed to meet the same service requirements. Engineering compliance is not evaluated.', 'Factory, delivery and assembly stages run sequentially in this simplified schedule. Productivity is expressed in team-hours per m²; each crew supplies eight team-hours per day.', 'Carbon covers a synthetic production-and-haul proxy only. Operational energy, maintenance, end of life and empty return trips are excluded.'],
+    methods: ['Floor area = homes × 30 m². Site days = ceiling(floor area × assumed team-hours per m² ÷ [crews × 8 team-hours per day]).', 'Programme days = factory + delivery + mobilisation + site days.', 'Cost = material + site team cost + transport + plant. The assumed site cost is USD 24 per team-hour. Compare all strategies using the same programme size, crew count and haul distance.'],
   },
   {
     id: 'vernacular', title: 'Vernacular Futures', shortTitle: 'Vernacular', kicker: '03 / WHOLE-LIFE THINKING',
@@ -48,7 +48,7 @@ export const labs = [
     controls: [select('material', 'Wall system', 'earth', [['earth', 'Earth + timber'], ['brick', 'Fired-brick wall'], ['hybrid', 'Insulated hybrid']]), select('climate', 'Illustrative climate', 'mild', [['mild', 'Mild'], ['hot', 'Hot'], ['cold', 'Cold']]), range('years', 'Study period', 10, 60, 5, 40, 'years'), range('distance', 'Material haul distance', 5, 500, 5, 45, 'km')],
     defaults: { material: 'earth', climate: 'mild', years: 40, distance: 45 },
     sources: [refs.lca, refs.lcc, refs.material],
-    assumptions: ['All material profiles, energy intensities, prices, maintenance cycles and transport factors are synthetic.', '300 m² floor area, 420 m² wall area, a constant 3% real discount rate, USD 0.18/kWh and 0.30 kg CO₂e/kWh are assumed.', 'Energy is an illustrative whole-building proxy influenced by wall choice and climate, not a validated thermal simulation.', 'Financial flows are discounted; environmental quantities are not. No claim is made that local materials always perform better.', 'The financial account includes construction, energy, repairs and end of life. The environmental proxy excludes end-of-life impacts and is not a full, reviewed LCA.'],
+    assumptions: ['All material profiles, energy intensities, prices, maintenance cycles and transport factors are synthetic.', '300 m² floor area, 420 m² wall area, a constant 3% real discount rate, USD 0.18/kWh and 0.30 kg CO₂e/kWh are assumed.', 'Energy is an illustrative whole-building proxy influenced by wall choice and climate, not a validated thermal simulation.', 'Financial flows are discounted; environmental quantities are not. No claim is made that local materials always perform better.', 'The financial account includes construction, energy, repairs and end of life. The selected study period is assumed to end the building’s use; no residual value is credited.', 'The environmental proxy excludes end-of-life impacts and is not a full, reviewed LCA.'],
     methods: ['LCC = construction + present value of annual energy + present value of repairs + discounted net end-of-life cost.', 'Future cash flow at year t is divided by (1 + 0.03)^t. Repairs at the final study year are excluded to avoid a repair immediately before assumed disposal.', 'Environmental proxy = production + haulage + undiscounted operating emissions + repair material emissions. The study period is held equal across options.'],
   },
   {
@@ -115,7 +115,7 @@ function circular(p) {
       { title: 'Start with the material account', text: `${p.area.toLocaleString('en-US')} m² × ${p.demolition}% removed = ${removedArea.toLocaleString('en-US')} m² affected. The five assumed material intensities add up to 0.70 t/m², giving ${total.toFixed(1)} tonnes.` },
       { title: 'Follow the recovery stream', text: `For concrete: ${materials[0].mass.toFixed(1)} t × ${p.sorting}% sorted × 88% assumed yield = ${materials[0].recovered.toFixed(1)} t recovered. Unsorted material and recovery losses go to landfill.` },
       { title: 'Build the cost account', text: `USD ${sorting.toFixed(0)} sorting + ${haul.toFixed(0)} haulage + ${disposal.toFixed(0)} disposal − ${revenue.toFixed(0)} revenue = USD ${netCost.toFixed(0)} net. The all-disposal baseline is USD ${baselineCost.toFixed(0)}.` },
-      { title: 'Test a research claim', text: 'Change sorting and haul distance separately. Distinguish the mass result from the cost result, and remember that the carbon credits here are invented rather than measured project benefits.' },
+      { title: 'Test a research claim', text: 'Change sorting and haul distance separately. Distance increases both scenarios’ haul costs equally, so it cannot reverse their cost ranking here. A model with different disposal and recovery destinations would be needed to investigate that question. The carbon credits are invented teaching values.' },
     ],
     details: { materials, total, recovered, landfill, baselineCost, netCost, sorting, haul, disposal, revenue, carbonKg, removedArea },
     chart: materials.map(m => ({ label: m.name, value: m.mass, recovered: m.recovered, color: m.color })),
@@ -133,7 +133,7 @@ function panelScenario(method, p) {
   const siteDays = Math.ceil(area * x.labour / (p.crews * 8));
   const delivery = Math.ceil(p.distance / 400);
   const stages = [{ label: 'Factory', days: x.factory, color: '#c6a349' }, { label: 'Delivery', days: delivery, color: '#7a9fa0' }, { label: 'Mobilise', days: 3, color: '#bca78c' }, { label: 'Assembly', days: siteDays, color: '#c76e4d' }];
-  const costs = [{ label: 'Material', value: area * x.material }, { label: 'Site labour', value: area * x.labour * 24 }, { label: 'Transport', value: Math.ceil(area * x.intensity / 12) * p.distance * 2.4 }, { label: 'Plant', value: x.plant }];
+  const costs = [{ label: 'Material', value: area * x.material }, { label: 'Site team cost', value: area * x.labour * 24 }, { label: 'Transport', value: Math.ceil(area * x.intensity / 12) * p.distance * 2.4 }, { label: 'Plant', value: x.plant }];
   return { label: x.label, method, area, stages, costs, days: stages.reduce((a, s) => a + s.days, 0), cost: costs.reduce((a, c) => a + c.value, 0), carbonKg: area * x.embodied + area * x.intensity * p.distance * .11 };
 }
 function panel(p) {
@@ -145,7 +145,7 @@ function panel(p) {
     explanation: `${p.units} homes provide ${area.toLocaleString('en-US')} m². With ${p.crews} site crews, ${selected.label.toLowerCase()} takes ${days} days in this sequential model. ${p.method === 'masonry' ? 'This is the comparison baseline.' : 'Compare the faster schedule against purchase, transport and plant costs.'}`,
     steps: [
       { title: 'Make the comparison equivalent', text: `${p.units} homes × 30 m² = ${area.toLocaleString('en-US')} m² for every method. The model assumes equal service performance; it does not verify structural or thermal compliance.` },
-      { title: 'Translate productivity into days', text: `${area} m² × ${panelProfiles[p.method].labour} labour hours/m² ÷ (${p.crews} crews × 8 h/day), rounded up, gives ${stages[3].days} site days. One model crew represents one unit of the assumed productivity.` },
+      { title: 'Translate productivity into days', text: `${area} m² × ${panelProfiles[p.method].labour} assumed team-hours/m² ÷ (${p.crews} crews × 8 team-hours/day), rounded up, gives ${stages[3].days} site days. Team size and productivity are illustrative, not an estimate of real staffing.` },
       { title: 'Include the supply chain', text: `Add ${stages[0].days} factory days, ${stages[1].days} delivery days and 3 mobilisation days. At ${p.distance} km, assumed transport costs USD ${costs[2].value.toFixed(0)}.` },
       { title: 'Compare more than speed', text: `The masonry baseline takes ${baseline.days} days and costs USD ${baseline.cost.toFixed(0)}. Change distance or crew size and examine cost and emissions separately. No method is assigned a universal advantage.` },
     ],
@@ -322,10 +322,20 @@ function shelter(p) {
   };
 }
 
+// Keep the highlighted control with the worked calculation it explains.
+const guideControls = {
+  circularbuild: ['area', 'sorting', 'sorting', 'distance'],
+  panelbuild: ['units', 'crews', 'distance', 'method'],
+  vernacular: ['years', 'climate', 'years', 'material'],
+  reliefroute: ['demandScale', 'bridge', 'fleet', 'shift'],
+  shelterspace: ['space', 'population', 'access', 'centres'],
+};
+
 export function simulate(id, supplied = {}) {
   const lab = labs.find(l => l.id === id);
   if (!lab) throw new RangeError(`Unknown lab: ${id}`);
   const inputs = cleanInputs(lab, supplied);
   const result = ({ circularbuild: circular, panelbuild: panel, vernacular, reliefroute: relief, shelterspace: shelter })[id](inputs);
-  return { ...result, inputs, dataNotice: 'Synthetic educational scenario. All numerical coefficients are illustrative. References describe methods, not validation of this dataset.' };
+  const steps = result.steps.map((step, index) => ({ ...step, controlKey: guideControls[id][index] }));
+  return { ...result, steps, inputs, dataNotice: 'Synthetic educational scenario. All numerical coefficients are illustrative. References describe methods, not validation of this dataset.' };
 }
