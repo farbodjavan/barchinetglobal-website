@@ -108,7 +108,7 @@ function updateThreeUI(){if(!$('#three-host'))return;const energyView=view==='en
 function ensureThree(){
  const apply=()=>{const host=$('#three-host');if(!host||!(view==='elevation'||view==='energy'))return;scene3d.attach(host);scene3d.update({geometry:{...state},energy:{...energy},selected:{...selected},mode:view==='energy'?'energy':'facade',...threeOptions,motion:motionOn&&!reduced.matches});if(pendingPose){scene3d.restorePose(pendingPose);pendingPose=null;}host.dataset.ready='true';$('#three-message').hidden=true;};
  if(scene3d){apply();return;}
- if(!scenePromise)scenePromise=import('./curtain-3d.mjs').then(({FacadeScene})=>{
+ if(!scenePromise)scenePromise=import('./curtain-3d.mjs?v=2').then(({FacadeScene})=>{
   scene3d=new FacadeScene({onSelect:p=>{pauseScene();selected=p;inspector='geometry';renderInspector();renderCanvas();announce(selectionInfo(state,selected).title+' selected in 3D.');},onInteract:pauseScene,onPose:p=>{zoom=p.zoom;threeOptions.pan=p.pan;if($('#three-pose')){$('#three-pose').textContent=`${p.yaw}° orbit · ${p.pitch}° tilt · ${Math.round(p.zoom*100)}%`;$('#three-host').dataset.pose=JSON.stringify(p);$('#three-pan').setAttribute('aria-pressed',String(p.pan));$('#zoom-value').textContent=Math.round(p.zoom*100)+'%';}},onError:threeFailure});
   window.addEventListener('pagehide',()=>scene3d?.detach());window.addEventListener('pageshow',()=>{if(view==='elevation'||view==='energy')ensureThree();});apply();
  }).catch(threeFailure);

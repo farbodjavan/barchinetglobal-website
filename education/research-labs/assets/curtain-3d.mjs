@@ -1,5 +1,5 @@
-import * as T from './vendor/three/three.module.js';
-import {OrbitControls} from './vendor/three/OrbitControls.js';
+import * as T from './vendor/three/three.module.min.js';
+import {OrbitControls} from './vendor/three/OrbitControls.js?v=2';
 import {facadeLayout,fitDistance,heatAppearance} from './curtain-3d-layout.mjs';
 import {energyResult} from './curtain-energy.mjs';
 
