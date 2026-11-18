@@ -22,7 +22,7 @@ for attempt in range(12):
     try:
         result={}
         for name,url in urls.items():
-            data,d=fetch(url+"?revision=21f8dd35d5e0")
+            data,d=fetch(url)
             d["bytes"]=len(data)
             if name=="studio":
                 d["sha256"]=hashlib.sha256(data).hexdigest()
