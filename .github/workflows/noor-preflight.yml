@@ -1,0 +1,25 @@
+name: Noor Studio preflight
+on:
+  push:
+    branches:
+      - noor-envelope-preflight-20261118
+    paths:
+      - 'noor-preflight-build.py'
+      - '.github/workflows/noor-preflight.yml'
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Complete and check the standalone research studio
+        run: python3 noor-preflight-build.py
+      - name: Stage checked files on the preview branch
+        run: |
+          git config user.name "Noor Studio Preflight"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- education/research-labs/architecture/envelope-studio/index.html noor-preflight-result.json
+          git commit -m "Stage verified Noor Studio standalone and QA result"
+          git push origin HEAD:refs/heads/noor-envelope-preflight-20261118
