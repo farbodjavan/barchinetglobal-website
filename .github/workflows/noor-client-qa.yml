@@ -1,0 +1,41 @@
+name: Noor client office browser verification
+on:
+  push:
+    branches: ['qa/noor-client-office-0e9db518']
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify the candidate and prepare Chromium
+        shell: bash
+        run: |
+          set -eu
+          test "$(git hash-object index.html)" = "0e9db51822dbe0adf5bf55d6c06040aeb0243e2e"
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$chrome" --version
+          echo "CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/noor-test" --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+          echo "PW_MODULE=$RUNNER_TEMP/noor-test/node_modules/playwright-core" >> "$GITHUB_ENV"
+      - name: Check reception, examples, brief, PDF and mobile
+        shell: bash
+        run: |
+          set -eu
+          python3 -m http.server 8181 --bind 127.0.0.1 > "$RUNNER_TEMP/noor-http.log" 2>&1 &
+          server=$!
+          trap 'kill "$server" || true' EXIT
+          for i in {1..25}; do if curl --fail --silent --head http://127.0.0.1:8181/ > /dev/null; then break; fi; sleep 1; done
+          node noor-smoke.cjs
+      - name: Save screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: noor-client-browser-evidence
+          path: qa-output/
+          if-no-files-found: ignore
+          retention-days: 7
