@@ -1,0 +1,71 @@
+name: Noor Studio visual and client journey review
+on:
+  push:
+    branches: ['qa/noor-studio-finishes-20261119']
+permissions:
+  contents: read
+jobs:
+  view:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        room: [entry, gallery, site, plaza, mobile]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: review
+      - name: Select the source under review
+        id: candidate
+        run: |
+          echo "sha=$(jq -r .sha review/qa/candidate.json)" >> "$GITHUB_OUTPUT"
+          echo "label=$(jq -r .label review/qa/candidate.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.candidate.outputs.sha }}
+          persist-credentials: false
+          path: site
+      - name: Prepare headless Chrome
+        run: |
+          echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/noor" --ignore-scripts --no-audit --no-fund playwright-core@1.56.1
+          echo "PW_MODULE=$RUNNER_TEMP/noor/node_modules/playwright-core" >> "$GITHUB_ENV"
+      - name: Render and exercise the client journey
+        env:
+          NOOR_URL: http://127.0.0.1:8765/education/research-labs/architecture/envelope-studio/
+          LABEL: ${{ steps.candidate.outputs.label }}
+          ROOM: ${{ matrix.room }}
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory site > "$RUNNER_TEMP/http.log" 2>&1 &
+          server=$!
+          trap 'kill "$server" || true' EXIT
+          for i in {1..20}; do if curl --fail --silent -o /dev/null "$NOOR_URL"; then break; fi; sleep .3; done
+          node review/qa/test-noor.cjs "$LABEL" "$ROOM"
+      - name: Reviewable capture
+        if: always()
+        env:
+          LABEL: ${{ steps.candidate.outputs.label }}
+          ROOM: ${{ matrix.room }}
+        run: |
+          python3 - <<'PY'
+          import os,base64,io,pathlib
+          from PIL import Image
+          p=pathlib.Path('review/qa/results')/os.environ['LABEL']/(os.environ['ROOM']+'.jpg')
+          if p.is_file():
+              buf=io.BytesIO()
+              img=Image.open(p)
+              img.thumbnail((720,640))
+              img.save(buf,'JPEG',quality=75,optimize=True)
+              code=base64.b64encode(buf.getvalue()).decode()
+              for start in range(0,len(code),1800):
+                  print('NOOR_IMAGE_PART '+str(start)+' '+code[start:start+1800])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: noor-${{ steps.candidate.outputs.label }}-${{ matrix.room }}
+          path: review/qa/results/
+          retention-days: 7
+          if-no-files-found: ignore
