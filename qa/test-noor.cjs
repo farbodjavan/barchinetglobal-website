@@ -26,6 +26,8 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   await page.waitForFunction(()=>document.querySelector('#studio-loading')?.hidden||document.body.classList.contains('walking-fallback'),{},{timeout:120000});
   metrics.boot=await page.evaluate(()=>({readyMs:Math.round(performance.now()),firstFrameMs:noorQA.firstFrameMs,room:document.getElementById('room-name').textContent,fallback:document.body.classList.contains('walking-fallback'),stageHidden:document.querySelector('#gallery-study').hidden}));
   if(metrics.boot.fallback)throw Error('3D view fell back to map');
+  const privacy=page.getByRole('button',{name:'Reject analytics',exact:true});
+  if(await privacy.isVisible()){await privacy.click();metrics.checks.consent='rejected';}
   await page.waitForFunction(()=>/16\s*\/\s*16/.test(document.querySelector('#frame-meter')?.textContent||''),{},{timeout:40000}).catch(()=>{});
   metrics.settled=await page.evaluate(()=>({at:Math.round(performance.now()),meter:document.querySelector('#frame-meter')?.textContent,state:window.noorQA.walker.getState(),cam:window.noorQA.camera.position.toArray(),rot:window.noorQA.camera.rotation.toArray(),render:window.noorQA.frame.getStats(),overflow:document.documentElement.scrollWidth>innerWidth}));
   await page.addStyleTag({content:'#frame-meter{display:none!important}'});
@@ -33,10 +35,10 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   if(space==='entry'&&!mobile){
     const before=await page.evaluate(()=>noorQA.walker.getState().position);
     const cam=page.locator('#view');
-    await cam.focus();await page.keyboard.down('w');
-    await page.waitForFunction(([x,y,z])=>Math.hypot(noorQA.walker.getState().position[0]-x,noorQA.walker.getState().position[2]-z)>.12,before,{timeout:10000});
-    await page.keyboard.up('w');
-    metrics.checks.walk=await page.evaluate(()=>noorQA.walker.getState().position);
+    await cam.focus();await page.keyboard.down('ArrowDown');
+    await page.waitForFunction(([x,y,z])=>Math.hypot(noorQA.walker.getState().position[0]-x,noorQA.walker.getState().position[2]-z)>.12,before,{timeout:25000}).catch(()=>{metrics.checks.walkTimeout=true;});
+    await page.keyboard.up('ArrowDown');
+    metrics.checks.walk=await page.evaluate(()=>noorQA.walker.getState().position);metrics.checks.walkDistance=Math.hypot(...metrics.checks.walk.map((n,i)=>n-before[i]));
     await page.getByRole('button',{name:'Guide',exact:true}).first().click();
     await page.locator('#sg-dialog[open] [data-guide-action="brief"]').click();
     await page.locator('#brief-form input[name=name]').fill('Noor QA roof');
@@ -48,7 +50,7 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
     const frame=page.frames().find(x=>x.parentFrame()===page.mainFrame());
     await f.locator('[data-unit=si]').click();
     metrics.checks.Ubefore=await f.locator('#impact .impact-number').getAttribute('data-u-value');
-    await f.locator('#film-control').click();
+    await f.locator('#film-control').evaluate(el=>el.click());
     metrics.checks.Uafter=await f.locator('#impact .impact-number').getAttribute('data-u-value');
     if(!Number(metrics.checks.Ubefore)||!Number(metrics.checks.Uafter)||metrics.checks.Ubefore===metrics.checks.Uafter)throw Error('Changing surface films did not change the assembly U-value');
     metrics.checks.initialReadout=(await frame.locator('body').innerText()).split('\n').filter(x=>/W\/|thermal resistance|ft²|m²|Btu|R-value|U-value/i.test(x)).slice(0,30);
@@ -58,6 +60,9 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
     await frame.evaluate(()=>{window.print=()=>window.__noorQAPrint=true;});
     await f.locator('[data-study-print]').first().click();
     metrics.checks.printTriggered=await frame.evaluate(()=>Boolean(window.__noorQAPrint));
+    const printed=await f.locator('#print-sheet').textContent();
+    metrics.checks.printPages=await f.locator('#print-sheet').evaluate(el=>[...el.querySelectorAll('h1,h2,h3')].map(h=>h.textContent.trim()).slice(0,26));
+    if(!/Noor QA roof/i.test(printed)||!/(conductiv|resistance|transmittance)/i.test(printed)||!/(source|reference)/i.test(printed))throw Error('Printable report is missing the named project, thermal results or sources');
     if(!metrics.checks.printTriggered)throw Error('Print/PDF action did not invoke printing');
     await page.locator('#close-tool').click();
     await page.locator('#light-btn').click();

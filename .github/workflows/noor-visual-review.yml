@@ -43,25 +43,6 @@ jobs:
           trap 'kill "$server" || true' EXIT
           for i in {1..20}; do if curl --fail --silent -o /dev/null "$NOOR_URL"; then break; fi; sleep .3; done
           node review/qa/test-noor.cjs "$LABEL" "$ROOM"
-      - name: Reviewable capture
-        if: always()
-        env:
-          LABEL: ${{ steps.candidate.outputs.label }}
-          ROOM: ${{ matrix.room }}
-        run: |
-          python3 - <<'PY'
-          import os,base64,io,pathlib
-          from PIL import Image
-          p=pathlib.Path('review/qa/results')/os.environ['LABEL']/(os.environ['ROOM']+'.jpg')
-          if p.is_file():
-              buf=io.BytesIO()
-              img=Image.open(p)
-              img.thumbnail((720,640))
-              img.save(buf,'JPEG',quality=75,optimize=True)
-              code=base64.b64encode(buf.getvalue()).decode()
-              for start in range(0,len(code),1800):
-                  print('NOOR_IMAGE_PART '+str(start)+' '+code[start:start+1800])
-          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
