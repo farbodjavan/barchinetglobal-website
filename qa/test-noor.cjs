@@ -2,13 +2,14 @@ const {chromium} = require(process.env.PW_MODULE||'playwright');
 const fs=require('node:fs'), path=require('node:path');
 const mode=process.argv[2]||'baseline', stop=process.argv[3]||'entry';
 const mobile=stop==='mobile'||stop==='webgl1', space=mobile||stop==='noprobe'||stop==='concept'?'entry':stop;
+const noGL=stop==='nogl';
 const base=process.env.NOOR_URL||('http://127.0.0.1:8765/'+mode+'/');
 const out=path.join(__dirname,'results',mode); fs.mkdirSync(out,{recursive:true});
 const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],checks:{}};
 (async()=>{
  let browser;
  try{
-  browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/chromium',args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-background-networking','--disable-renderer-backgrounding',...(stop==='webgl1'?['--disable-webgl2']:[])]});
+  browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/chromium',args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-background-networking','--disable-renderer-backgrounding',...(stop==='webgl1'?['--disable-webgl2']:[]),...(noGL?['--disable-webgl']:[])]});
   const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1040,height:680},deviceScaleFactor:1,hasTouch:mobile,isMobile:mobile});
   page.setDefaultTimeout(60000);
   page.on('console',m=>{if(m.type()==='error')metrics.errors.push(m.text().slice(0,1600));if(m.type()==='warning')metrics.warnings.push(m.text().slice(0,250));});
@@ -27,9 +28,9 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   },{disableProbe:stop==='noprobe'});
   const url=base+'?space='+space+'&diagnostics=1'+(stop==='concept'?'&view=concept':'');
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:55000});
-  await page.waitForFunction(()=>document.querySelector('#studio-loading')?.hidden||document.body.classList.contains('walking-fallback'),{},{timeout:120000});
+  await page.waitForFunction(()=>document.querySelector('#studio-loading')?.hidden,{},{timeout:120000});
   metrics.boot=await page.evaluate(()=>({readyMs:Math.round(performance.now()),loaderClosedMs:noorQA.loaderClosedMs,firstFrameMs:noorQA.firstFrameMs,room:document.getElementById('room-name').textContent,fallback:document.body.classList.contains('walking-fallback'),stageHidden:document.querySelector('#gallery-study').hidden}));
-  if(metrics.boot.fallback)throw Error('3D view fell back to map');
+  if(metrics.boot.fallback!==noGL)throw Error('Renderer fallback does not match available capabilities');
   if(stop==='concept'){
     await page.locator('#gallery-study').waitFor({state:'visible'});
     await page.locator('#gallery-study [data-close-plate]').click();
@@ -38,6 +39,7 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   }
   const privacy=page.getByRole('button',{name:'Reject analytics',exact:true});
   if(await privacy.isVisible()){await privacy.evaluate(button=>button.click());metrics.checks.consent='rejected';}
+  if(!noGL){
   await page.waitForFunction(()=>{const meter=document.querySelector('#frame-meter')?.textContent||'';const count=Number(meter.match(/(\d+)\s*\/\s*16/)?.[1]||0);return count>=8||meter.includes('native antialiasing');},{},{timeout:65000}).catch(()=>{});
   metrics.settled=await page.evaluate(()=>({at:Math.round(performance.now()),meter:document.querySelector('#frame-meter')?.textContent,state:window.noorQA.walker.getState(),cam:window.noorQA.camera.position.toArray(),rot:window.noorQA.camera.rotation.toArray(),webgl2:noorQA.renderer.capabilities.isWebGL2,render:window.noorQA.frame.getStats(),overflow:document.documentElement.scrollWidth>innerWidth}));
   await page.addStyleTag({content:'#frame-meter{display:none!important}'});
@@ -46,13 +48,30 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   const extent=await page.locator('#view').boundingBox();
   await page.screenshot({clip:extent,path:path.join(out,stop+'-render.jpg'),type:'jpeg',quality:93,timeout:60000});
   await clearView.evaluate(el=>el.remove());
-  if(stop==='entry'&&!mobile&&mode!=='isolation'){
+  }else{
+    metrics.checks.fallbackMap=await page.locator('#fallback-map button').count();
+    if(!metrics.checks.fallbackMap)throw Error('Fallback room map does not offer destinations');
+    const sceneViewer=page.locator('#fallback [data-gallery-study]');
+    if(await sceneViewer.count()){
+      await sceneViewer.click();
+      const v=page.locator('#gallery-study');
+      await v.locator('img').evaluate(async img=>await img.decode());
+      metrics.checks.fallbackPlate=await v.locator('img').evaluate(img=>img.naturalWidth);
+      await v.locator('[data-enter]').click();
+      await v.waitFor({state:'hidden'});
+    }
+    await page.screenshot({path:path.join(out,'nogl.jpg'),type:'jpeg',quality:85});
+  }
+  if((stop==='entry'||noGL)&&mode!=='isolation'){
+    if(!noGL){
     const before=await page.evaluate(()=>noorQA.walker.getState().position);
     const cam=page.locator('#view');
     await cam.focus();await page.keyboard.down('ArrowDown');
     await page.waitForFunction(([x,y,z])=>Math.hypot(noorQA.walker.getState().position[0]-x,noorQA.walker.getState().position[2]-z)>.12,before,{timeout:25000}).catch(()=>{metrics.checks.walkTimeout=true;});
     await page.keyboard.up('ArrowDown');
     metrics.checks.walk=await page.evaluate(()=>noorQA.walker.getState().position);metrics.checks.walkDistance=Math.hypot(...metrics.checks.walk.map((n,i)=>n-before[i]));
+    if(metrics.checks.walkDistance<.1)throw Error('Arrow movement did not move the camera');
+    }
     await page.getByRole('button',{name:'Guide',exact:true}).first().click();
     await page.locator('#sg-dialog[open] .sg-goal[data-guide-action="brief"]').click();
     await page.locator('#brief-form input[name=name]').fill('Noor QA roof');
@@ -79,6 +98,7 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
     if(!/Noor QA roof/i.test(printed)||!/(conductiv|resistance|transmittance)/i.test(printed)||!/(source|reference)/i.test(printed))throw Error('Printable report is missing the named project, thermal results or sources');
     if(!metrics.checks.printTriggered)throw Error('Print/PDF action did not invoke printing');
     await page.locator('#close-tool').click();
+    if(!noGL){
     await page.locator('#light-btn').click();
     await page.locator('[data-sun=morning]').click();
     metrics.checks.morning=await page.locator('[data-sun=morning]').getAttribute('aria-pressed');
@@ -94,14 +114,16 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
         await viewer.locator('img').evaluate(async im=>{await im.decode();if(!im.naturalWidth)throw Error('Render has no pixels');});
         metrics.checks.plates.push(await viewer.locator('img').evaluate(im=>[im.alt,im.naturalWidth,im.naturalHeight]));
       }
+      if(JSON.stringify(metrics.checks.plates.map(p=>p.slice(1)))!==JSON.stringify([[1248,780],[1280,800],[1360,820]]))throw Error('Unexpected decoded studio plates');
       await viewer.locator('[data-enter]').click();
       if(await viewer.isVisible())throw Error('Walk into this view did not restore the 3D scene');
+    }
     }
   }
   if(mobile){
     metrics.checks.touchPad=await page.locator('[aria-label="Walk forward"]').isVisible();
     await page.getByRole('button',{name:'Guide',exact:true}).first().click();
-    await page.locator('#sg-dialog[open] [data-guide-action="study"]').click();
+    await page.locator('#sg-dialog[open] .sg-goal[data-guide-action="study"]').click();
     await page.frameLocator('#workbench').locator('#active-name').waitFor({state:'visible'});
     metrics.checks.mobileStudy=true;
   }
