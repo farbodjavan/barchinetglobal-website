@@ -1,0 +1,48 @@
+name: Assemble verified Noor Studio candidate
+on:
+  push:
+    branches: ['build/noor-finishes-20261119']
+    paths: ['payload/manifest.json']
+permissions:
+  contents: write
+jobs:
+  candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reconstruct and verify the studio bundle
+        env:
+          TARGET: work/noor-finishes-20261119
+          SOURCE_BASE: e23cc6dcfb066e10c28b988067ba15ac04efd76d
+          STUDIO: education/research-labs/architecture/envelope-studio/index.html
+        run: |
+          set -eu
+          base=$(jq -er .parent payload/manifest.json)
+          want=$(jq -er .blob payload/manifest.json)
+          [[ "$base" =~ ^[0-9a-f]{40}$ && "$want" =~ ^[0-9a-f]{40}$ ]]
+          git merge-base --is-ancestor "$SOURCE_BASE" "$base"
+          if git show-ref --verify --quiet "refs/remotes/origin/$TARGET"; then
+            test "$(git rev-parse "origin/$TARGET")" = "$base"
+          else
+            test "$base" = "$SOURCE_BASE"
+          fi
+          tmp="$RUNNER_TEMP/noor-build"
+          mkdir "$tmp"
+          git show "$SOURCE_BASE:$STUDIO" > "$tmp/before"
+          cat payload/parts/*.bin > "$tmp/change.zstd"
+          echo "$(jq -er .patch_sha256 payload/manifest.json)  $tmp/change.zstd" | sha256sum --check
+          zstd --memory=256MB --patch-from="$tmp/before" -d "$tmp/change.zstd" -o "$tmp/after"
+          test "$(git hash-object -w "$tmp/after")" = "$want"
+          export GIT_INDEX_FILE="$tmp/index"
+          git read-tree "$base^{tree}"
+          git update-index --cacheinfo "100644,$want,$STUDIO"
+          tree=$(git write-tree)
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          commit=$(git commit-tree "$tree" -p "$base" -m 'Refine Noor Studio architectural materials, furnishings and daylight')
+          test "$(git diff-tree --no-commit-id --name-only -r "$commit")" = "$STUDIO"
+          git push origin "$commit:refs/heads/$TARGET"
+          echo "Candidate $commit, studio blob $want" >> "$GITHUB_STEP_SUMMARY"
