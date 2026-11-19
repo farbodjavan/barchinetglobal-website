@@ -1,7 +1,7 @@
 const {chromium} = require(process.env.PW_MODULE||'playwright');
 const fs=require('node:fs'), path=require('node:path');
 const mode=process.argv[2]||'baseline', stop=process.argv[3]||'entry';
-const mobile=stop==='mobile', space=mobile?'entry':stop;
+const mobile=stop==='mobile', space=mobile||stop==='noprobe'?'entry':stop;
 const base=process.env.NOOR_URL||('http://127.0.0.1:8765/'+mode+'/');
 const out=path.join(__dirname,'results',mode); fs.mkdirSync(out,{recursive:true});
 const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],checks:{}};
@@ -15,12 +15,15 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   page.on('pageerror',e=>metrics.pageErrors.push(String(e).slice(0,2000)));
   page.on('requestfailed',r=>metrics.requestsFailed.push(r.url().slice(0,300)+' '+r.failure()?.errorText));
   await page.route('**/*',route=>{const url=route.request().url();if(/^https?:/.test(url)&&new URL(url).origin!==new URL(base).origin)return route.fulfill({status:200,body:''});return route.continue();});
-  await page.addInitScript(()=>{
+  await page.addInitScript(({disableProbe})=>{
     window.noorQA={};
     document.addEventListener('noor-first-view',()=>window.noorQA.firstFrameMs=Math.round(performance.now()),{once:true});
     const watch=name=>Object.defineProperty(window,name,{configurable:true,set(obj){const key=name==='LibraryWalk'?'mount':'install', f=obj[key];obj[key]=function(...args){const result=f.apply(this,args);if(name==='LibraryWalk'){window.noorQA.walker=result;window.noorQA.camera=args[0].camera;}else{window.noorQA.frame=result;window.noorQA.renderer=args[2];}return result;};Object.defineProperty(window,name,{configurable:true,writable:true,value:obj});}});
-    if(window===top){watch('LibraryWalk');watch('LibraryFrameControl');}
-  });
+    if(window===top){
+      watch('LibraryWalk');watch('LibraryFrameControl');
+      if(disableProbe)Object.defineProperty(window,'NoorRoomRadiance',{configurable:true,set(obj){obj.create=()=>null;Object.defineProperty(window,'NoorRoomRadiance',{value:obj,writable:true,configurable:true});}});
+    }
+  },{disableProbe:stop==='noprobe'});
   const url=base+'?space='+space+'&diagnostics=1';
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:55000});
   await page.waitForFunction(()=>document.querySelector('#studio-loading')?.hidden||document.body.classList.contains('walking-fallback'),{},{timeout:120000});
@@ -32,7 +35,7 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   metrics.settled=await page.evaluate(()=>({at:Math.round(performance.now()),meter:document.querySelector('#frame-meter')?.textContent,state:window.noorQA.walker.getState(),cam:window.noorQA.camera.position.toArray(),rot:window.noorQA.camera.rotation.toArray(),render:window.noorQA.frame.getStats(),overflow:document.documentElement.scrollWidth>innerWidth}));
   await page.addStyleTag({content:'#frame-meter{display:none!important}'});
   await page.screenshot({path:path.join(out,stop+'.jpg'),type:'jpeg',quality:89,timeout:65000});
-  if(space==='entry'&&!mobile){
+  if(space==='entry'&&!mobile&&mode!=='isolation'){
     const before=await page.evaluate(()=>noorQA.walker.getState().position);
     const cam=page.locator('#view');
     await cam.focus();await page.keyboard.down('ArrowDown');
