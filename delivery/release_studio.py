@@ -8,6 +8,7 @@ import gzip
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -49,7 +50,9 @@ def studio_files(directory):
 
 class Hosting:
     def __init__(self):
-        self.token = subprocess.run(["gcloud", "auth", "print-access-token", "--quiet"], check=True,
+        gcloud = shutil.which("gcloud")
+        require(gcloud, "Open Google Cloud Shell, or install the Google Cloud CLI on this computer.")
+        self.token = subprocess.run([gcloud, "auth", "print-access-token", "--quiet"], check=True,
                                     stdout=subprocess.PIPE, text=True).stdout.strip()
         require(bool(self.token), "Google Cloud CLI needs an authenticated Firebase Hosting account.")
 

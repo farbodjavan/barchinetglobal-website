@@ -39,10 +39,20 @@ jobs:
           export GIT_INDEX_FILE="$tmp/index"
           git read-tree "$base^{tree}"
           git update-index --cacheinfo "100644,$want,$STUDIO"
+          expected="$tmp/expected-paths"
+          echo "$STUDIO" > "$expected"
+          if jq -e 'has("preview_blob")' payload/manifest.json >/dev/null; then
+            preview="${STUDIO%/*}/preview.jpg"
+            cat payload/preview/*.bin > "$tmp/preview.jpg"
+            preview_sha=$(jq -er .preview_blob payload/manifest.json)
+            test "$(git hash-object -w "$tmp/preview.jpg")" = "$preview_sha"
+            git update-index --cacheinfo "100644,$preview_sha,$preview"
+            echo "$preview" >> "$expected"
+          fi
           tree=$(git write-tree)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           commit=$(git commit-tree "$tree" -p "$base" -m 'Refine Noor Studio architectural materials, furnishings and daylight')
-          test "$(git diff-tree --no-commit-id --name-only -r "$commit")" = "$STUDIO"
+          diff -u <(sort "$expected") <(git diff-tree --no-commit-id --name-only -r "$commit" | sort)
           git push origin "$commit:refs/heads/$TARGET"
           echo "Candidate $commit, studio blob $want" >> "$GITHUB_STEP_SUMMARY"
