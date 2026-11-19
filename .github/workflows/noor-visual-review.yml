@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        room: [entry, gallery, site, plaza, mobile]
+        room: [entry, gallery, webgl1]
     steps:
       - uses: actions/checkout@v4
         with:

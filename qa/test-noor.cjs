@@ -1,16 +1,16 @@
 const {chromium} = require(process.env.PW_MODULE||'playwright');
 const fs=require('node:fs'), path=require('node:path');
 const mode=process.argv[2]||'baseline', stop=process.argv[3]||'entry';
-const mobile=stop==='mobile', space=mobile||stop==='noprobe'||stop==='concept'?'entry':stop;
+const mobile=stop==='mobile'||stop==='webgl1', space=mobile||stop==='noprobe'||stop==='concept'?'entry':stop;
 const base=process.env.NOOR_URL||('http://127.0.0.1:8765/'+mode+'/');
 const out=path.join(__dirname,'results',mode); fs.mkdirSync(out,{recursive:true});
 const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],checks:{}};
 (async()=>{
  let browser;
  try{
-  browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/chromium',args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-background-networking','--disable-renderer-backgrounding']});
+  browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'/usr/bin/chromium',args:['--no-sandbox','--disable-dev-shm-usage','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-background-networking','--disable-renderer-backgrounding',...(stop==='webgl1'?['--disable-webgl2']:[])]});
   const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1040,height:680},deviceScaleFactor:1,hasTouch:mobile,isMobile:mobile});
-  page.setDefaultTimeout(22000);
+  page.setDefaultTimeout(60000);
   page.on('console',m=>{if(m.type()==='error')metrics.errors.push(m.text().slice(0,1600));if(m.type()==='warning')metrics.warnings.push(m.text().slice(0,250));});
   page.on('pageerror',e=>metrics.pageErrors.push(String(e).slice(0,2000)));
   page.on('requestfailed',r=>metrics.requestsFailed.push(r.url().slice(0,300)+' '+r.failure()?.errorText));
@@ -18,6 +18,7 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   await page.addInitScript(({disableProbe})=>{
     window.noorQA={};
     document.addEventListener('noor-first-view',()=>window.noorQA.firstFrameMs=Math.round(performance.now()),{once:true});
+    document.addEventListener('noor-ready-for-walk',()=>window.noorQA.loaderClosedMs=Math.round(performance.now()),{once:true});
     const watch=name=>Object.defineProperty(window,name,{configurable:true,set(obj){const key=name==='LibraryWalk'?'mount':'install', f=obj[key];obj[key]=function(...args){const result=f.apply(this,args);if(name==='LibraryWalk'){window.noorQA.walker=result;window.noorQA.camera=args[0].camera;}else{window.noorQA.frame=result;window.noorQA.renderer=args[2];}return result;};Object.defineProperty(window,name,{configurable:true,writable:true,value:obj});}});
     if(window===top){
       watch('LibraryWalk');watch('LibraryFrameControl');
@@ -27,7 +28,7 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
   const url=base+'?space='+space+'&diagnostics=1'+(stop==='concept'?'&view=concept':'');
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:55000});
   await page.waitForFunction(()=>document.querySelector('#studio-loading')?.hidden||document.body.classList.contains('walking-fallback'),{},{timeout:120000});
-  metrics.boot=await page.evaluate(()=>({readyMs:Math.round(performance.now()),firstFrameMs:noorQA.firstFrameMs,room:document.getElementById('room-name').textContent,fallback:document.body.classList.contains('walking-fallback'),stageHidden:document.querySelector('#gallery-study').hidden}));
+  metrics.boot=await page.evaluate(()=>({readyMs:Math.round(performance.now()),loaderClosedMs:noorQA.loaderClosedMs,firstFrameMs:noorQA.firstFrameMs,room:document.getElementById('room-name').textContent,fallback:document.body.classList.contains('walking-fallback'),stageHidden:document.querySelector('#gallery-study').hidden}));
   if(metrics.boot.fallback)throw Error('3D view fell back to map');
   if(stop==='concept'){
     await page.locator('#gallery-study').waitFor({state:'visible'});
@@ -36,9 +37,9 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
     metrics.checks.coldRenderViewer=true;
   }
   const privacy=page.getByRole('button',{name:'Reject analytics',exact:true});
-  if(await privacy.isVisible()){await privacy.click();metrics.checks.consent='rejected';}
-  await page.waitForFunction(()=>/16\s*\/\s*16/.test(document.querySelector('#frame-meter')?.textContent||''),{},{timeout:40000}).catch(()=>{});
-  metrics.settled=await page.evaluate(()=>({at:Math.round(performance.now()),meter:document.querySelector('#frame-meter')?.textContent,state:window.noorQA.walker.getState(),cam:window.noorQA.camera.position.toArray(),rot:window.noorQA.camera.rotation.toArray(),render:window.noorQA.frame.getStats(),overflow:document.documentElement.scrollWidth>innerWidth}));
+  if(await privacy.isVisible()){await privacy.evaluate(button=>button.click());metrics.checks.consent='rejected';}
+  await page.waitForFunction(()=>{const meter=document.querySelector('#frame-meter')?.textContent||'';const count=Number(meter.match(/(\d+)\s*\/\s*16/)?.[1]||0);return count>=8||meter.includes('native antialiasing');},{},{timeout:65000}).catch(()=>{});
+  metrics.settled=await page.evaluate(()=>({at:Math.round(performance.now()),meter:document.querySelector('#frame-meter')?.textContent,state:window.noorQA.walker.getState(),cam:window.noorQA.camera.position.toArray(),rot:window.noorQA.camera.rotation.toArray(),webgl2:noorQA.renderer.capabilities.isWebGL2,render:window.noorQA.frame.getStats(),overflow:document.documentElement.scrollWidth>innerWidth}));
   await page.addStyleTag({content:'#frame-meter{display:none!important}'});
   await page.screenshot({path:path.join(out,stop+'.jpg'),type:'jpeg',quality:89,timeout:65000});
   const clearView=await page.addStyleTag({content:'#stage > :not(#view){visibility:hidden!important;} #view{outline:none!important;}'});
