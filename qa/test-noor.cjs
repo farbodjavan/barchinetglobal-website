@@ -1,7 +1,7 @@
 const {chromium} = require(process.env.PW_MODULE||'playwright');
 const fs=require('node:fs'), path=require('node:path');
 const mode=process.argv[2]||'baseline', stop=process.argv[3]||'entry';
-const mobile=stop==='mobile', space=mobile||stop==='noprobe'?'entry':stop;
+const mobile=stop==='mobile', space=mobile||stop==='noprobe'||stop==='concept'?'entry':stop;
 const base=process.env.NOOR_URL||('http://127.0.0.1:8765/'+mode+'/');
 const out=path.join(__dirname,'results',mode); fs.mkdirSync(out,{recursive:true});
 const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],checks:{}};
@@ -24,18 +24,28 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
       if(disableProbe)Object.defineProperty(window,'NoorRoomRadiance',{configurable:true,set(obj){obj.create=()=>null;Object.defineProperty(window,'NoorRoomRadiance',{value:obj,writable:true,configurable:true});}});
     }
   },{disableProbe:stop==='noprobe'});
-  const url=base+'?space='+space+'&diagnostics=1';
+  const url=base+'?space='+space+'&diagnostics=1'+(stop==='concept'?'&view=concept':'');
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:55000});
   await page.waitForFunction(()=>document.querySelector('#studio-loading')?.hidden||document.body.classList.contains('walking-fallback'),{},{timeout:120000});
   metrics.boot=await page.evaluate(()=>({readyMs:Math.round(performance.now()),firstFrameMs:noorQA.firstFrameMs,room:document.getElementById('room-name').textContent,fallback:document.body.classList.contains('walking-fallback'),stageHidden:document.querySelector('#gallery-study').hidden}));
   if(metrics.boot.fallback)throw Error('3D view fell back to map');
+  if(stop==='concept'){
+    await page.locator('#gallery-study').waitFor({state:'visible'});
+    await page.locator('#gallery-study [data-close-plate]').click();
+    await page.locator('#gallery-study').waitFor({state:'hidden'});
+    metrics.checks.coldRenderViewer=true;
+  }
   const privacy=page.getByRole('button',{name:'Reject analytics',exact:true});
   if(await privacy.isVisible()){await privacy.click();metrics.checks.consent='rejected';}
   await page.waitForFunction(()=>/16\s*\/\s*16/.test(document.querySelector('#frame-meter')?.textContent||''),{},{timeout:40000}).catch(()=>{});
   metrics.settled=await page.evaluate(()=>({at:Math.round(performance.now()),meter:document.querySelector('#frame-meter')?.textContent,state:window.noorQA.walker.getState(),cam:window.noorQA.camera.position.toArray(),rot:window.noorQA.camera.rotation.toArray(),render:window.noorQA.frame.getStats(),overflow:document.documentElement.scrollWidth>innerWidth}));
   await page.addStyleTag({content:'#frame-meter{display:none!important}'});
   await page.screenshot({path:path.join(out,stop+'.jpg'),type:'jpeg',quality:89,timeout:65000});
-  if(space==='entry'&&!mobile&&mode!=='isolation'){
+  const clearView=await page.addStyleTag({content:'#stage > :not(#view){visibility:hidden!important;} #view{outline:none!important;}'});
+  const extent=await page.locator('#view').boundingBox();
+  await page.screenshot({clip:extent,path:path.join(out,stop+'-render.jpg'),type:'jpeg',quality:93,timeout:60000});
+  await clearView.evaluate(el=>el.remove());
+  if(stop==='entry'&&!mobile&&mode!=='isolation'){
     const before=await page.evaluate(()=>noorQA.walker.getState().position);
     const cam=page.locator('#view');
     await cam.focus();await page.keyboard.down('ArrowDown');
@@ -43,7 +53,7 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
     await page.keyboard.up('ArrowDown');
     metrics.checks.walk=await page.evaluate(()=>noorQA.walker.getState().position);metrics.checks.walkDistance=Math.hypot(...metrics.checks.walk.map((n,i)=>n-before[i]));
     await page.getByRole('button',{name:'Guide',exact:true}).first().click();
-    await page.locator('#sg-dialog[open] [data-guide-action="brief"]').click();
+    await page.locator('#sg-dialog[open] .sg-goal[data-guide-action="brief"]').click();
     await page.locator('#brief-form input[name=name]').fill('Noor QA roof');
     await page.locator('#brief-form select[name=kind]').selectOption('roof');
     await page.locator('#brief-form button[type=submit]').click();
@@ -71,6 +81,21 @@ const metrics={mode,stop,errors:[],warnings:[],pageErrors:[],requestsFailed:[],c
     await page.locator('#light-btn').click();
     await page.locator('[data-sun=morning]').click();
     metrics.checks.morning=await page.locator('[data-sun=morning]').getAttribute('aria-pressed');
+    const renders=page.locator('#light-settings [data-gallery-study]');
+    if(await renders.count()){
+      await renders.click();
+      const viewer=page.locator('#gallery-study');
+      await viewer.waitFor({state:'visible'});
+      const tabs=viewer.locator('[data-plate-list] button');
+      metrics.checks.plates=[];
+      for(let i=0;i<await tabs.count();i++){
+        await tabs.nth(i).click();
+        await viewer.locator('img').evaluate(async im=>{await im.decode();if(!im.naturalWidth)throw Error('Render has no pixels');});
+        metrics.checks.plates.push(await viewer.locator('img').evaluate(im=>[im.alt,im.naturalWidth,im.naturalHeight]));
+      }
+      await viewer.locator('[data-enter]').click();
+      if(await viewer.isVisible())throw Error('Walk into this view did not restore the 3D scene');
+    }
   }
   if(mobile){
     metrics.checks.touchPad=await page.locator('[aria-label="Walk forward"]').isVisible();
