@@ -43,3 +43,17 @@
 .tp-status{margin:0;font-size:13px;color:var(--accent);min-height:20px}
 @media(max-width:1080px){.tp-bench{grid-template-columns:1fr 1fr}.tp-next{grid-column:1/-1}}
 @media(max-width:720px){.tp-bench{grid-template-columns:1fr}.tp-bench>*{padding:20px 18px}}
+
+/* Second pass: presets and a drawing that follows the inputs */
+.tp-presets{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 16px}
+.tp-presets button{min-height:40px;padding:0 12px;border:1px solid #9fb0aa;border-radius:999px;background:#f3f5f1;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+.tp-presets button:hover{background:#e6ece7}
+.tp-drawing{margin:0 0 14px;border:1px solid #35555a;border-radius:10px;background:#0c2327}
+.tp-drawing svg{display:block;width:100%;height:auto;max-height:230px}
+.tp-drawing .d-line{fill:none;stroke:#f2ede2;stroke-width:2;stroke-linejoin:round}
+.tp-drawing .d-fill{fill:#dfc29d;fill-opacity:.32}
+.tp-drawing .d-fill.d-line{stroke:#f2ede2;stroke-width:2}
+.tp-drawing .d-thin{fill:none;stroke:#f2ede2;stroke-width:1;stroke-opacity:.7}
+.tp-drawing .d-dash{fill:none;stroke:#dfc29d;stroke-width:1.2;stroke-dasharray:5 4}
+.tp-drawing .d-dim{fill:none;stroke:#9fb7b0;stroke-width:1}
+.tp-drawing text{fill:#d7e3de;font:500 11px Inter,"Segoe UI",Arial,sans-serif}

@@ -92,6 +92,38 @@
     },
   };
 
+
+  const box = 'viewBox="0 0 320 200" role="img"';
+  const dimText = (x, y, t, anchor = 'middle') => `<text x="${x}" y="${y}" text-anchor="${anchor}">${t}</text>`;
+  const fit = (w, h, maxW = 220, maxH = 130) => Math.min(maxW / w, maxH / h);
+  const DRAW = {
+    'tank-volume'(v) {
+      const w = v.shape === 'rect' ? v.length : v.diameter, k = fit(w, v.height), W = w * k, Hh = v.height * k, x = 160 - W / 2, y = 165 - Hh, lv = Hh * v.level / 100, r = v.shape === 'cyl' ? Math.min(14, W / 6) : 0;
+      return `<svg ${box} aria-label="Side view of the tank filled to ${fmt(v.level)} percent"><rect class="d-fill" x="${x}" y="${165 - lv}" width="${W}" height="${lv}"/><path class="d-line" d="M${x} ${y}V165H${x + W}V${y}"/>${r ? `<ellipse class="d-thin" cx="160" cy="${y}" rx="${W / 2}" ry="${r / 2}"/>` : `<path class="d-thin" d="M${x} ${y}H${x + W}"/>`}<path class="d-thin" d="M${x} ${165 - lv}H${x + W}"/><path class="d-dim" d="M${x} 180H${x + W}M${x} 176v8M${x + W} 176v8M${x - 14} ${y}V165M${x - 18} ${y}h8M${x - 18} 165h8"/>${dimText(160, 195, (v.shape === 'rect' ? fmt(v.length) + ' × ' + fmt(v.width) : 'Ø ' + fmt(v.diameter)) + ' m')}${dimText(x - 20, y + Hh / 2 + 4, fmt(v.height) + ' m', 'end')}${dimText(x + W + 8, 165 - lv + 4, fmt(v.level) + '%', 'start')}</svg>`;
+    },
+    'concrete-estimate'(v) {
+      const w = v.shape === 'rect' ? v.length : v.diameter, d = v.shape === 'rect' ? v.width : v.diameter, k = fit(w, d, 220, 86), W = w * k, D = d * k, x = 160 - W / 2, y = 20, t = Math.max(4, Math.min(22, v.thickness * k * 3));
+      return `<svg ${box} aria-label="Plan and edge view of the pad">${v.shape === 'rect' ? `<rect class="d-fill d-line" x="${x}" y="${y}" width="${W}" height="${D}"/>` : `<circle class="d-fill d-line" cx="160" cy="${y + D / 2}" r="${W / 2}"/>`}<path class="d-dim" d="M${x} ${y + D + 12}H${x + W}M${x} ${y + D + 8}v8M${x + W} ${y + D + 8}v8"/>${dimText(160, y + D + 28, (v.shape === 'rect' ? fmt(v.length) + ' × ' + fmt(v.width) : 'Ø ' + fmt(v.diameter)) + ' m')}<rect class="d-fill d-line" x="${x}" y="${190 - t}" width="${W}" height="${t}"/>${dimText(x + W + 8, 190 - t / 2 + 4, fmt(v.thickness * 1000, 0) + ' mm thick', 'start')}${dimText(x, 190 - t - 6, 'edge view, thickness exaggerated', 'start')}</svg>`;
+    },
+    'metal-weight'(v) {
+      const sw = v.shape === 'plate' ? v.width : v.shape === 'round' ? v.diameter : v.side, sh = v.shape === 'plate' ? v.thickness : sw, k = fit(sw, Math.max(sh, sw / 12), 110, 90), W = sw * k, Hh = Math.max(3, sh * k), cx = 70, cy = 85;
+      const L = Math.max(30, Math.min(170, v.length * 34));
+      return `<svg ${box} aria-label="Cross-section and length of the stock">${v.shape === 'round' ? `<circle class="d-fill d-line" cx="${cx}" cy="${cy}" r="${W / 2}"/>` : `<rect class="d-fill d-line" x="${cx - W / 2}" y="${cy - Hh / 2}" width="${W}" height="${Hh}"/>`}${dimText(cx, 165, v.shape === 'plate' ? fmt(v.width, 0) + ' × ' + fmt(v.thickness, 1) + ' mm' : (v.shape === 'round' ? 'Ø ' : '□ ') + fmt(sw, 1) + ' mm')}${dimText(cx, 182, 'cross-section')}<rect class="d-fill d-line" x="140" y="${cy - 9}" width="${L}" height="18"/><path class="d-dim" d="M140 ${cy + 26}H${140 + L}M140 ${cy + 22}v8M${140 + L} ${cy + 22}v8"/>${dimText(140 + L / 2, cy + 44, fmt(v.length) + ' m long' + (v.quantity > 1 ? ' × ' + fmt(v.quantity, 0) : ''))}${dimText(140 + L / 2, 182, 'length, not to scale')}</svg>`;
+    },
+    'stair-geometry'(v) {
+      const n = Math.min(40, v.risers), run = (v.risers - 1) * v.tread, k = fit(run || 1, v.rise, 230, 135), r = v.rise / v.risers * k, g = v.tread * k, x0 = 160 - (run * k) / 2, y0 = 168;
+      let d = `M${x0} ${y0}`; for (let i = 0; i < n; i++) d += `v${-r}${i < n - 1 ? `h${g}` : ''}`;
+      const top = y0 - r * n, end = x0 + g * (n - 1);
+      return `<svg ${box} aria-label="Side view of the flight with ${fmt(v.risers, 0)} risers"><path class="d-fill" d="${d}V${y0}Z"/><path class="d-line" d="${d}h26"/><path class="d-thin" d="M${x0 - 20} ${y0}H${end + 30}"/><path class="d-dash" d="M${x0} ${y0 - r}L${end} ${top}"/><path class="d-dim" d="M${x0} 182H${end}M${x0} 178v8M${end} 178v8M${end + 20} ${y0}V${top}M${end + 16} ${y0}h8M${end + 16} ${top}h8"/>${dimText((x0 + end) / 2, 196, fmt(run / 1000, 2) + ' m run')}${dimText(end + 26, (y0 + top) / 2 + 4, fmt(v.rise / 1000, 2) + ' m', 'start')}</svg>`;
+    },
+  };
+  const PRESETS = {
+    'tank-volume': [['Compact 1 × 1 × 1 m', { shape: 'rect', length: 1, width: 1, height: 1, level: 50, flow: 25 }], ['Long 2 × 1 × 1 m', { shape: 'rect', length: 2, width: 1, height: 1, level: 50, flow: 25 }], ['Round Ø 1.5 × 2 m', { shape: 'cyl', diameter: 1.5, height: 2, level: 30, flow: 40 }]],
+    'concrete-estimate': [['Garden pad 4 × 3 m', { shape: 'rect', length: 4, width: 3, thickness: .1, reserve: 10 }], ['Path 8 × 1 m', { shape: 'rect', length: 8, width: 1, thickness: .08, reserve: 10 }], ['Round base Ø 2 m', { shape: 'round', diameter: 2, thickness: .15, reserve: 5 }]],
+    'metal-weight': [['Plate 1000 × 10 mm', { shape: 'plate', width: 1000, thickness: 10, length: 1, quantity: 1, density: 7850 }], ['Round bar Ø 20, 6 m', { shape: 'round', diameter: 20, length: 6, quantity: 1, density: 7850 }], ['Square bar 40, 3 m × 4', { shape: 'square', side: 40, length: 3, quantity: 4, density: 7850 }]],
+    'stair-geometry': [['2.80 m, 16 risers', { rise: 2800, risers: 16, tread: 280 }], ['3.00 m, 17 risers', { rise: 3000, risers: 17, tread: 270 }], ['2.60 m, 15 risers', { rise: 2600, risers: 15, tread: 290 }]],
+  };
+
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   for (const root of document.querySelectorAll('[data-tool-product]')) {
     const id = root.dataset.toolProduct, tool = TOOLS[id];
@@ -106,7 +138,7 @@
       ? `<fieldset class="tp-field" data-field="${key}"><legend>${esc(f.label)}</legend><div class="tp-choice">${f.options.map(([v, l]) => `<label><input type="radio" name="${id}-${key}" value="${v}" ${values[key] === v ? 'checked' : ''}><span>${esc(l)}</span></label>`).join('')}</div></fieldset>`
       : `<div class="tp-field" data-field="${key}"><label for="${id}-${key}">${esc(f.label)}${f.optional ? ' <em>optional</em>' : ''}</label><div class="tp-input"><input id="${id}-${key}" type="number" inputmode="decimal" step="${f.step || 'any'}" min="${f.min}" ${f.max ? `max="${f.max}"` : ''} value="${esc(values[key])}" aria-describedby="${id}-${key}-msg"><span aria-hidden="true">${esc(f.unit)}</span></div><p class="tp-msg" id="${id}-${key}-msg">${f.hint ? esc(f.hint) : ''}</p></div>`;
     root.innerHTML = `<div class="visual-heading"><p class="eyebrow">Use it now · web calculator</p><h2>${esc(tool.purpose)}</h2><p>Enter your own values. The result and its working update as you type. This web calculator is separate from the Android app and nothing you enter leaves this page.</p></div>
-<div class="tp-bench"><form class="tp-form" novalidate aria-label="${esc(tool.title)} inputs"><h3><span>1</span> Inputs</h3>${Object.entries(tool.fields).map(fieldHtml).join('')}<button type="button" class="tp-reset">Reset to the example</button></form>
+<div class="tp-bench"><form class="tp-form" novalidate aria-label="${esc(tool.title)} inputs"><h3><span>1</span> Inputs</h3><div class="tp-presets" role="group" aria-label="Start from an example">${PRESETS[id].map((preset, i) => `<button type="button" data-preset="${i}">${esc(preset[0])}</button>`).join('')}</div>${Object.entries(tool.fields).map(fieldHtml).join('')}<button type="button" class="tp-reset">Reset to the example</button></form>
 <div class="tp-result"><h3><span>2</span> Result</h3><div class="tp-live" aria-live="polite" aria-atomic="true"></div><p class="tp-limits"><strong>Know the limits.</strong> ${esc(tool.limits)}</p></div>
 <div class="tp-next"><h3><span>3</span> Next step</h3><button type="button" class="button tp-copy">Copy result</button><button type="button" class="button tp-link">Copy link to this calculation</button><p class="tp-status" role="status"></p><a class="text-link" href="mailto:farbodjavan@barchinet.com?subject=${id}%20enquiry">Ask about this tool <span aria-hidden="true">↗</span></a><a class="text-link" href="${tool.next[0]}">Next tool: ${esc(tool.next[1])} <span aria-hidden="true">→</span></a><a class="text-link" href="/tools/">All tools <span aria-hidden="true">→</span></a></div></div>`;
     const form = root.querySelector('.tp-form'), live = root.querySelector('.tp-live'), status = root.querySelector('.tp-status');
@@ -149,7 +181,7 @@
         let out;
         try { out = tool.compute(parsed); } catch (error) { console.error(error); live.innerHTML = '<div class="tp-empty"><strong>The calculation could not run</strong><p>Reset to the example and try again.</p></div>'; summary = ''; return; }
         summary = `${tool.title} — ${out.primary[0]}: ${out.primary[1]} ${out.primary[2]}. ${out.rows.map(r => r[0] + ': ' + r[1]).join('. ')}. Working: ${out.working.join('; ')}. Estimate only. ${tool.limits}`;
-        live.innerHTML = `<p class="tp-primary-label">${esc(out.primary[0])}</p><p class="tp-primary">${esc(out.primary[1])} <small>${esc(out.primary[2])}</small></p><dl>${out.rows.map(r => `<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd></div>`).join('')}</dl><details open><summary>Show the working</summary><ol>${out.working.map(w => `<li>${esc(w)}</li>`).join('')}</ol></details>`;
+        live.innerHTML = `<div class="tp-drawing">${DRAW[id](parsed)}</div><p class="tp-primary-label">${esc(out.primary[0])}</p><p class="tp-primary">${esc(out.primary[1])} <small>${esc(out.primary[2])}</small></p><dl>${out.rows.map(r => `<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd></div>`).join('')}</dl><details open><summary>Show the working</summary><ol>${out.working.map(w => `<li>${esc(w)}</li>`).join('')}</ol></details>`;
       }
       for (const button of root.querySelectorAll('.tp-copy,.tp-link')) button.disabled = !summary;
       status.textContent = '';
@@ -166,6 +198,15 @@
         else form.querySelector(`#${id}-${key}`).value = f.value;
       }
       update(); status.textContent = 'Example values restored.';
+    };
+    for (const button of root.querySelectorAll('[data-preset]')) button.onclick = () => {
+      const [label, preset] = PRESETS[id][Number(button.dataset.preset)];
+      for (const [key, f] of Object.entries(tool.fields)) {
+        const value = key in preset ? preset[key] : f.optional ? '' : f.value;
+        if (f.type === 'choice') form.querySelector(`[name="${id}-${key}"][value="${value}"]`).checked = true;
+        else form.querySelector(`#${id}-${key}`).value = value;
+      }
+      update(); status.textContent = `Example loaded: ${label}.`;
     };
     root.querySelector('.tp-copy').onclick = () => copy(summary, 'Result copied.');
     root.querySelector('.tp-link').onclick = () => {
