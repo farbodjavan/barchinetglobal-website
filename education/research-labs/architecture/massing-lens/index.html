@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#edf0e5">
+  <meta name="description" content="Compare three equal-area building forms in a schematic architecture study.">
+  <title>Massing Lens · Barchinet Global Research Labs</title>
+  <link rel="icon" href="../../assets/barchinet-symbol.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://barchinetglobal.com/education/research-labs/architecture/massing-lens/">
+  <link rel="stylesheet" href="./massing.css?v=2">
+  <script type="module" src="./massing.mjs?v=2"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="brand" href="/education/research-labs/"><img src="../../assets/barchinet-global.svg" alt="Barchinet Global" width="127" height="32"></a>
+    <nav aria-label="Breadcrumb"><a href="/education/research-labs/">Research Labs</a><span aria-hidden="true"> / </span><a href="/education/research-labs/architecture/">Architecture</a></nav>
+    <a class="button light" href="/workspace/projects/?tab=studio&amp;project=d3eb0d28-fefd-4e8f-9016-ddb224bf9ae6">Open project workspace ↗</a>
+  </header>
+  <main id="main" class="shell">
+    <section class="hero" aria-labelledby="title">
+      <div class="hero-copy">
+        <p class="eyebrow">Architecture · Early design study</p>
+        <h1 id="title">Massing <em>Lens</em></h1>
+        <p class="intro">Explore how shape changes when every option has the same floor area and height.</p>
+        <a class="button primary" href="#explore">Compare forms <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-image" role="img" aria-label="Three architectural massing models on a green drafting table"></div>
+    </section>
+
+    <section class="explorer" id="explore" aria-labelledby="explore-title">
+      <header class="section-head"><div><h2 id="explore-title">Compare the massing</h2><p>The illustrative Yazd case starts at 250 m² per floor with three floors.</p></div>
+        <div class="view-controls" aria-label="Model view">
+          <button class="button" type="button" data-view="axon" aria-pressed="true">3D orbit</button>
+          <button class="button" type="button" data-view="plan" aria-pressed="false">Plan</button>
+        </div>
+      </header>
+      <div class="bench">
+        <form class="inputs" aria-label="Study inputs">
+          <h3>Study inputs</h3>
+          <div class="numeric-inputs">
+            <label>Floor area <span>m² per floor</span><input type="number" name="area" min="50" max="1000" step="1" value="250" required></label>
+            <label>Floors <span>1–10</span><input type="number" name="floors" min="1" max="10" step="1" value="3" required></label>
+            <label>Floor-to-floor height <span>m</span><input type="number" name="height" min="2.5" max="5" step="0.1" value="3" required></label>
+          </div>
+          <label class="angle">Footprint rotation <output id="angle" for="rotation">0°</output><input id="rotation" type="range" name="rotation" min="0" max="180" step="5" value="0"></label>
+          <p id="form-error" role="status" hidden></p>
+          <div class="input-actions">
+            <button class="button" type="reset">Reset Yazd example</button>
+            <button class="button" type="button" id="export">Export comparison</button>
+          </div>
+        </form>
+        <div class="results">
+          <div id="totals" class="totals" aria-live="polite"></div>
+          <section class="orbit-panel" id="orbit-panel" aria-label="Shared 3D comparison" hidden>
+            <div class="orbit-stage"><canvas tabindex="0" aria-label="Three equal-area masses. Drag or use the arrow keys to orbit. Use plus and minus to zoom."></canvas></div>
+            <div class="orbit-tools" role="group" aria-label="3D comparison controls">
+              <button class="button" type="button" data-orbit="explode" aria-pressed="false">Separate floors</button>
+              <button class="button" type="button" data-orbit="out" aria-label="Zoom out">−</button>
+              <button class="button" type="button" data-orbit="in" aria-label="Zoom in">+</button>
+              <button class="button" type="button" data-orbit="fit">Reset camera</button>
+              <span>Drag to orbit · Scroll or pinch to zoom</span>
+            </div>
+            <p id="orbit-note" class="footnote" hidden>Floors are separated for illustration. The measurements are unchanged.</p>
+          </section>
+          <p id="orbit-fallback" class="footnote" role="status" hidden>3D orbit is unavailable in this browser. The fixed views and plan comparison are available.</p>
+          <div class="models" id="models"></div>
+          <p class="footnote">The three forms use a shared scale. Wall area is a geometric quantity, and energy simulation is outside this study.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="research" aria-labelledby="research-title">
+      <header class="section-head"><div><h2 id="research-title">From study to prototype</h2><p>Use the geometry experiment to frame a question worth testing.</p></div></header>
+      <div class="research-layout">
+        <div class="research-card">
+          <div id="research-steps" class="research-steps" aria-label="Research steps"></div>
+          <div id="research-detail" class="research-detail" aria-live="polite"></div>
+        </div>
+        <div class="research-card notes">
+          <h3>Discovery notes</h3>
+          <label for="notes">What would you test with a designer?</label>
+          <textarea id="notes" rows="5" maxlength="2000" placeholder="Which decision is difficult today? What would change their choice?"></textarea>
+          <p id="note-status" class="footnote" role="status">Notes are saved in this browser.</p>
+        </div>
+      </div>
+    </section>
+    <footer class="foot">
+      <a href="/education/research-labs/architecture/">Explore the architecture collection</a>
+      <a href="https://energyplus.readthedocs.io/en/stable/quick_start/quick_start.html" target="_blank" rel="noopener">EnergyPlus simulation reference ↗</a>
+    </footer>
+  </main>
+  <noscript><p class="shell">Enable JavaScript to compare the model geometry.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eae9df">
+  <meta name="description" content="Explore a fictional pavilion drawing set and compare two revisions in this interactive Barchinet Global Research Labs prototype.">
+  <title>Drawing Desk — Barchinet Global Research Labs</title>
+  <link rel="canonical" href="https://barchinetglobal.com/education/research-labs/architecture/drawing-desk/">
+  <link rel="icon" href="/education/research-labs/assets/barchinet-symbol.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./drawing-desk.css">
+  <script type="module" src="./drawing-desk.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header shell">
+    <a class="brand" href="/education/research-labs/">
+      <img src="/education/research-labs/assets/barchinet-symbol.svg" width="35" height="35" alt="">
+      <span><strong>Barchinet Global</strong><small>Research Labs</small></span>
+    </a>
+    <a class="back" href="/education/research-labs/architecture/">Architecture collection <span aria-hidden="true">↗</span></a>
+  </header>
+  <main class="shell" id="main">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="label">Architecture <span aria-hidden="true">/</span> Interactive study</p>
+        <h1 id="page-title">Drawing<br><em>Desk.</em></h1>
+        <p class="dek">When a drawing changes, what else needs to change with it?</p>
+        <p class="intro">Follow three coordination notes through a fictional reading pavilion. Compare two issues of the drawing set and see exactly what changed.</p>
+        <a class="start" href="#desk">Explore the 3D model <span aria-hidden="true">↓</span></a>
+      </div>
+      <figure class="hero-image">
+        <img src="./pavilion-study.jpg" width="1280" height="853" alt="Illustration of a small timber pavilion model on drafting paper" fetchpriority="high">
+        <figcaption>Concept model <span aria-hidden="true">·</span> Fictional reading pavilion</figcaption>
+      </figure>
+    </section>
+    <section id="desk" aria-labelledby="desk-title">
+      <div class="desk-heading">
+        <div>
+          <p class="label">Sample drawing set</p>
+          <h2 id="desk-title">The Reading Pavilion</h2>
+          <p>Orbit the pavilion, then open a note to find its evidence in the drawings. Switch issues to see the revisions.</p>
+        </div>
+        <div class="switch" role="group" aria-label="Drawing set issue">
+          <button type="button" data-issue="draft" aria-pressed="true">Issue 01 <small>Initial set</small></button>
+          <button type="button" data-issue="revised" aria-pressed="false">Issue 02 <small>Revised set</small></button>
+        </div>
+      </div>
+      <noscript><p>Enable JavaScript to switch issues and compare the sample drawings.</p></noscript>
+      <div class="desk-grid">
+        <section class="sheets" aria-labelledby="sheet-heading">
+          <nav class="sheet-nav" aria-label="Sample sheets">
+            <button type="button" data-sheet="model" aria-pressed="true">3D <span>Model</span></button>
+            <button type="button" data-sheet="A00" aria-pressed="false">A00 <span>Index</span></button>
+            <button type="button" data-sheet="A10" aria-pressed="false">A10 <span>Plan</span></button>
+            <button type="button" data-sheet="A20" aria-pressed="false">A20 <span>Section</span></button>
+            <button type="button" data-sheet="A30" aria-pressed="false">A30 <span>Detail</span></button>
+          </nav>
+          <section id="pavilion-model" class="model-panel" aria-label="Interactive pavilion model">
+            <div class="model-stage">
+              <canvas tabindex="0" aria-label="3D reading pavilion. Drag or use the arrow keys to orbit. Use plus and minus to zoom."></canvas>
+            </div>
+            <div class="model-controls" role="group" aria-label="Pavilion model controls">
+              <button type="button" data-model-action="roof" aria-pressed="false">Roof cutaway</button>
+              <button type="button" data-model-action="top">Top view</button>
+              <button type="button" data-model-action="out" aria-label="Zoom out">−</button>
+              <button type="button" data-model-action="in" aria-label="Zoom in">+</button>
+              <button type="button" data-model-action="fit">Reset view</button>
+            </div>
+            <p id="model-hint">Drag to orbit. Use the controls to zoom or look inside.</p>
+          </section>
+          <article class="paper" hidden>
+            <header class="paper-heading">
+              <p class="label" id="sheet-id">A00</p>
+              <h3 id="sheet-heading">Drawing index</h3>
+            </header>
+            <div id="sheet-content">
+              <table>
+                <thead><tr><th scope="col">Sheet</th><th scope="col">Drawing</th><th scope="col">Listed revision</th></tr></thead>
+                <tbody><tr><td>A10</td><td>Floor plan</td><td>A</td></tr><tr><td>A20</td><td>Section</td><td>A</td></tr><tr><td>A30</td><td>Eave detail</td><td>A</td></tr></tbody>
+              </table>
+            </div>
+            <footer class="paper-footer"><span>Reading Pavilion</span><span>Sample sheet · Not to scale</span></footer>
+          </article>
+        </section>
+        <section class="notes" aria-labelledby="notes-title">
+          <header class="notes-header">
+            <h3 id="notes-title">Coordination notes</h3>
+            <p id="issue-summary" aria-live="polite" aria-atomic="true">3 discrepancies in Issue 01</p>
+          </header>
+          <div id="note-list" role="group" aria-label="Choose a coordination note"></div>
+          <section class="evidence" aria-labelledby="evidence-title">
+            <h4 id="evidence-title">Plan revision</h4>
+            <p id="evidence-detail">Compare the drawing index with the revision printed on the floor plan.</p>
+            <div id="evidence-links" class="evidence-links" role="group" aria-label="Open a sheet showing the selected evidence"></div>
+          </section>
+        </section>
+      </div>
+      <p class="scope">All sheets and notes are fictional and use illustrative geometry. This prototype demonstrates drawing coordination only.</p>
+    </section>
+  </main>
+  <footer class="site-footer shell"><a href="/education/research-labs/">Barchinet Global Research Labs</a></footer>
+</body>
+</html>
