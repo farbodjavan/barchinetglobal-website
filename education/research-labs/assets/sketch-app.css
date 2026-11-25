@@ -40,3 +40,6 @@
   #print-record blockquote{margin:16px 0;padding-left:12px;border-left:2px solid #888}
   #print-record li{margin:7px 0}.print-sources section{margin:25px 0;break-inside:avoid}.print-sources a{overflow-wrap:anywhere;color:#111}
 }
+
+/* Eight apps: let the strip scroll sideways instead of widening the page. */
+.app-nav{overflow-x:auto;scrollbar-width:thin}.app-nav a{white-space:nowrap;flex:none}
