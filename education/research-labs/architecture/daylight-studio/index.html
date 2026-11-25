@@ -4,16 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f4f0e6">
-  <meta name="description" content="Daylight Studio: turn a small courtyard studio, change the time of day, hide the roof and pick rooms on a linked plan. A Research Labs showcase.">
+  <meta name="description" content="Daylight Studio: a courtyard studio in Los Angeles in four light states. Path-traced stills, a baked-light 3D model, and a plan and section linked to it.">
   <title>Daylight Studio — Barchinet Global Research Labs</title>
   <link rel="icon" type="image/svg+xml" href="/education/research-labs/assets/barchinet-symbol.svg">
   <link rel="canonical" href="/education/research-labs/architecture/daylight-studio/">
+  <meta property="og:title" content="Daylight Studio — Barchinet Global Research Labs">
+  <meta property="og:image" content="/education/research-labs/architecture/daylight-studio/cover.webp">
   <script defer src="/assets/analytics.js?v=20261104"></script>
-  <link rel="stylesheet" href="/education/research-labs/assets/scene-kit.css?v=2">
-  <link rel="stylesheet" href="/education/research-labs/assets/plan-kit.css?v=1">
-  <link rel="stylesheet" href="./daylight.css?v=1">
-  <link rel="modulepreload" href="/education/research-labs/assets/vendor/three/three.module.min.js"><link rel="modulepreload" href="/education/research-labs/assets/vendor/three/three.core.min.js">
-  <script type="module" src="./daylight.mjs?v=1" onerror="document.documentElement.classList.add('module-failed')"></script>
+  <link rel="stylesheet" href="/education/research-labs/assets/scene-kit.css?v=3">
+  <link rel="stylesheet" href="./daylight.css?v=2">
+  <link rel="preload" as="image" href="./stills/winter-noon-exterior.webp" fetchpriority="high">
+  <script type="module" src="./daylight.mjs?v=2" onerror="document.documentElement.classList.add('module-failed')"></script>
   <link rel="stylesheet" href="/assets/site-chrome.css?v=20261124"><script defer src="/assets/site-chrome.js?v=20261124"></script>
 </head>
 <body>
@@ -21,53 +22,76 @@
 <main id="main" class="ds-shell">
   <nav class="ds-crumbs" aria-label="Breadcrumb"><a href="/education/research-labs/">Research Labs</a><span aria-hidden="true">/</span><a href="/education/research-labs/architecture/">Architecture</a><span aria-hidden="true">/</span><span aria-current="page">Daylight Studio</span></nav>
   <header class="ds-head">
-    <div>
-      <p class="ds-eyebrow">Architecture · Showcase</p>
-      <h1>Daylight <em>Studio</em></h1>
-      <p class="ds-lead">One room, one courtyard, four times of day. See how a roof overhang, a tree and the direction a window faces decide where daylight lands.</p>
-    </div>
-    <ol class="ds-steps" aria-label="How to use this page">
-      <li><b>1</b> Pick a time of day</li>
-      <li><b>2</b> Hide the roof or pick a room</li>
-      <li><b>3</b> Open the numbered points</li>
-    </ol>
+    <p class="ds-eyebrow">Architecture · Showcase · Fictional building</p>
+    <h1>Daylight <em>Studio</em></h1>
+    <p class="ds-lead">One room in Los Angeles, opening south onto a walled courtyard. See what a 1.6 m canopy does to the sun in winter, in summer, late in the day and after dark.</p>
   </header>
 
+  <section class="ds-light" aria-labelledby="light-title">
+    <h2 id="light-title" class="ds-label">1 · Choose the light</h2>
+    <div class="ds-states" id="ds-states" role="group" aria-label="Light state"></div>
+    <div class="ds-caption"><strong id="ds-caption-title"></strong><p id="ds-caption"></p></div>
+  </section>
+
   <div class="ds-work">
-    <section class="ds-view" id="studio-3d" aria-labelledby="view-title">
+    <section class="ds-card ds-view" aria-labelledby="view-title">
       <div class="ds-bar">
-        <h2 id="view-title">3D view <small id="view-kind">Loading…</small></h2>
-        <p class="ds-time" id="time-readout"></p>
+        <h2 id="view-title" class="ds-label">2 · Look around</h2>
+        <div class="ds-seg" role="group" aria-label="Stills or 3D model"><button type="button" id="ds-mode-stills" aria-pressed="true">Stills</button><button type="button" id="ds-mode-3d" aria-pressed="false">3D model</button></div>
       </div>
-      <div class="ds-stage" id="studio-stage"><canvas tabindex="0" aria-label="Three-dimensional view of the courtyard studio. Drag or use the arrow keys to turn it, plus and minus to zoom, zero to reset."></canvas></div>
-      <div class="ds-fallback" id="studio-fallback" hidden><div class="fallback-picture"></div><div class="fallback-times" role="group" aria-label="Time of day"></div></div>
-      <div class="ds-tools" role="group" aria-label="View controls">
-        <button type="button" class="ds-primary" id="roof-toggle" data-view-action="roof" aria-pressed="false">Hide roof</button>
-        <button type="button" data-view-action="top">Look from above</button>
-        <button type="button" data-view-action="out" aria-label="Zoom out">−</button>
-        <button type="button" data-view-action="in" aria-label="Zoom in">+</button>
-        <button type="button" data-view-action="reset">Reset view</button>
+      <div class="ds-viewport">
+        <div class="ds-poster" id="ds-poster"><noscript><img src="./stills/winter-noon-exterior.webp" alt="Path-traced render of the courtyard studio at winter noon" width="1600" height="900"></noscript></div>
+        <div class="ds-stage" id="ds-stage" hidden><canvas tabindex="0" aria-label="Three-dimensional model of the courtyard studio. Drag or use the arrow keys to turn, plus and minus to zoom, zero to reset."></canvas><p class="ds-loading" id="ds-loading"></p></div>
+        <button type="button" class="ds-open3d" id="ds-open3d">Explore in 3D</button>
       </div>
-      <p class="ds-status" id="studio-status" role="status" aria-live="polite"></p>
-      <p class="ds-source" id="model-source">Preparing the model…</p>
+      <div class="ds-stillbar"><div class="ds-chips" id="ds-still-tabs" role="group" aria-label="Rendered views"></div><span class="ds-size">3D model: about 3.5 MB per light state</span></div>
+      <div class="ds-tools" role="group" aria-label="3D view controls">
+        <button type="button" id="roof-toggle" aria-pressed="false">Hide roof</button>
+        <button type="button" id="ds-top">Look from above</button>
+        <button type="button" id="ds-zoom-out" aria-label="Zoom out">−</button>
+        <button type="button" id="ds-zoom-in" aria-label="Zoom in">+</button>
+        <button type="button" id="ds-reset">Reset view</button>
+      </div>
+      <p class="ds-status" id="ds-status" role="status" aria-live="polite"></p>
+      <p class="ds-source" id="ds-source">Path-traced stills rendered in Blender Cycles.</p>
     </section>
 
-    <aside class="ds-plan" aria-labelledby="plan-title">
+    <aside class="ds-card ds-plan" aria-labelledby="plan-title">
       <div class="ds-bar">
-        <h2 id="plan-title">Plan <small>pick a room to move the camera</small></h2>
-        <button type="button" id="plan-rendered" aria-pressed="false" hidden>Rendered plan</button>
+        <h2 id="plan-title" class="ds-label">3 · Read the drawings</h2>
+        <div class="ds-seg" id="ds-sheet-tabs" role="tablist" aria-label="Drawing"><button type="button" role="tab" id="sheet-tab-plan" data-sheet="plan" aria-controls="ds-sheet" aria-selected="true">Plan</button><button type="button" role="tab" id="sheet-tab-section" data-sheet="section" aria-controls="ds-sheet" aria-selected="false" tabindex="-1">Section</button><button type="button" role="tab" id="sheet-tab-rendered" data-sheet="rendered" aria-controls="ds-sheet" aria-selected="false" tabindex="-1">From above</button></div>
       </div>
-      <div class="ds-sheet" id="studio-plan"></div>
-      <ul class="ds-rooms" id="room-list" aria-label="Rooms"></ul>
+      <div class="ds-drawing" id="ds-sheet" role="tabpanel" aria-labelledby="sheet-tab-plan"></div>
+      <p class="ds-note" id="ds-sheet-note"></p>
+      <ol class="ds-goto" id="ds-goto" aria-label="Places in the building"></ol>
+      <div class="ds-anchor"><strong id="ds-anchor-title">Pick a numbered point</strong><p id="ds-anchor-text">On the plan, in the list, or in the 3D view. Each one moves the camera and explains what is there.</p></div>
     </aside>
   </div>
 
-  <section class="ds-notes" aria-label="About this showcase">
-    <div><h2>What is real here</h2><p>The plan is drawn to scale and its areas are calculated from the same outline the 3D view uses. The sun positions are illustrative for four times of day; they are not calculated for a date or a latitude.</p></div>
-    <div><h2>What is still schematic</h2><p>Until the baked model is installed, the 3D view is a stand-in made of simple shapes with real-time light. It shows direction and shadow, not materials or bounced light.</p></div>
-    <div><h2>Next step</h2><p>Compare forms with the same floor area in <a href="/education/research-labs/architecture/massing-lens/">Massing Lens</a>, or check a drawing set against a model in <a href="/education/research-labs/architecture/drawing-desk/">Drawing Desk</a>.</p></div>
-  </section>
-  <noscript><p class="ds-source">Daylight Studio needs JavaScript for its 3D view and linked plan.</p></noscript>
+  <div class="ds-lower">
+    <section class="ds-card ds-walk" id="ds-walk" aria-labelledby="walk-title">
+      <p class="ds-label" id="walk-count">4 · Take the walk</p>
+      <h2 id="walk-title">Guided walk</h2>
+      <p id="walk-text"></p>
+      <button type="button" class="ds-primary" id="walk-start">Start the walk</button>
+      <div class="ds-walknav" id="walk-nav" hidden><button type="button" id="walk-prev">Back</button><button type="button" class="ds-primary" id="walk-next">Next</button><button type="button" class="ds-link" id="walk-end">End walk</button></div>
+    </section>
+    <section class="ds-card" aria-labelledby="layers-title">
+      <h2 id="layers-title" class="ds-label">5 · Show and hide layers</h2>
+      <div class="ds-layers" id="ds-layers"></div>
+    </section>
+    <section class="ds-card ds-honest" aria-labelledby="honest-title">
+      <h2 id="honest-title" class="ds-label">What you are looking at</h2>
+      <ul>
+        <li><b>Stills</b> are path-traced renders.</li>
+        <li><b>The interactive model</b> shows baked light: four fixed states, no live sun, no reflections in the glass.</li>
+        <li><b>The neighbouring blocks</b> are schematic massing.</li>
+        <li><b>The building</b> is fictional. Sun angles are for latitude 34° N at noon.</li>
+      </ul>
+      <p>Next: compare forms in <a href="/education/research-labs/architecture/massing-lens/">Massing Lens</a> or check a drawing set in <a href="/education/research-labs/architecture/drawing-desk/">Drawing Desk</a>.</p>
+    </section>
+  </div>
+  <noscript><p class="ds-source">The light switch, 3D model and linked drawings need JavaScript. The picture above is the winter-noon render.</p></noscript>
 </main>
 </body>
 </html>

@@ -1,178 +1,195 @@
-import { Three, addBlock, createModelViewer, materials } from '../../assets/model-viewer.mjs?v=2';
-import { dayStates } from '../../assets/scene-kit.mjs?v=2';
-import { drawPlan, bindPlan, polygonArea } from '../../assets/plan-kit.mjs?v=1';
-import { loadGlb } from '../../assets/glb-lite.mjs?v=1';
-import { studio, toWorld, roomCentre, H } from './studio-data.mjs?v=1';
-
-const $ = selector => document.querySelector(selector);
+// Daylight Studio: path-traced stills first, then a baked-light model with linked plan, section, walk and layers.
+// The 3D engine and the 3 to 4 MB model are loaded only when the visitor asks for them.
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const here = new URL('.', import.meta.url);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const viewNames = { exterior: 'Outside', interior: 'Inside', table: 'Review table', courtyard: 'Courtyard' };
 
-/* ---------- Stand-in model, built from the same data as the plan ---------- */
-function buildStandIn() {
-  const root = new Three.Group(), roof = new Three.Group(), [ox, oz] = studio.origin;
-  roof.name = 'Roof';
-  const skin = { plaster: materials.plaster('#efe9dc'), garden: materials.plaster('#e2d8c4'), timber: materials.timber('#b98a54'), dark: materials.timber('#6f4b2e'), stone: materials.stone('#a9a79c'), concrete: materials.concrete('#bdb9ae'), fabric: materials.fabric('#7f8f86'), paint: materials.paint('#f4f4f0'), glass: materials.glass(), frame: materials.metal('#3a4144'), leaf: materials.foliage('#5f8050'), floor: materials.timber('#c9a678'), tile: materials.stone('#cfd2cc'), paving: materials.stone('#b7b2a4') };
-  const along = (w, y0, y1, material, parent = root, t = w.t) => { // a box following a plan segment between two heights
-    const dx = w.x2 - w.x1, dy = w.y2 - w.y1, length = Math.hypot(dx, dy);
-    const mesh = addBlock(parent, material, [length, y1 - y0, t], [(w.x1 + w.x2) / 2 + ox, (y0 + y1) / 2, (w.y1 + w.y2) / 2 + oz]);
-    mesh.rotation.y = -Math.atan2(dy, dx);
-    return mesh;
-  };
-  for (const wall of studio.walls) along(wall, 0, wall.h ?? H, wall.h ? skin.garden : skin.plaster);
-  for (const win of studio.windows) {
-    if (win.sill > 0) along(win, 0, win.sill, skin.plaster);
-    along(win, win.head, H, skin.plaster);
-    const glass = along(win, win.sill, win.head, skin.glass, root, .03); glass.castShadow = false;
-    along(win, win.sill, win.sill + .06, skin.frame, root, .09); along(win, win.head - .06, win.head, skin.frame, root, .09);
-    const dx = win.x2 - win.x1, dy = win.y2 - win.y1, length = Math.hypot(dx, dy), bars = Math.max(1, Math.round(length / 1.1));
-    for (let i = 0; i <= bars; i++) { const k = i / bars, x = win.x1 + dx * k, y = win.y1 + dy * k; addBlock(root, skin.frame, [.06, win.head - win.sill, .09], [x + ox, (win.sill + win.head) / 2, y + oz]).rotation.y = -Math.atan2(dy, dx); }
-  }
-  for (const d of studio.doors) { // head above each door opening
-    const a = d.along * Math.PI / 180, seg = { x1: d.x, y1: d.y, x2: d.x + Math.cos(a) * d.w, y2: d.y + Math.sin(a) * d.w, t: d.y > 9 ? .25 : d.along ? .15 : .25 };
-    if (d.y < 9) along(seg, 2.1, H, skin.plaster);
-  }
-  // floors: a room slab per room, paving in the courtyard
-  for (const room of studio.rooms) {
-    const xs = room.poly.map(p => p[0]), ys = room.poly.map(p => p[1]), w = Math.max(...xs) - Math.min(...xs) + .3, d = Math.max(...ys) - Math.min(...ys) + .3;
-    addBlock(root, room.id === 'courtyard' ? skin.paving : room.hatch === 'tile' ? skin.tile : skin.floor, [w, .12, d], [(Math.min(...xs) + Math.max(...xs)) / 2 + ox, -.06 + (room.id === 'courtyard' ? -.02 : 0), (Math.min(...ys) + Math.max(...ys)) / 2 + oz]).castShadow = false;
-  }
-  for (const item of studio.furniture) {
-    if (item.type === 'rect') addBlock(root, skin[item.material] || skin.timber, [item.w, item.height, item.h], [item.x + item.w / 2 + ox, item.height / 2, item.y + item.h / 2 + oz]);
-    else if (item.type === 'circle') { const mesh = new Three.Mesh(new Three.CylinderGeometry(item.r, item.r * .8, item.height, 20), skin.paint); mesh.position.set(item.x + ox, item.height / 2, item.y + oz); mesh.castShadow = mesh.receiveShadow = true; root.add(mesh); }
-    else if (item.type === 'tree') {
-      const trunk = new Three.Mesh(new Three.CylinderGeometry(.09, .14, item.height * .55, 10), skin.dark); trunk.position.set(item.x + ox, item.height * .275, item.y + oz); trunk.castShadow = true; root.add(trunk);
-      for (const [dx, dy, dz, r] of [[0, .78, 0, 1], [.5, .66, .3, .72], [-.45, .7, -.25, .76], [.1, .92, -.35, .6], [-.2, .6, .5, .62]]) { const crown = new Three.Mesh(new Three.IcosahedronGeometry(item.r * r, 2), skin.leaf); crown.position.set(item.x + ox + dx * item.r, item.height * dy, item.y + oz + dz * item.r); crown.castShadow = crown.receiveShadow = true; root.add(crown); }
-    }
-  }
-  // lamp over the desk, a few books on the shelf: small things that give the room a sense of size
-  for (let i = 0; i < 7; i++) addBlock(root, [skin.fabric, skin.dark, skin.paint][i % 3], [.2, .24 + (i % 3) * .04, .05 + (i % 2) * .02], [6.67 + ox, 1.2 + (i > 3 ? .5 : 0), 2.3 + (i % 4) * .28 + oz]);
-  // roof slab with a timber soffit and a deeper overhang towards the courtyard
-  addBlock(roof, skin.concrete, [11, .18, 7], [0, H + .2, 3 + oz]);
-  addBlock(roof, skin.timber, [10.9, .08, 6.9], [0, H + .06, 3 + oz]);
-  for (const x of [-5.3, 5.3]) addBlock(roof, skin.dark, [.12, .3, 7], [x, H + .15, 3 + oz]);
-  root.add(roof);
-  return { root, roof: [roof] };
+async function drawing(path) { // fetch an SVG and scope its <style> so it cannot restyle the page
+  const text = await (await fetch(new URL(path, here))).text();
+  const doc = new DOMParser().parseFromString(text, 'image/svg+xml'), svg = doc.documentElement;
+  if (svg.nodeName !== 'svg' || doc.querySelector('parsererror')) throw new Error('Drawing could not be read');
+  for (const bad of svg.querySelectorAll('script, foreignObject, metadata')) bad.remove();
+  for (const style of svg.querySelectorAll('style')) style.textContent = style.textContent.replace(/(^|})\s*([^{}]+)\{/g, (_, close, selectors) => `${close} ${selectors.split(',').map(s => '.ds-drawing ' + s.trim()).join(', ')} {`);
+  return document.importNode(svg, true);
 }
 
-/* ---------- Page ---------- */
 async function init() {
-  const stageEl = $('#studio-stage'), status = $('#studio-status'), source = $('#model-source'), planBox = $('#studio-plan'), roofButton = $('#roof-toggle');
-  let manifest = { ready: false, states: {}, cutaway: ['roof', 'ceiling'] };
-  try { const response = await fetch(new URL('manifest.json', here)); if (response.ok) manifest = { ...manifest, ...(await response.json()) }; } catch { /* the stand-in works without a manifest */ }
-  const rooms = manifest.rooms || studio.rooms, origin = manifest.planOrigin || studio.origin;
-  let time = 'afternoon', selectedRoom = null, roofParts = [], roofHidden = false, baked = false, loadToken = 0, viewer = null;
-
+  const manifest = await (await fetch(new URL('manifest.json', here))).json();
+  const states = manifest.states, anchors = manifest.anchors, stateOf = key => states.find(s => s.key === key);
+  const params = new URLSearchParams(location.hash.slice(1));
+  let state = stateOf(params.get('light')) ? params.get('light') : states[0].key;
+  let still = 'exterior', mode = 'stills', viewer = null, engine = null, roofParts = [], roofHidden = false, layerNodes = new Map(), hidden = new Set();
+  let loadToken = 0, current = null, walkIndex = -1, sheet = 'plan', activeAnchor = null, lastAnchors = {};
+  const stage = $('#ds-stage'), poster = $('#ds-poster'), status = $('#ds-status'), planBox = $('#ds-sheet');
   const say = text => { status.textContent = text; };
-  const hotspotList = anchors => (manifest.hotspots || studio.hotspots).map(spot => {
-    const fallback = spot.at ? toWorld(spot.at[0], spot.at[2], spot.at[1], origin) : [0, 1.5, 0];
-    return { label: spot.label, text: spot.text, view: spot.view && { ...spot.view, target: anchors?.[spot.anchor] || fallback }, position: anchors?.[spot.anchor] || fallback };
-  });
+  const remember = () => { const next = new URLSearchParams(); next.set('light', state); if (activeAnchor) next.set('at', activeAnchor); history.replaceState(null, '', '#' + next); };
 
-  function renderPlan() {
-    const underlay = manifest.plan?.ready && $('#plan-rendered')?.getAttribute('aria-pressed') === 'true';
-    planBox.innerHTML = drawPlan({ ...studio, rooms }, { selected: selectedRoom, selectable: true });
-    if (underlay) { // rendered orthographic plan from Blender, placed under the linework by its extent in metres
-      const [x0, y0, x1, y1] = manifest.plan.bounds || studio.bounds, svg = planBox.querySelector('svg');
-      svg.querySelector('.pk-rooms').insertAdjacentHTML('beforebegin', `<image href="${new URL(manifest.plan.image, here)}" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" preserveAspectRatio="none"/>`);
-      svg.classList.add('pk-over-image');
-    }
-    $('#room-list').innerHTML = rooms.map(room => `<li><button type="button" data-room="${room.id}" aria-pressed="${room.id === selectedRoom}"><span>${room.number}</span>${room.name}<small>${(room.area ?? polygonArea(room.poly)).toFixed(1)} m²</small></button></li>`).join('');
+  /* ---------- light state, stills ---------- */
+  $('#ds-states').innerHTML = states.map(s => `<button type="button" data-state="${s.key}" aria-pressed="false"><b>${esc(s.label)}</b><small>${esc(s.detail)}</small></button>`).join('');
+  function renderStills() {
+    const s = stateOf(state); if (!s.stills.includes(still)) still = s.stills[0];
+    $('#ds-still-tabs').innerHTML = s.stills.map(v => `<button type="button" data-still="${v}" aria-pressed="${v === still}">${viewNames[v]}</button>`).join('');
+    poster.innerHTML = `<img src="${new URL(`stills/${state}-${still}.webp`, here)}" alt="Path-traced render: ${esc(viewNames[still].toLowerCase())} view, ${esc(s.label.toLowerCase())}" width="1600" height="900" decoding="async"><span class="ds-tag">Path-traced render · ${esc(s.detail)}</span>`;
   }
-  function setRoof(hidden, announce = true) {
-    roofHidden = hidden;
-    for (const part of roofParts) part.visible = !hidden;
-    roofButton.setAttribute('aria-pressed', String(hidden)); roofButton.textContent = hidden ? 'Show roof' : 'Hide roof';
-    viewer?.refreshLighting();
-    if (announce) say(hidden ? 'Roof hidden. You are looking into the rooms from above.' : 'Roof shown.');
+  function renderState() {
+    const s = stateOf(state);
+    for (const button of $$('[data-state]')) button.setAttribute('aria-pressed', String(button.dataset.state === state));
+    $('#ds-caption').textContent = s.caption; $('#ds-caption-title').textContent = s.detail;
+    for (const layer of $$('[data-state]', planBox)) layer.style.display = layer.id === s.planLayer ? '' : 'none';
+    renderStills(); viewer?.markTime(state); remember();
   }
-  function selectRoom(id, focusPlan) {
-    const room = rooms.find(r => r.id === id); if (!room) return;
-    selectedRoom = id; renderPlan();
-    if (focusPlan) planBox.querySelector(`[data-room="${id}"]`)?.focus({ preventScroll: true });
-    if (!viewer) { say(`${room.name} selected. The 3D view is not available in this browser.`); return; }
-    const [cx, cy] = roomCentre(room);
-    if (room.id !== 'courtyard' && !roofHidden) setRoof(true, false);
-    viewer.flyTo({ ...(room.view || { azimuth: 2.6, elevation: .95, distance: .6 }), target: toWorld(cx, cy, 1.1, origin) });
-    say(`${room.name}: camera moved${room.id !== 'courtyard' ? ', roof hidden' : ''}.`);
+  async function setState(key, { announce = true } = {}) {
+    if (!stateOf(key)) return;
+    state = key; renderState();
+    if (announce) say(`${stateOf(key).label}. ${stateOf(key).caption}`);
+    if (mode === '3d') await loadModel();
   }
 
-  /* 3D or fallback */
-  viewer = createModelViewer(stageEl, {
-    enablePan: true, time, groundColor: '#b9b3a2', home: { azimuth: .62, elevation: .38, distance: 1.12 },
-    purpose: 'A small courtyard studio. Change the time of day and watch where the light lands.',
-    tips: ['Drag to turn, scroll or pinch to zoom', 'Pick a time of day at the top', 'Hide the roof, or pick a room on the plan', 'Keys: arrows turn, + and − zoom, 0 resets'],
-    storageKey: 'barchinet.hint.daylight',
-    onTimeChange: key => { time = key; syncTimeButtons(); if (baked) loadBaked(key); },
-    onError: showFallback,
-  });
-
-  function showStandIn() {
-    baked = false;
-    const built = buildStandIn(); roofParts = built.roof;
-    viewer.showGround(true);
-    viewer.replace(built.root, { size: 8.6, center: 1.1, hotspots: hotspotList() });
-    setRoof(roofHidden, false);
-    source.dataset.kind = 'standin';
-    source.textContent = 'Stand-in model: simple shapes with real-time sun and shadows. The baked, path-traced model has not been installed yet.';
-    $('#view-kind').textContent = 'Stand-in geometry · real-time light, not baked';
+  /* ---------- 3D ---------- */
+  function applyLayers() {
+    for (const [name, node] of layerNodes) node.visible = !hidden.has(name) && !(roofHidden && roofParts.includes(node));
+    viewer?.draw();
+    $('#roof-toggle').setAttribute('aria-pressed', String(roofHidden)); $('#roof-toggle').textContent = roofHidden ? 'Show roof' : 'Hide roof';
+    for (const box of $$('[data-layer]')) { box.checked = !hidden.has(box.dataset.layer) && !(roofHidden && manifest.cutaway.some(p => box.dataset.layer.toLowerCase().startsWith(p))); }
   }
-  async function loadBaked(key) {
-    const entry = manifest.states?.[key]; if (!entry?.model) return showStandIn();
-    const token = ++loadToken; stageEl.classList.add('is-loading'); say(`Loading the ${dayStates[key].label.toLowerCase()} model…`);
+  function hotspots(found) {
+    lastAnchors = found;
+    return anchors.map(a => ({ id: a.id, label: a.label, text: a.text, position: found[a.id] || a.view.target, view: a.view }));
+  }
+  async function loadModel() {
+    const s = stateOf(state), token = ++loadToken;
+    if (current === state) return;
+    stage.classList.add('is-loading'); $('#ds-loading').textContent = `Loading ${s.label.toLowerCase()} light…`;
     try {
-      const result = await loadGlb(new URL(entry.model, here));
+      const result = await engine.loadGlb(new URL(s.model, here), { bakedEncoding: manifest.bakedEncoding });
       if (token !== loadToken) return;
-      const size = result.box.getSize(new Three.Vector3()), prefixes = (manifest.cutaway || []).map(p => p.toLowerCase());
-      roofParts = []; result.scene.traverse(node => { if (prefixes.some(p => node.name.toLowerCase().startsWith(p))) roofParts.push(node); });
-      baked = true; viewer.showGround(!manifest.modelHasGround);
-      viewer.replace(result.scene, { size: Math.max(size.x, size.z) * .62, center: Math.min(1.4, size.y * .4), hotspots: hotspotList(result.anchors) });
-      setRoof(roofHidden, false);
-      source.dataset.kind = 'baked';
-      source.textContent = `Baked model, ${dayStates[key].label.toLowerCase()} light. Light and shadow were path-traced in Blender and stored in the textures; the browser only displays them.`;
-      $('#view-kind').textContent = 'Baked light · fixed to four times of day';
-      say(`${dayStates[key].label} light loaded.`);
+      layerNodes = new Map(result.scene.children.filter(n => !/^ANCHOR_/i.test(n.name)).map(n => [n.name, n]));
+      roofParts = [...layerNodes].filter(([name]) => manifest.cutaway.some(p => name.toLowerCase().startsWith(p))).map(([, node]) => node);
+      const first = current === null;
+      viewer.showGround(false); viewer.setBackdrop(s.sky[0], s.sky[1]);
+      viewer.replace(result.scene, { size: manifest.view.size, center: manifest.view.center, hotspots: hotspots(result.anchors), keepPose: !first });
+      current = state; applyLayers();
+      if (activeAnchor) viewer.selectHotspot(anchors.findIndex(a => a.id === activeAnchor), true);
+      $('#ds-source').textContent = `Interactive model with baked light: ${s.detail}. The light was path-traced in Blender and stored in the textures, so it does not change as you move. Glass is drawn as a flat tint, without reflections.`;
     } catch (error) {
       if (token !== loadToken) return;
-      console.error(error);
-      showStandIn(); say('');
-      source.dataset.kind = 'error';
-      source.textContent = `The baked model could not be shown (${error.message}) The stand-in model is displayed instead.`;
-    } finally { if (token === loadToken) stageEl.classList.remove('is-loading'); }
+      console.error(error); showStills();
+      $('#ds-source').textContent = `The 3D model could not be loaded (${error.message}). The path-traced stills are shown instead.`;
+    } finally { if (token === loadToken) stage.classList.remove('is-loading'); }
+  }
+  function no3d() {
+    viewer = null; mode = 'stills'; document.body.classList.add('ds-no3d'); showStills();
+    $('#ds-open3d').disabled = true; $('#ds-open3d').textContent = '3D is not available in this browser';
+    $('#ds-source').textContent = 'This browser cannot draw the 3D model. The path-traced stills, the plan and the section all still work.';
+  }
+  async function open3d() {
+    if (mode === '3d') return true;
+    if (!engine) {
+      $('#ds-open3d').disabled = true; $('#ds-open3d').textContent = 'Loading the 3D engine…';
+      try { const [view, glb] = await Promise.all([import('../../assets/model-viewer.mjs?v=3'), import('../../assets/glb-lite.mjs?v=3')]); engine = { ...view, ...glb }; }
+      catch (error) { console.error(error); $('#ds-open3d').disabled = false; $('#ds-open3d').textContent = 'Explore in 3D'; say('The 3D engine could not be loaded. Check the connection and try again.'); return false; }
+      $('#ds-open3d').disabled = false; $('#ds-open3d').textContent = 'Explore in 3D';
+      viewer = engine.createModelViewer(stage, {
+        enablePan: true, shift: 0, minDistance: .6, tour: false, home: manifest.view.home, time: state,
+        timeStates: states.map(s => ({ key: s.key, label: s.label, title: s.detail })),
+        purpose: 'Baked-light model. Turn it, step inside with the numbered points, and change the light.',
+        tips: ['Drag to look around, scroll or pinch to move closer', 'Numbered points take you to a place and explain it', 'The light buttons swap the baked light and keep your view', 'Keys: arrows turn, + and − zoom, 0 resets'],
+        storageKey: 'barchinet.hint.daylight', schematic: 'Neighbouring blocks are schematic massing',
+        onTimeChange: key => setState(key), onError: no3d,
+        onHotspot: spot => { markAnchor(spot.id, { from3d: true }); },
+      });
+      if (!viewer) return false;
+    }
+    mode = '3d'; document.body.classList.add('ds-3d'); poster.hidden = true; stage.hidden = false;
+    $('#ds-mode-stills').setAttribute('aria-pressed', 'false'); $('#ds-mode-3d').setAttribute('aria-pressed', 'true');
+    await loadModel();
+    return mode === '3d';
+  }
+  function showStills() {
+    mode = 'stills'; document.body.classList.remove('ds-3d'); poster.hidden = false; stage.hidden = true;
+    $('#ds-mode-stills').setAttribute('aria-pressed', 'true'); $('#ds-mode-3d').setAttribute('aria-pressed', 'false');
+    $('#ds-source').textContent = 'Path-traced stills rendered in Blender Cycles. Open the 3D model to move around the same building with its light baked in.';
   }
 
-  function showFallback() { // no WebGL: rendered stills if installed, otherwise the plan carries the page
-    viewer = null;
-    $('#studio-3d').classList.add('no-3d');
-    for (const button of document.querySelectorAll('[data-view-action]')) button.disabled = true;
-    const box = $('#studio-fallback'); box.hidden = false;
-    const draw = () => {
-      const still = manifest.ready && manifest.states?.[time]?.still;
-      box.querySelector('.fallback-picture').innerHTML = still
-        ? `<img src="${new URL(still, here)}" alt="Rendered view of the studio in ${dayStates[time].label.toLowerCase()} light" width="1920" height="1080">`
-        : `<p><strong>3D is not available in this browser.</strong> The plan beside this panel still works: pick a room to read its size. Rendered pictures for each time of day will appear here once they are installed.</p>`;
-      for (const button of box.querySelectorAll('[data-fallback-time]')) button.setAttribute('aria-pressed', String(button.dataset.fallbackTime === time));
-    };
-    box.querySelector('.fallback-times').innerHTML = Object.entries(dayStates).map(([key, s]) => `<button type="button" data-fallback-time="${key}">${s.label}</button>`).join('');
-    for (const button of box.querySelectorAll('[data-fallback-time]')) button.onclick = () => { time = button.dataset.fallbackTime; draw(); say(`${dayStates[time].label} selected.`); };
-    draw();
-    source.textContent = '3D graphics are unavailable in this browser.';
+  /* ---------- anchors: plan <-> 3D ---------- */
+  function markAnchor(id, { from3d = false } = {}) {
+    activeAnchor = id;
+    for (const el of $$('[data-anchor]', planBox)) el.classList.toggle('is-on', el.dataset.anchor === id);
+    for (const button of $$('[data-goto]')) button.setAttribute('aria-pressed', String(button.dataset.goto === id));
+    const anchor = anchors.find(a => a.id === id);
+    if (anchor) { $('#ds-anchor-title').textContent = anchor.label; $('#ds-anchor-text').textContent = anchor.text; if (from3d) say(`${anchor.label}. ${anchor.text}`); }
+    remember();
   }
-  const syncTimeButtons = () => { $('#time-readout').textContent = `${dayStates[time].label}, about ${dayStates[time].hour}`; };
+  async function goTo(id, { quiet = false } = {}) {
+    const index = anchors.findIndex(a => a.id === id); if (index < 0) return;
+    markAnchor(id);
+    if (!(await open3d())) { if (!quiet) say(`${anchors[index].label}. ${anchors[index].text}`); return; }
+    if (roofHidden) { roofHidden = false; applyLayers(); }
+    viewer.selectHotspot(index);
+    if (!quiet) say(`${anchors[index].label}: camera moved. ${anchors[index].text}`);
+  }
+  function overview() {
+    activeAnchor = null; for (const el of $$('.is-on', planBox)) el.classList.remove('is-on');
+    for (const button of $$('[data-goto]')) button.setAttribute('aria-pressed', 'false');
+    $('#ds-anchor-title').textContent = 'Pick a numbered point'; $('#ds-anchor-text').textContent = 'On the plan, in the list, or in the 3D view. Each one moves the camera and explains what is there.';
+    viewer?.clearHotspot(); viewer?.fitView(); remember();
+  }
 
-  const actions = {
-    roof: () => setRoof(!roofHidden),
-    reset: () => { selectedRoom = null; renderPlan(); viewer?.fitView(); say('View reset.'); },
-    top: () => { if (!roofHidden) setRoof(true, false); viewer?.top(); say('Looking straight down with the roof hidden. Compare with the plan.'); },
-    in: () => viewer?.zoom(1.25), out: () => viewer?.zoom(1 / 1.25),
-  };
-  for (const button of document.querySelectorAll('[data-view-action]')) button.onclick = () => actions[button.dataset.viewAction]();
-  bindPlan(planBox, id => selectRoom(id, true));
-  $('#room-list').addEventListener('click', event => { const button = event.target.closest('[data-room]'); if (button) { selectRoom(button.dataset.room); $(`#room-list [data-room="${button.dataset.room}"]`)?.focus({ preventScroll: true }); } });
-  const rendered = $('#plan-rendered');
-  if (manifest.plan?.ready) { rendered.hidden = false; rendered.onclick = () => { rendered.setAttribute('aria-pressed', String(rendered.getAttribute('aria-pressed') !== 'true')); renderPlan(); }; }
-  renderPlan(); syncTimeButtons();
-  if (viewer) { if (manifest.ready) await loadBaked(time); else showStandIn(); }
+  /* ---------- plan, section, rendered plan ---------- */
+  const sheets = {};
+  async function showSheet(key) {
+    sheet = key;
+    for (const tab of $$('[data-sheet]')) { const on = tab.dataset.sheet === key; tab.setAttribute('aria-selected', String(on)); tab.tabIndex = on ? 0 : -1; }
+    planBox.setAttribute('aria-labelledby', 'sheet-tab-' + key);
+    try {
+      if (key === 'rendered') planBox.innerHTML = `<img src="${new URL(manifest.plan.rendered, here)}" alt="Roof-off view from straight above at summer noon: desks along the north wall, review table inside the south bay, olive tree in the courtyard" width="2000" height="1490" loading="lazy">`;
+      else { sheets[key] ||= await drawing(key === 'plan' ? manifest.plan.drawing : manifest.plan.section); planBox.replaceChildren(sheets[key]); }
+    } catch (error) { console.error(error); planBox.innerHTML = '<p class="ds-error">This drawing could not be loaded. Reload the page to try again.</p>'; }
+    $('#ds-sheet-note').textContent = { plan: 'Drawn plan, north up. Numbered points are linked to the 3D view. The shaded patch shows where noon sun or shade falls for the winter and summer states.', section: 'Drawn section, south to north, at latitude 34° N: the summer and winter noon sun against the 1.6 m canopy.', rendered: 'Path-traced render from straight above with the roof removed, summer noon. North is up.' }[key];
+    renderState(); if (activeAnchor) markAnchor(activeAnchor);
+  }
+
+  /* ---------- guided walk ---------- */
+  async function walkTo(index) {
+    const steps = manifest.walk; walkIndex = Math.max(0, Math.min(steps.length - 1, index)); const step = steps[walkIndex];
+    $('#ds-walk').classList.add('is-on');
+    $('#walk-count').textContent = `Step ${walkIndex + 1} of ${steps.length}`; $('#walk-title').textContent = step.title; $('#walk-text').textContent = step.text;
+    $('#walk-prev').disabled = walkIndex === 0; $('#walk-next').textContent = walkIndex === steps.length - 1 ? 'Finish' : 'Next';
+    $('#walk-start').hidden = true; $('#walk-nav').hidden = false;
+    if (step.state && step.state !== state) await setState(step.state, { announce: false });
+    if (step.anchor) await goTo(step.anchor, { quiet: true }); else if (await open3d()) { if (roofHidden) { roofHidden = false; applyLayers(); } overview(); }
+    say(`Step ${walkIndex + 1} of ${steps.length}: ${step.title}. ${step.text}`);
+  }
+  function endWalk() { walkIndex = -1; $('#ds-walk').classList.remove('is-on'); $('#walk-start').hidden = false; $('#walk-nav').hidden = true; $('#walk-title').textContent = 'Guided walk'; $('#walk-text').textContent = `${manifest.walk.length} short steps through the building and its four light states.`; say('Walk finished. Explore freely.'); }
+
+  /* ---------- wiring ---------- */
+  $('#ds-states').addEventListener('click', e => { const b = e.target.closest('[data-state]'); if (b) setState(b.dataset.state); });
+  $('#ds-still-tabs').addEventListener('click', e => { const b = e.target.closest('[data-still]'); if (b) { still = b.dataset.still; renderStills(); $(`[data-still="${still}"]`).focus(); if (mode === '3d') showStills(); } });
+  $('#ds-open3d').onclick = async () => { if (await open3d()) $('canvas', stage).focus({ preventScroll: true }); };
+  $('#ds-mode-3d').onclick = () => open3d(); $('#ds-mode-stills').onclick = showStills;
+  $('#roof-toggle').onclick = async () => { if (!(await open3d())) return; roofHidden = !roofHidden; applyLayers(); say(roofHidden ? 'Roof and ceiling hidden. You are looking into the room from outside.' : 'Roof and ceiling shown.'); };
+  $('#ds-top').onclick = async () => { if (!(await open3d())) return; roofHidden = true; applyLayers(); viewer.clearHotspot(); viewer.top(); say('Looking straight down with the roof hidden. North is up, as on the plan.'); };
+  $('#ds-reset').onclick = async () => { if (!(await open3d())) return; roofHidden = false; applyLayers(); overview(); say('View reset.'); };
+  $('#ds-zoom-in').onclick = () => viewer?.zoom(1.25); $('#ds-zoom-out').onclick = () => viewer?.zoom(1 / 1.25);
+  $('#ds-layers').innerHTML = manifest.layers.map(l => `<label><input type="checkbox" data-layer="${esc(l.node)}" checked><span>${esc(l.label)}${l.note ? ` <em>${esc(l.note)}</em>` : ''}</span></label>`).join('');
+  $('#ds-layers').addEventListener('change', async e => { const box = e.target.closest('[data-layer]'); if (!box) return; const name = box.dataset.layer, show = box.checked; if (!(await open3d())) { box.checked = true; return; } if (show) { hidden.delete(name); if (manifest.cutaway.some(p => name.toLowerCase().startsWith(p))) roofHidden = false; } else hidden.add(name); applyLayers(); say(`${name} ${show ? 'shown' : 'hidden'}.`); });
+  $('#ds-goto').innerHTML = anchors.map((a, i) => `<li><button type="button" data-goto="${a.id}" aria-pressed="false"><span>${i + 1}</span>${esc(a.label)}</button></li>`).join('');
+  $('#ds-goto').addEventListener('click', e => { const b = e.target.closest('[data-goto]'); if (b) goTo(b.dataset.goto); });
+  const pickOnPlan = e => { const el = e.target.closest?.('[data-anchor]'); if (el && planBox.contains(el) && anchors.some(a => a.id === el.dataset.anchor)) { e.preventDefault(); goTo(el.dataset.anchor); } };
+  planBox.addEventListener('click', pickOnPlan);
+  planBox.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') pickOnPlan(e); });
+  const tabs = $$('[data-sheet]');
+  for (const tab of tabs) tab.onclick = () => showSheet(tab.dataset.sheet);
+  $('#ds-sheet-tabs').addEventListener('keydown', e => { const at = tabs.indexOf(document.activeElement); if (at < 0 || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return; e.preventDefault(); const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (at + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length; tabs[next].focus(); tabs[next].click(); });
+  $('#walk-start').onclick = () => walkTo(0); $('#walk-prev').onclick = () => walkTo(walkIndex - 1);
+  $('#walk-next').onclick = () => (walkIndex >= manifest.walk.length - 1 ? endWalk() : walkTo(walkIndex + 1)); $('#walk-end').onclick = endWalk;
+
+  endWalk(); status.textContent = ''; showStills(); await showSheet('plan');
+  // The plan's own numbering follows the drawing; the list beside it is the large-target route to the same anchors.
+  if (anchors.some(a => a.id === params.get('at'))) markAnchor(params.get('at'));
   document.documentElement.classList.add('studio-ready');
 }
 
-init().catch(error => { console.error(error); document.documentElement.classList.add('module-failed'); });
+init().catch(error => { console.error(error); document.documentElement.classList.add('module-failed'); const s = document.querySelector('#ds-source'); if (s) s.textContent = 'This page could not start. Reload to try again.'; });

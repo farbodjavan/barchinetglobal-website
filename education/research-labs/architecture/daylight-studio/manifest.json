@@ -1,14 +1,328 @@
 {
-  "ready": false,
-  "comment": "Set ready to true once the four .glb files are in model/. Paths are relative to this folder. See README.md here for the exact export settings.",
-  "states": {
-    "morning":   { "model": "model/studio-morning.glb",   "still": "stills/studio-morning.webp" },
-    "noon":      { "model": "model/studio-noon.glb",      "still": "stills/studio-noon.webp" },
-    "afternoon": { "model": "model/studio-afternoon.glb", "still": "stills/studio-afternoon.webp" },
-    "dusk":      { "model": "model/studio-dusk.glb",      "still": "stills/studio-dusk.webp" }
+ "ready": true,
+ "bakedEncoding": "linear",
+ "title": "Courtyard studio, Los Angeles",
+ "note": "Fictional building. Light states are separate GLBs with identical geometry; see README.md.",
+ "view": {
+  "size": 13,
+  "center": 1.5,
+  "home": {
+   "azimuth": 0.75,
+   "elevation": 0.5,
+   "distance": 1
+  }
+ },
+ "cutaway": [
+  "roof and ceiling"
+ ],
+ "states": [
+  {
+   "key": "winter-noon",
+   "label": "Winter noon",
+   "detail": "Winter, 12:00 · sun 32° high",
+   "model": "model/courtyard-studio-los-angeles.winter-noon.glb",
+   "sky": [
+    "#3f5f86",
+    "#9fb3c4"
+   ],
+   "planLayer": "layer-daylight-winter",
+   "stills": [
+    "exterior",
+    "interior",
+    "table",
+    "courtyard"
+   ],
+   "caption": "The winter sun is low, 32° above the horizon, so it passes under the canopy and through the glazed bay. A patch of direct sun reaches about 2.9 m into the room, onto the rug beside the review table."
   },
-  "cutaway": ["roof", "ceiling"],
-  "modelHasGround": true,
-  "planOrigin": [-5, -5],
-  "plan": { "ready": false, "image": "plan/studio-plan.webp", "bounds": [0, 0, 10, 10] }
+  {
+   "key": "summer-noon",
+   "label": "Summer noon",
+   "detail": "Summer, 12:00 · sun 79° high",
+   "model": "model/courtyard-studio-los-angeles.summer-noon.glb",
+   "sky": [
+    "#3c6ea6",
+    "#a9c3d8"
+   ],
+   "planLayer": "layer-daylight-summer",
+   "stills": [
+    "interior"
+   ],
+   "caption": "The summer sun is high, 79° above the horizon. The 1.6 m timber canopy shades the whole glazed bay, so no direct sun reaches the floor inside."
+  },
+  {
+   "key": "late-afternoon",
+   "label": "Late afternoon",
+   "detail": "Autumn, 17:00 · low sun from the west",
+   "model": "model/courtyard-studio-los-angeles.late-afternoon.glb",
+   "sky": [
+    "#6f8fb0",
+    "#e6cdb4"
+   ],
+   "stills": [
+    "exterior",
+    "interior",
+    "table",
+    "courtyard"
+   ],
+   "caption": "An autumn afternoon at 17:00. The sun is low in the west: the timber fins throw long shadows across the courtyard paving and the light turns warm."
+  },
+  {
+   "key": "evening",
+   "label": "Evening",
+   "detail": "Evening · lights on",
+   "model": "model/courtyard-studio-los-angeles.evening.glb",
+   "sky": [
+    "#1b2a47",
+    "#27375a"
+   ],
+   "stills": [
+    "exterior",
+    "interior",
+    "table",
+    "courtyard"
+   ],
+   "caption": "After dark the room lights itself: pendants over the review table, track lights along the ceiling and garden lights in the courtyard. From outside, the glazed bay glows."
+  }
+ ],
+ "anchors": [
+  {
+   "id": "review_table",
+   "label": "Review table",
+   "text": "The review table, with the Cypress House model on it, sits just inside the glazed bay. This is where the winter sun patch lands.",
+   "view": {
+    "position": [
+     5.2,
+     1.65,
+     -0.8
+    ],
+    "target": [
+     1.2,
+     0.9,
+     1.5
+    ]
+   }
+  },
+  {
+   "id": "material_library",
+   "label": "Material library",
+   "text": "Shelves of samples on the east wall, next to the east window.",
+   "view": {
+    "position": [
+     2.2,
+     1.65,
+     -0.6
+    ],
+    "target": [
+     6.5,
+     1.2,
+     -3
+    ]
+   }
+  },
+  {
+   "id": "pin_up_wall",
+   "label": "Pin-up wall",
+   "text": "A pin-up board on the west wall, beside the sofa.",
+   "view": {
+    "position": [
+     -2.2,
+     1.65,
+     0.4
+    ],
+    "target": [
+     -6.68,
+     1.5,
+     2.2
+    ]
+   }
+  },
+  {
+   "id": "desks",
+   "label": "Desks",
+   "text": "Four desks stand along the north wall, away from the direct sun that comes through the south bay.",
+   "view": {
+    "position": [
+     1.5,
+     1.7,
+     1.2
+    ],
+    "target": [
+     0,
+     0.9,
+     -3.7
+    ]
+   }
+  },
+  {
+   "id": "entry",
+   "label": "Entry",
+   "text": "The entry door is on the west wall, reached by a path from the street.",
+   "view": {
+    "position": [
+     -2.5,
+     1.7,
+     1.5
+    ],
+    "target": [
+     -7,
+     1.1,
+     -1.2
+    ]
+   }
+  },
+  {
+   "id": "bay_opening",
+   "label": "Glazed courtyard bay",
+   "text": "Six metres of glass facing south onto the courtyard, with timber fins outside.",
+   "view": {
+    "position": [
+     -0.5,
+     1.65,
+     -2.2
+    ],
+    "target": [
+     1.2,
+     1.3,
+     4.35
+    ]
+   }
+  },
+  {
+   "id": "courtyard",
+   "label": "Courtyard",
+   "text": "A walled courtyard, 15.2 × 6.4 m, paved in concrete pavers, with an olive tree in a planter.",
+   "view": {
+    "position": [
+     7.5,
+     6.5,
+     14
+    ],
+    "target": [
+     0,
+     0.8,
+     6.5
+    ]
+   }
+  },
+  {
+   "id": "canopy",
+   "label": "Timber canopy",
+   "text": "The canopy projects 1.6 m over the bay. It blocks the high summer sun and lets the low winter sun pass underneath.",
+   "view": {
+    "position": [
+     6.5,
+     3.4,
+     10.5
+    ],
+    "target": [
+     1.2,
+     2.6,
+     5
+    ]
+   }
+  }
+ ],
+ "walk": [
+  {
+   "title": "Start outside",
+   "state": "winter-noon",
+   "text": "A single room, 14 × 9 m, opens south onto a walled courtyard. The neighbouring blocks around it are schematic massing, there only to give the street a scale."
+  },
+  {
+   "title": "The canopy in summer",
+   "anchor": "canopy",
+   "state": "summer-noon",
+   "text": "At summer noon the sun is 79° high. The 1.6 m canopy keeps the whole glazed bay in shade."
+  },
+  {
+   "title": "The same bay in winter",
+   "anchor": "bay_opening",
+   "state": "winter-noon",
+   "text": "At winter noon the sun is only 32° high. It passes under the canopy and lays a patch of sun about 2.9 m into the room."
+  },
+  {
+   "title": "Review table",
+   "anchor": "review_table",
+   "state": "winter-noon",
+   "text": "The review table sits where that winter sun lands, with the Cypress House model on it."
+  },
+  {
+   "title": "Desks on the north side",
+   "anchor": "desks",
+   "text": "The desks line the north wall, away from direct sun through the bay."
+  },
+  {
+   "title": "Material library",
+   "anchor": "material_library",
+   "text": "Samples are kept on the east wall beside the east window."
+  },
+  {
+   "title": "Pin-up wall",
+   "anchor": "pin_up_wall",
+   "text": "The west wall carries the pin-up board, with the sofa in front of it."
+  },
+  {
+   "title": "Courtyard, late afternoon",
+   "anchor": "courtyard",
+   "state": "late-afternoon",
+   "text": "At 17:00 in autumn the sun is low in the west and the fins draw long shadows across the paving."
+  },
+  {
+   "title": "Evening",
+   "state": "evening",
+   "text": "With the lights on, the bay glows and the garden lights pick out the courtyard."
+  }
+ ],
+ "layers": [
+  {
+   "node": "Roof and ceiling",
+   "label": "Roof and ceiling"
+  },
+  {
+   "node": "Walls",
+   "label": "Walls"
+  },
+  {
+   "node": "Glazing",
+   "label": "Glazing"
+  },
+  {
+   "node": "Timber and joinery",
+   "label": "Timber and joinery"
+  },
+  {
+   "node": "Steel frames and fittings",
+   "label": "Steel frames"
+  },
+  {
+   "node": "Furniture and models",
+   "label": "Furniture and models"
+  },
+  {
+   "node": "Lamps and screens",
+   "label": "Lamps and screens"
+  },
+  {
+   "node": "Floor and rug",
+   "label": "Floor and rug"
+  },
+  {
+   "node": "Planting",
+   "label": "Planting"
+  },
+  {
+   "node": "Site and courtyard paving",
+   "label": "Courtyard paving"
+  },
+  {
+   "node": "Street and neighbours",
+   "label": "Street and neighbours",
+   "note": "schematic massing"
+  }
+ ],
+ "plan": {
+  "drawing": "plan/courtyard-studio-plan.svg",
+  "section": "plan/courtyard-studio-section.svg",
+  "rendered": "plan/summer-noon-plan.webp"
+ }
 }
