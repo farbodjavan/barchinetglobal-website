@@ -115,3 +115,8 @@ h2 { font: 400 clamp(2.25rem,4.4vw,4.1rem)/1.06 Georgia, serif; letter-spacing: 
   .sheet-nav button { padding-inline: 5px; }
   .sheet-nav button span { margin-left: 1px; }
 }
+
+/* Loading and failure states: the concept image stays as the poster until the model draws. */
+.model-stage::after { content: 'Preparing the 3D model…'; position: absolute; left: 12px; bottom: 12px; padding: 7px 12px; border-radius: 999px; background: #10282acc; color: #fff; font-size: 12px; }
+.model-panel.ready .model-stage::after, .model-panel.no-3d .model-stage::after { content: none; }
+.module-failed .model-stage::after { content: 'The 3D model could not load. Reload the page to try again.'; }

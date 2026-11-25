@@ -111,3 +111,10 @@ h2 { font: 400 clamp(2.2rem,4vw,3.3rem)/1 Georgia, serif; letter-spacing: -.045e
 @media (max-width: 385px) {
   .numeric-inputs { grid-template-columns: minmax(0,1fr); }
 }
+
+/* Loading and failure states for the shared 3D view (the canvas covers this label once it draws). */
+.orbit-stage { position: relative; background: #18312f; border-radius: inherit; }
+.orbit-stage::before { content: 'Preparing the 3D view…'; position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; text-align: center; color: #cfe0d8; font-size: 14px; }
+.orbit-stage canvas { position: relative; }
+.module-failed .orbit-stage::before { content: 'The 3D view could not load. Reload the page to try again.'; color: #f3d6b0; }
+.module-failed .orbit-tools { display: none; }

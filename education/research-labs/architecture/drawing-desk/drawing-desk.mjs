@@ -161,10 +161,12 @@ function initDesk(page) {
   const onError = () => {
     modelHint.textContent = '3D rendering is unavailable in this browser. You can still inspect the drawings.';
     for (const button of modelActions) button.disabled = true;
+    modelPanel.classList.add('no-3d');
   };
   const viewer = createModelViewer(modelPanel.querySelector('.model-stage'), { onError });
   if (viewer) {
     const roof = makePavilion(viewer);
+    modelPanel.classList.add('ready');
     const actions = {
       roof: button => {
         roof.visible = !roof.visible;
