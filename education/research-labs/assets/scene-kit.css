@@ -38,3 +38,7 @@
 #three-host .sk-schematic{bottom:36px}
 @media(max-width:640px){.sk-purpose{display:none}.sk-tools{margin-left:0;width:100%;justify-content:space-between}}
 @media(min-width:641px){.sk-top{flex-wrap:nowrap}.sk-purpose{flex:0 1 auto}.sk-tools{flex:none}}
+.sk-tour{min-height:44px;padding:0 16px;border:0;border-radius:999px;background:#dfc29d;color:#102c31;font-size:13px;font-weight:700;box-shadow:0 2px 10px #0002;white-space:nowrap}
+.sk-tour[hidden]{display:none}
+@media(max-width:900px){.sk-top{flex-wrap:wrap}.sk-tools{flex-wrap:wrap;justify-content:flex-end}}
+@media(max-width:640px){.sk-card:not([hidden])~.sk-schematic{display:none}.ds-stage .sk-time{display:none}.ds-stage .sk-tools{justify-content:flex-end}}

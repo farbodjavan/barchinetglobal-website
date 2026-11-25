@@ -1,4 +1,4 @@
-import { Three, addBlock, createModelViewer, materials } from '../../assets/model-viewer.mjs?v=2';
+import { Three, addBlock, createModelViewer, materials } from '../../assets/model-viewer.mjs?v=3';
 
 export const yazd = { area: 250, floors: 3, height: 3, rotation: 0 };
 const series = [

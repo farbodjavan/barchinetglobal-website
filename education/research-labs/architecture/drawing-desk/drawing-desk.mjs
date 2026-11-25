@@ -1,4 +1,4 @@
-import { Three, addBlock, createModelViewer, materials } from '../../assets/model-viewer.mjs?v=2';
+import { Three, addBlock, createModelViewer, materials } from '../../assets/model-viewer.mjs?v=3';
 import { drawPlan, bindPlan } from '../../assets/plan-kit.mjs?v=1';
 // A10 as an architectural drawing. Geometry matches the 3D pavilion: plan x = model X + 7.5, plan y = model Z + 5.
 const pavilionPlan = issue => ({

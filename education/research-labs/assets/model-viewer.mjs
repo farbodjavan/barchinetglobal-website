@@ -1,5 +1,5 @@
 import { OrbitControls } from './vendor/three/OrbitControls.js?v=2';
-import { Three, createStage, createOverlay, flyCamera, materials, pickQuality } from './scene-kit.mjs?v=2';
+import { Three, createStage, createOverlay, flyCamera, materials, pickQuality } from './scene-kit.mjs?v=3';
 
 const defaultAzimuth = Math.PI * .16;
 const defaultElevation = Math.PI * .085;
@@ -9,7 +9,7 @@ const fov = 40;
 //   purpose, tips, storageKey, schematic  -> first-run hint and one-line purpose in the view
 //   time                                  -> starting time of day ('morning' | 'noon' | 'afternoon' | 'dusk')
 //   grid                                  -> faint measuring grid on the ground
-export function createModelViewer(frame, { onError, enablePan = false, purpose, tips, storageKey, schematic, time = 'afternoon', grid = false, groundColor, onTimeChange, home = {} } = {}) {
+export function createModelViewer(frame, { onError, enablePan = false, purpose, tips, storageKey, schematic, time = 'afternoon', grid = false, groundColor, onTimeChange, home = {}, timeStates, shift = .17, onHotspot, minDistance, tour = true } = {}) {
   const canvas = frame.querySelector('canvas');
   let renderer;
   try {
@@ -32,9 +32,10 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
   const minZoom = .6, maxZoom = 3.4;
 
   const overlay = createOverlay(frame, {
-    purpose, tips, storageKey, schematic, time,
-    onTime: key => { const state = stage.setTime(key); draw(); onTimeChange?.(key, state); return state; },
-    onHotspot: spot => { if (spot.view) flyTo(spot.view); },
+    purpose, tips, storageKey, schematic, time, states: timeStates, tour,
+    // With custom states (a baked model) the page decides what a state means; the sky and sun stay as they are.
+    onTime: key => { if (timeStates) { onTimeChange?.(key); return timeStates.find(s => s.key === key); } const state = stage.setTime(key); draw(); onTimeChange?.(key, state); return state; },
+    onHotspot: (spot, index) => { if (spot.view) flyTo(spot.view); onHotspot?.(spot, index); },
   });
 
   function draw() {
@@ -54,10 +55,10 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
     if (!width || !height) return;
     camera.aspect = width / height;
     // Shift the picture down like an architectural shift lens, so the horizon and sky stay in frame.
-    camera.setViewOffset(width, height, 0, -height * .17, width, height);
+    if (shift) camera.setViewOffset(width, height, 0, -height * shift, width, height);
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
-    controls.minDistance = fitDistance() * .25; controls.maxDistance = fitDistance() * 1.8;
+    controls.minDistance = minDistance ?? fitDistance() * .25; controls.maxDistance = fitDistance() * 1.8;
     draw();
   }
 
@@ -80,6 +81,10 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
 
   // view: { azimuth, elevation (radians), target: [x, y, z], distance (multiple of the fitted distance), zoom }
   function flyTo(view = {}, duration) {
+    if (view.position) { // absolute pose in metres, used for eye-level views inside a model
+      flyCamera(camera, controls, { position: new Three.Vector3(...view.position), target: new Three.Vector3(...view.target), zoom: view.zoom ?? 1 }, draw, duration);
+      return;
+    }
     const target = view.target ? new Three.Vector3(...view.target) : new Three.Vector3(0, modelCenter, 0);
     const position = orbitPosition(view.azimuth ?? home.azimuth ?? defaultAzimuth, view.elevation ?? home.elevation ?? defaultElevation, target, fitDistance() * (view.distance ?? home.distance ?? 1));
     flyCamera(camera, controls, { position, target, zoom: view.zoom ?? 1 }, draw, duration);
@@ -92,7 +97,7 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
     draw();
   }
 
-  function replace(content, { size, center = 0, hotspots } = {}) {
+  function replace(content, { size, center = 0, hotspots, keepPose = false } = {}) {
     const resources = new Set();
     model.traverse(({ geometry, material }) => {
       if (geometry) resources.add(geometry);
@@ -108,11 +113,12 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
     if (hotspots) overlay.setHotspots(hotspots);
     const azimuth = first ? home.azimuth ?? defaultAzimuth : controls.getAzimuthalAngle();
     const elevation = first ? home.elevation ?? defaultElevation : Math.PI / 2 - controls.getPolarAngle();
-    const keep = first ? null : camera.position.distanceTo(controls.target);
+    const keep = first ? null : camera.position.distanceTo(controls.target), keepTarget = first ? null : controls.target.clone(), keepPosition = first ? null : camera.position.clone();
     controls.target.set(0, center, 0);
     resize();
     camera.position.copy(orbitPosition(azimuth, elevation, controls.target, keep ?? fitDistance() * (home.distance ?? 1)));
-    controls.minDistance = fitDistance() * .25; controls.maxDistance = fitDistance() * 1.8;
+    if (keepPose && keepPosition) { controls.target.copy(keepTarget); camera.position.copy(keepPosition); }
+    controls.minDistance = minDistance ?? fitDistance() * .25; controls.maxDistance = fitDistance() * 1.8;
     controls.update();
     renderer.shadowMap.needsUpdate = true;
     draw();
@@ -146,8 +152,12 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
     top: () => flyTo({ azimuth: 0, elevation: Math.PI / 2 - .002 }),
     setTime: key => { const state = stage.setTime(key); draw(); return state; },
     setHotspots: list => { overlay.setHotspots(list); draw(); },
-    selectHotspot: index => overlay.select(index),
-    say: overlay.say, draw, showGround: visible => { stage.ground.visible = visible; stage.gridLines.visible = visible && grid; draw(); }, quality: () => (degraded ? 'low' : 'high'),
+    selectHotspot: (index, silent = false) => overlay.select(index, { silent }),
+    say: overlay.say, draw, clearHotspot: overlay.clear, markTime: overlay.setTime,
+    // Flat gradient sky for baked models, whose own textures already hold the light.
+    setBackdrop: (top, horizon) => { const c = document.createElement('canvas'); c.width = 4; c.height = 256; const g = c.getContext('2d'), grad = g.createLinearGradient(0, 0, 0, 256); grad.addColorStop(0, top); grad.addColorStop(.5, horizon); grad.addColorStop(1, horizon); g.fillStyle = grad; g.fillRect(0, 0, 4, 256); const t = new Three.CanvasTexture(c); t.mapping = Three.EquirectangularReflectionMapping; t.colorSpace = Three.SRGBColorSpace; scene.background?.isCanvasTexture && scene.background.dispose(); scene.background = t; scene.backgroundBlurriness = 0; renderer.toneMapping = Three.NoToneMapping; draw(); },
+    pose: () => ({ position: camera.position.toArray(), target: controls.target.toArray() }),
+    showGround: visible => { stage.ground.visible = visible; stage.gridLines.visible = visible && grid; draw(); }, quality: () => (degraded ? 'low' : 'high'),
   };
 }
 

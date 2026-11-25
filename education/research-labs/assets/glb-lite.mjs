@@ -28,13 +28,14 @@ export function parseGlbContainer(buffer) {
   return { json, bin };
 }
 
-export async function loadGlb(url, { signal } = {}) {
+// bakedEncoding: 'srgb' (the glTF rule for emission textures) or 'linear' for bakes whose pixels hold linear light.
+export async function loadGlb(url, { signal, bakedEncoding = 'srgb' } = {}) {
   const response = await fetch(url, { signal });
   if (!response.ok) throw new Error(`Model not found (${response.status}).`);
-  return buildScene(parseGlbContainer(await response.arrayBuffer()));
+  return buildScene(parseGlbContainer(await response.arrayBuffer()), { bakedEncoding });
 }
 
-export async function buildScene({ json, bin }) {
+export async function buildScene({ json, bin }, { bakedEncoding = 'srgb' } = {}) {
   const accessor = index => {
     const a = json.accessors[index];
     if (a.sparse) throw new Error('Sparse accessors are not supported.');
@@ -62,9 +63,26 @@ export async function buildScene({ json, bin }) {
     const pbr = m.pbrMetallicRoughness || {}, factor = pbr.baseColorFactor || [1, 1, 1, 1];
     const unlit = Boolean(m.extensions?.KHR_materials_unlit), emissive = withChannel(m.emissiveTexture), base = withChannel(pbr.baseColorTexture);
     const common = { name: m.name || '', side: m.doubleSided ? Three.DoubleSide : Three.FrontSide, transparent: m.alphaMode === 'BLEND', alphaTest: m.alphaMode === 'MASK' ? (m.alphaCutoff ?? .5) : 0, opacity: factor[3] };
-    // A bake is "unlit" either through the extension or by carrying its picture in the emissive slot.
-    if (unlit || emissive) { const material = new Three.MeshBasicMaterial({ ...common, map: unlit ? base : emissive, color: unlit ? new Three.Color(factor[0], factor[1], factor[2]) : new Three.Color(1, 1, 1) }); material.toneMapped = false; material.userData.baked = true; return material; }
-    return new Three.MeshStandardMaterial({ ...common, map: base, color: new Three.Color(factor[0], factor[1], factor[2]), roughness: pbr.roughnessFactor ?? 1, metalness: pbr.metallicFactor ?? 1 });
+    // A bake is "unlit" either through the extension, by carrying its picture in the emissive slot,
+    // or (lamps, screens) by a plain emissive colour. Emissive strength is applied and clamped to display white.
+    const strength = m.extensions?.KHR_materials_emissive_strength?.emissiveStrength ?? 1, glow = m.emissiveFactor || [0, 0, 0];
+    const lit = glow.some(v => v > 0);
+    if (unlit || emissive || lit) {
+      if (emissive && !unlit && bakedEncoding === 'linear') { emissive.colorSpace = Three.LinearSRGBColorSpace; emissive.needsUpdate = true; }
+      const tint = unlit ? factor : glow.map(v => Math.min(1, v * strength));
+      const material = new Three.MeshBasicMaterial({ ...common, map: unlit ? base : emissive, color: new Three.Color().setRGB(tint[0], tint[1], tint[2], Three.SRGBColorSpace) });
+      if (!unlit && !emissive) material.color.setRGB(tint[0], tint[1], tint[2]);
+      material.toneMapped = false; material.userData.baked = true; return material;
+    }
+    const material = new Three.MeshStandardMaterial({ ...common, map: base, color: new Three.Color(factor[0], factor[1], factor[2]), roughness: pbr.roughnessFactor ?? 1, metalness: pbr.metallicFactor ?? 1 });
+    material.userData.factor = factor;
+    return material;
+  });
+  // In a baked scene nothing should react to the page's own lights: glass and other plain surfaces become flat tints.
+  if (materials.some(m => m.userData.baked)) materials.forEach((m, i) => {
+    if (m.userData.baked) return;
+    const f = m.userData.factor, flat = new Three.MeshBasicMaterial({ name: m.name, side: m.side, transparent: m.transparent, opacity: m.opacity, alphaTest: m.alphaTest, map: m.map, color: new Three.Color(f[0], f[1], f[2]), depthWrite: !m.transparent });
+    flat.toneMapped = false; flat.userData.baked = true; materials[i] = flat;
   });
   const fallback = new Three.MeshStandardMaterial({ color: '#bbbbbb', roughness: .8 });
   const meshes = (json.meshes || []).map(mesh => mesh.primitives.filter(p => (p.mode ?? 4) === 4).map(p => {

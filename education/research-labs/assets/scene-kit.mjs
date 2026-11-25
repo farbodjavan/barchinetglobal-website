@@ -187,11 +187,12 @@ export function flyCamera(camera, controls, to, draw, duration = 900) {
 
 /* ---------- Overlay: hotspots, time of day, first-run hint ---------- */
 const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-export function createOverlay(frame, { purpose, tips = ['Drag to turn', 'Scroll or pinch to zoom', 'Arrow keys turn, + and − zoom'], storageKey, onTime, time, onHotspot, schematic } = {}) {
+export function createOverlay(frame, { purpose, tips = ['Drag to turn', 'Scroll or pinch to zoom', 'Arrow keys turn, + and − zoom'], storageKey, onTime, time, onHotspot, schematic, states, tour = true } = {}) {
+  const stateList = states || Object.entries(dayStates).map(([key, s]) => ({ key, label: s.label, title: `${s.label}, about ${s.hour}` }));
   frame.classList.add('sk-frame');
   const layer = document.createElement('div'); layer.className = 'sk-layer';
   layer.innerHTML = `<div class="sk-spots" role="group" aria-label="Guided points in the 3D view"></div>
-<div class="sk-top">${purpose ? `<p class="sk-purpose">${escapeHtml(purpose)}</p>` : ''}<div class="sk-tools">${onTime ? `<div class="sk-time" role="group" aria-label="Time of day">${Object.entries(dayStates).map(([key, s]) => `<button type="button" data-time="${key}" aria-pressed="${key === time}" title="${s.label}, about ${s.hour}">${s.label}</button>`).join('')}</div>` : ''}<button type="button" class="sk-help" aria-expanded="false" aria-label="How to use this view">?</button></div></div>
+<div class="sk-top">${purpose ? `<p class="sk-purpose">${escapeHtml(purpose)}</p>` : ''}<div class="sk-tools">${onTime ? `<div class="sk-time" role="group" aria-label="Time of day">${stateList.map(s => `<button type="button" data-time="${s.key}" aria-pressed="${s.key === time}" title="${escapeHtml(s.title || s.label)}">${escapeHtml(s.label)}</button>`).join('')}</div>` : ''}<button type="button" class="sk-tour" hidden>Guided tour</button><button type="button" class="sk-help" aria-expanded="false" aria-label="How to use this view">?</button></div></div>
 <div class="sk-card" hidden><button type="button" class="sk-card-close" aria-label="Close this note">×</button><strong></strong><p></p></div>
 <div class="sk-hint" role="note" hidden><strong>${escapeHtml(purpose || 'Explore the model')}</strong><ul>${tips.map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ul><button type="button" class="sk-hint-close">Got it</button></div>
 ${schematic ? `<p class="sk-schematic">${escapeHtml(schematic)}</p>` : ''}<p class="sk-live" role="status" aria-live="polite"></p>`;
@@ -204,10 +205,12 @@ ${schematic ? `<p class="sk-schematic">${escapeHtml(schematic)}</p>` : ''}<p cla
   layer.querySelector('.sk-hint-close').onclick = () => { showHint(false); help.focus(); };
   layer.querySelector('.sk-card-close').onclick = () => { card.hidden = true; for (const b of spotsBox.children) b.setAttribute('aria-pressed', 'false'); };
   layer.addEventListener('keydown', event => { if (event.key === 'Escape') { if (!card.hidden) layer.querySelector('.sk-card-close').click(); else if (!hint.hidden) showHint(false); } });
-  for (const button of layer.querySelectorAll('[data-time]')) button.onclick = () => { for (const b of layer.querySelectorAll('[data-time]')) b.setAttribute('aria-pressed', String(b === button)); const s = onTime(button.dataset.time); live.textContent = `Light set to ${s.label.toLowerCase()}, about ${s.hour}.`; };
-  let spots = [];
+  for (const button of layer.querySelectorAll('[data-time]')) button.onclick = () => { for (const b of layer.querySelectorAll('[data-time]')) b.setAttribute('aria-pressed', String(b === button)); const s = onTime(button.dataset.time); if (s?.label) live.textContent = `Light set to ${s.label.toLowerCase()}${s.hour ? ', about ' + s.hour : ''}.`; };
+  let spots = [], tourAt = -1;
+  const tourButton = layer.querySelector('.sk-tour');
+  tourButton.onclick = () => { tourAt = (tourAt + 1) % spots.length; select(tourAt); tourButton.textContent = tourAt === spots.length - 1 ? 'Restart tour' : `Next: ${tourAt + 2} of ${spots.length}`; };
   function setHotspots(list) {
-    spots = list; card.hidden = true;
+    spots = list; card.hidden = true; tourAt = -1; tourButton.hidden = !tour || list.length < 2; tourButton.textContent = 'Guided tour';
     spotsBox.innerHTML = list.map((s, i) => `<button type="button" class="sk-spot" data-spot="${i}" aria-pressed="false" aria-label="${escapeHtml(s.label)}"><span aria-hidden="true">${i + 1}</span><em>${escapeHtml(s.label)}</em></button>`).join('');
     for (const button of spotsBox.children) button.onclick = () => select(Number(button.dataset.spot));
   }
@@ -228,7 +231,8 @@ ${schematic ? `<p class="sk-schematic">${escapeHtml(schematic)}</p>` : ''}<p cla
       button.classList.toggle('sk-off', !visible);
     });
   }
-  return { setHotspots, select, project, say: text => { live.textContent = text; }, layer };
+  const setTime = key => { for (const b of layer.querySelectorAll('[data-time]')) b.setAttribute('aria-pressed', String(b.dataset.time === key)); };
+  return { setHotspots, select, project, setTime, clear: () => { card.hidden = true; for (const b of spotsBox.children) b.setAttribute('aria-pressed', 'false'); }, say: text => { live.textContent = text; }, layer };
 }
 
 export { Three };
