@@ -1,4 +1,4 @@
-import { Three, addBlock, createModelViewer, stageGrid } from '../../assets/model-viewer.mjs';
+import { Three, addBlock, createModelViewer, materials } from '../../assets/model-viewer.mjs?v=2';
 
 export const yazd = { area: 250, floors: 3, height: 3, rotation: 0 };
 const series = [
@@ -112,11 +112,10 @@ function renderMassing(viewer, study, separated) {
   const spacing = Math.max(...study.forms.map(form => Math.hypot(form.width, form.depth))) * 1.11;
   const gap = separated ? study.height * .31 : 0;
   const visualHeight = study.totalHeight + (study.floors - 1) * gap;
-  stageGrid(group, Math.ceil(spacing * 3.24 / 5) * 5, 24);
   study.forms.forEach((form, index) => {
-    const material = new Three.MeshStandardMaterial({ color: form.tones[1], roughness: .79 });
-    const edge = new Three.MeshStandardMaterial({ color: form.tones[0], roughness: .85 });
-    const floorTop = new Three.MeshStandardMaterial({ color: form.tones[2], roughness: .84 });
+    const material = materials.plaster(form.tones[1]);
+    const edge = materials.concrete(form.tones[0]);
+    const floorTop = materials.concrete(form.tones[2]);
     const stack = new Three.Group();
     stack.rotation.y = Three.MathUtils.degToRad(study.rotation);
     stack.position.x = (index - 1) * spacing;
@@ -127,9 +126,18 @@ function renderMassing(viewer, study, separated) {
       addBlock(stack, separated || level === study.floors - 1 ? floorTop : edge,
         [form.width * 1.012, trim, form.depth * 1.012], [0, base + study.height - trim / 2, 0]);
     }
-    group.add(stack);
+    const figure = new Three.Mesh(new Three.CapsuleGeometry(.22, 1.26, 4, 10), materials.paint('#2f3b3a'));
+    figure.position.set((index - 1) * spacing + form.width / 2 + 1.2, .85, form.depth / 2 + 1.2);
+    figure.castShadow = true;
+    group.add(stack, figure);
   });
-  viewer.replace(group, { size: Math.hypot(spacing * 1.51, visualHeight / 2), center: visualHeight * .43 });
+  const hotspots = study.forms.map((form, index) => ({
+    label: form.name,
+    position: [(index - 1) * spacing, visualHeight + study.height * .25, 0],
+    text: `${form.name}: ${format(form.width)} × ${format(form.depth)} m footprint, ${format(form.perimeter)} m perimeter. Same floor area and height as the other two.`,
+    view: { target: [(index - 1) * spacing, visualHeight * .45, 0], azimuth: Math.PI * .2, elevation: Math.PI * .13, distance: .62 },
+  }));
+  viewer.replace(group, { size: Math.hypot(spacing * 1.51, visualHeight / 2), center: visualHeight * .43, hotspots });
 }
 
 function init() {
@@ -191,6 +199,11 @@ function init() {
   orbitPanel.hidden = false;
   viewer = createModelViewer(orbitPanel.querySelector('.orbit-stage'), {
     enablePan: true,
+    grid: true,
+    purpose: 'Three forms with the same floor area and height. Turn them to compare how shape changes the outside wall.',
+    tips: ['Drag to turn, scroll or pinch to zoom', 'Tap a numbered point to fly to one form', 'Change the light with the time-of-day switch', 'Keys: arrows turn, + and − zoom, 0 resets'],
+    storageKey: 'barchinet.hint.massing',
+    schematic: 'Schematic massing blocks, not designed buildings',
     onError: () => {
       orbitAvailable = false;
       renderResults();

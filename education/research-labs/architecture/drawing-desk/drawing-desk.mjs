@@ -1,4 +1,4 @@
-import { Three, addBlock, createModelViewer, stageGrid } from '../../assets/model-viewer.mjs';
+import { Three, addBlock, createModelViewer, materials } from '../../assets/model-viewer.mjs?v=2';
 
 const sheets = {
   A00: { title: 'Drawing index' },
@@ -18,16 +18,14 @@ const sectionCanopy = 'Entry canopy';
 function makePavilion(viewer) {
   const model = new Three.Group();
   const roof = new Three.Group();
-  const material = color => new Three.MeshStandardMaterial({ color, roughness: .77 });
-  const timber = material('#c5965b');
-  const cedar = material('#8b5a35');
-  const stone = material('#9eac9b');
-  const card = material('#e7d9ab');
-  const roofTile = material('#99bec0');
-  const moss = material('#688879');
-  const seats = material('#aa624d');
+  const timber = materials.timber('#c5965b');
+  const cedar = materials.timber('#8b5a35');
+  const stone = materials.stone('#9eac9b');
+  const card = materials.plaster('#e7d9ab');
+  const roofTile = materials.metal('#8fb0b2');
+  const moss = materials.foliage('#688879');
+  const seats = materials.fabric('#aa624d');
   const block = (surface, size, position) => addBlock(model, surface, size, position);
-  stageGrid(model, 22, 22);
   block(stone, [15, .25, 10], [0, .03, 0]);
   block(cedar, [12, .28, 7.4], [0, .29, 0]);
   for (let index = 0; index < 23; index++) {
@@ -163,10 +161,22 @@ function initDesk(page) {
     for (const button of modelActions) button.disabled = true;
     modelPanel.classList.add('no-3d');
   };
-  const viewer = createModelViewer(modelPanel.querySelector('.model-stage'), { onError });
+  const viewer = createModelViewer(modelPanel.querySelector('.model-stage'), {
+    onError,
+    purpose: 'A fictional timber reading pavilion. Turn it, lift the roof, and check it against the drawings.',
+    tips: ['Drag to turn, scroll or pinch to zoom', 'Tap a numbered point for a guided look', 'Hide roof shows the interior', 'Keys: arrows turn, + and − zoom, 0 resets'],
+    storageKey: 'barchinet.hint.drawingdesk',
+    schematic: 'Schematic model built from boxes; fictional project',
+  });
   if (viewer) {
     const roof = makePavilion(viewer);
     modelPanel.classList.add('ready');
+    viewer.setHotspots([
+      { label: 'Roof and eaves', position: [0, 3.9, 0], text: 'The roof plane and the two long beams that carry it. Hide the roof to see the room below.', view: { azimuth: .5, elevation: .5, distance: 1 } },
+      { label: 'Reading tables', position: [-.9, 1.5, .42], text: 'Three tables with benches on both sides, set along the long axis.', view: { target: [-.9, 1.1, .4], azimuth: .25, elevation: .42, distance: .7 } },
+      { label: 'Book wall', position: [-3.9, 2.6, -2.85], text: 'Five shelves between two uprights on the north side.', view: { target: [-3.9, 1.5, -2.6], azimuth: .15, elevation: .2, distance: .6 } },
+      { label: 'Entry steps', position: [.1, .7, 4.1], text: 'Three timber steps lead up to the deck on the south side.', view: { target: [.1, .5, 3.6], azimuth: .55, elevation: .22, distance: .65 } },
+    ]);
     const actions = {
       roof: button => {
         roof.visible = !roof.visible;

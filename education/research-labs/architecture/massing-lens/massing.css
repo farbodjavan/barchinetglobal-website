@@ -118,3 +118,8 @@ h2 { font: 400 clamp(2.2rem,4vw,3.3rem)/1 Georgia, serif; letter-spacing: -.045e
 .orbit-stage canvas { position: relative; }
 .module-failed .orbit-stage::before { content: 'The 3D view could not load. Reload the page to try again.'; color: #f3d6b0; }
 .module-failed .orbit-tools { display: none; }
+
+/* Second pass: taller stage for the sky-and-ground view. */
+.orbit-stage { height: clamp(340px,44vw,560px); background: #cfd8dc; }
+.orbit-stage::before { color: #173337; }
+@media (max-width: 700px) { .orbit-stage { height: clamp(300px,96vw,420px); } }
