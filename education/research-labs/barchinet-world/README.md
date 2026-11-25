@@ -1,6 +1,6 @@
 # Barchinet World (Research Labs prototype)
 
-Unpublished prototype for review. Intended location: `education/research-labs/barchinet-world/`.
+Research prototype with fictional data. Location: `education/research-labs/barchinet-world/`.
 
 ## What it is
 One story in five steps: explore the World, enter the Los Angeles office (Serein Envelope, in the Courtyard studio),
