@@ -52,7 +52,7 @@ h2 { font: 400 clamp(2.25rem,4.4vw,4.1rem)/1.06 Georgia, serif; letter-spacing: 
 .sheet-nav { display: flex; flex-wrap: wrap; gap: 5px; padding: 9px; background: #e6e9df; border-bottom: 1px solid var(--line); }
 .sheet-nav button { font-size: .81rem; padding: 7px 9px; }
 .sheet-nav button span { font-weight: 500; margin-left: 3px; }
-.model-stage { position: relative; height: clamp(315px,40vw,480px); background: #18312f url('./pavilion-study.jpg') center / cover; }
+.model-stage { position: relative; height: clamp(315px,40vw,480px); background: #18312f url('./pavilion-study.webp') center / cover; }
 .model-stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
 .model-stage canvas:active { cursor: grabbing; }
 .model-stage canvas:focus-visible { outline-offset: -5px; outline-color: #ecb69b; }
