@@ -1,0 +1,14 @@
+{
+  "ready": false,
+  "comment": "Set ready to true once the four .glb files are in model/. Paths are relative to this folder. See README.md here for the exact export settings.",
+  "states": {
+    "morning":   { "model": "model/studio-morning.glb",   "still": "stills/studio-morning.webp" },
+    "noon":      { "model": "model/studio-noon.glb",      "still": "stills/studio-noon.webp" },
+    "afternoon": { "model": "model/studio-afternoon.glb", "still": "stills/studio-afternoon.webp" },
+    "dusk":      { "model": "model/studio-dusk.glb",      "still": "stills/studio-dusk.webp" }
+  },
+  "cutaway": ["roof", "ceiling"],
+  "modelHasGround": true,
+  "planOrigin": [-5, -5],
+  "plan": { "ready": false, "image": "plan/studio-plan.webp", "bounds": [0, 0, 10, 10] }
+}

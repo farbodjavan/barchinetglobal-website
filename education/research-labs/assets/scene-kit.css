@@ -37,3 +37,4 @@
 @media(prefers-reduced-motion:reduce){.sk-spot em{transition:none}}
 #three-host .sk-schematic{bottom:36px}
 @media(max-width:640px){.sk-purpose{display:none}.sk-tools{margin-left:0;width:100%;justify-content:space-between}}
+@media(min-width:641px){.sk-top{flex-wrap:nowrap}.sk-purpose{flex:0 1 auto}.sk-tools{flex:none}}

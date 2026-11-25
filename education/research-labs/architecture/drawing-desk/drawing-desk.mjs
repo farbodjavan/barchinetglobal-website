@@ -1,4 +1,30 @@
 import { Three, addBlock, createModelViewer, materials } from '../../assets/model-viewer.mjs?v=2';
+import { drawPlan, bindPlan } from '../../assets/plan-kit.mjs?v=1';
+// A10 as an architectural drawing. Geometry matches the 3D pavilion: plan x = model X + 7.5, plan y = model Z + 5.
+const pavilionPlan = issue => ({
+  title: `A10 FLOOR PLAN · REV ${issue.planRevision}`,
+  bounds: [0, 0, 15, 10], pad: 2.6, scaleBar: [0, 1, 2, 5],
+  site: [[0, 0], [15, 0], [15, 10], [0, 10]],
+  rooms: [
+    { id: 'alcove', number: '1', name: 'Book alcove', hatch: 'timber', poly: [[1.5, 1.3], [5.6, 1.3], [5.6, 3.3], [1.5, 3.3]], label: [3.6, 2.75] },
+    { id: 'reading', number: '2', name: 'Reading room', hatch: 'timber', poly: [[1.5, 3.3], [5.6, 3.3], [5.6, 1.3], [13.5, 1.3], [13.5, 8.7], [1.5, 8.7]], label: [10.6, 3.2] },
+    { id: 'plinth', name: 'Stone plinth', hatch: 'paving', poly: [[0, 0], [15, 0], [15, 10], [0, 10], [0, 0], [1.5, 1.3], [1.5, 8.7], [13.5, 8.7], [13.5, 1.3], [1.5, 1.3]], label: [7.5, .62], showArea: false, selectable: false },
+  ],
+  walls: [{ x1: 1.85, y1: 1.9, x2: 1.85, y2: 5.4, t: .1 }],
+  columns: [1.85, 5.6, 9.4, 13.15].flatMap(x => [[x, 1.77, .2], [x, 8.23, .2]]),
+  grid: [{ x: 1.85, label: '1' }, { x: 5.6, label: '2' }, { x: 9.4, label: '3' }, { x: 13.15, label: '4' }, { y: 1.77, label: 'A' }, { y: 8.23, label: 'B' }],
+  furniture: [
+    ...[3.3, 6.6, 9.8].flatMap(x => [{ type: 'rect', x: x - 1.05, y: 4.95, w: 2.1, h: .95 }, { type: 'rect', x: x - .85, y: 4.25, w: 1.7, h: .38 }, { type: 'rect', x: x - .85, y: 6.24, w: 1.7, h: .38 }]),
+    { type: 'rect', x: 2.0, y: 1.88, w: 3.2, h: .55 }, ...[2.4, 2.8, 3.2, 3.6, 4.0, 4.4, 4.8].map(x => ({ type: 'line', points: [[x, 1.88], [x, 2.43]] })),
+    { type: 'steps', x: 5.6, y: 8.72, w: 4, going: .32, count: 3 },
+    { type: 'tree', x: .75, y: 2.2, r: .7 }, { type: 'tree', x: 14.25, y: 2.2, r: .7 },
+    { type: 'dashed', points: [[1.1, .9], [13.9, .9], [13.9, 9.1], [1.1, 9.1]], closed: true },
+  ],
+  dims: [{ from: [1.5, 1.3], to: [13.5, 1.3], offset: -2.0, text: '12.00 m' }, { from: [1.5, 1.3], to: [1.5, 8.7], offset: 2.6, text: '7.40 m' }],
+  sectionMark: { x1: -1.6, x2: 16.6, y: 7.4, label: 'A20' },
+  notes: [{ x: 10, y: 9.5, text: issue.planCanopy, cls: 'canopy-note', anchor: 'start' }, { x: 1.2, y: .78, text: 'roof line above', anchor: 'start' }],
+});
+
 
 const sheets = {
   A00: { title: 'Drawing index' },
@@ -119,13 +145,8 @@ const sheetContent = {
       </tbody>
     </table>`,
   A10: (issue, target) => `
-    <div class="draft-drawing floor" role="img" aria-label="Schematic plan with a reading room, book alcove and canopy">
-      <div class="floor-frame" aria-hidden="true">
-        <span class="floor-alcove">Book alcove</span>
-        <span class="floor-room">Reading room</span>
-        <span class="floor-porch ${target('Plan label')}">${issue.planCanopy}</span>
-      </div>
-    </div>
+    <div class="draft-drawing plan-sheet ${target('Plan label')}">${drawPlan(pavilionPlan(issue), { selectable: true })}</div>
+    <p class="plan-hint">Pick a numbered room to see it in the 3D model.</p>
     <div class="sheet-tags">
       <span class="${target('Plan label')}">Canopy: ${issue.planCanopy}</span>
       <span class="${target('Plan title block')}">Revision ${issue.planRevision}</span>
@@ -190,6 +211,14 @@ function initDesk(page) {
     };
     for (const button of modelActions) button.addEventListener('click', () => actions[button.dataset.modelAction](button));
   }
+
+  const planViews = { alcove: 2, reading: 1 }; // room id -> hotspot index in the model
+  bindPlan(page.querySelector('#sheet-content'), id => {
+    if (!viewer || !(id in planViews)) return;
+    openSheet('model');
+    viewer.selectHotspot(planViews[id]);
+    modelPanel.querySelector('canvas').focus({ preventScroll: true });
+  });
 
   function openSheet(key, focus = false) {
     sheetKey = key;

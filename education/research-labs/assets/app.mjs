@@ -1,6 +1,6 @@
 import { labs, simulate } from './models.mjs';
 import { referencesByLab, maturityLevels, projectMaturity, referenceNotice } from './references.mjs';
-import { renderHub as renderLabsHub } from './labs-hub.mjs?v=20261124';
+import { renderHub as renderLabsHub } from './labs-hub.mjs?v=20261125';
 
 const BASE='/education/research-labs/';
 const FIELD=BASE+'post-disaster-reconstruction/';

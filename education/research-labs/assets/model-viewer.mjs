@@ -9,7 +9,7 @@ const fov = 40;
 //   purpose, tips, storageKey, schematic  -> first-run hint and one-line purpose in the view
 //   time                                  -> starting time of day ('morning' | 'noon' | 'afternoon' | 'dusk')
 //   grid                                  -> faint measuring grid on the ground
-export function createModelViewer(frame, { onError, enablePan = false, purpose, tips, storageKey, schematic, time = 'afternoon', grid = false, groundColor } = {}) {
+export function createModelViewer(frame, { onError, enablePan = false, purpose, tips, storageKey, schematic, time = 'afternoon', grid = false, groundColor, onTimeChange, home = {} } = {}) {
   const canvas = frame.querySelector('canvas');
   let renderer;
   try {
@@ -33,7 +33,7 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
 
   const overlay = createOverlay(frame, {
     purpose, tips, storageKey, schematic, time,
-    onTime: key => { const state = stage.setTime(key); draw(); return state; },
+    onTime: key => { const state = stage.setTime(key); draw(); onTimeChange?.(key, state); return state; },
     onHotspot: spot => { if (spot.view) flyTo(spot.view); },
   });
 
@@ -81,7 +81,7 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
   // view: { azimuth, elevation (radians), target: [x, y, z], distance (multiple of the fitted distance), zoom }
   function flyTo(view = {}, duration) {
     const target = view.target ? new Three.Vector3(...view.target) : new Three.Vector3(0, modelCenter, 0);
-    const position = orbitPosition(view.azimuth ?? defaultAzimuth, view.elevation ?? defaultElevation, target, fitDistance() * (view.distance ?? 1));
+    const position = orbitPosition(view.azimuth ?? home.azimuth ?? defaultAzimuth, view.elevation ?? home.elevation ?? defaultElevation, target, fitDistance() * (view.distance ?? home.distance ?? 1));
     flyCamera(camera, controls, { position, target, zoom: view.zoom ?? 1 }, draw, duration);
   }
 
@@ -96,7 +96,7 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
     const resources = new Set();
     model.traverse(({ geometry, material }) => {
       if (geometry) resources.add(geometry);
-      for (const item of [].concat(material || [])) resources.add(item);
+      for (const item of [].concat(material || [])) { resources.add(item); for (const slot of ['map', 'emissiveMap', 'alphaMap']) if (item[slot]?.isTexture && !item[slot].isCanvasTexture) resources.add(item[slot]); }
     });
     model.clear();
     for (const resource of resources) resource.dispose();
@@ -106,11 +106,12 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
     modelCenter = center;
     stage.setRadius(radius);
     if (hotspots) overlay.setHotspots(hotspots);
-    const azimuth = first ? defaultAzimuth : controls.getAzimuthalAngle();
-    const elevation = first ? defaultElevation : Math.PI / 2 - controls.getPolarAngle();
+    const azimuth = first ? home.azimuth ?? defaultAzimuth : controls.getAzimuthalAngle();
+    const elevation = first ? home.elevation ?? defaultElevation : Math.PI / 2 - controls.getPolarAngle();
+    const keep = first ? null : camera.position.distanceTo(controls.target);
     controls.target.set(0, center, 0);
     resize();
-    camera.position.copy(orbitPosition(azimuth, elevation, controls.target, fitDistance()));
+    camera.position.copy(orbitPosition(azimuth, elevation, controls.target, keep ?? fitDistance() * (home.distance ?? 1)));
     controls.minDistance = fitDistance() * .25; controls.maxDistance = fitDistance() * 1.8;
     controls.update();
     renderer.shadowMap.needsUpdate = true;
@@ -146,7 +147,7 @@ export function createModelViewer(frame, { onError, enablePan = false, purpose, 
     setTime: key => { const state = stage.setTime(key); draw(); return state; },
     setHotspots: list => { overlay.setHotspots(list); draw(); },
     selectHotspot: index => overlay.select(index),
-    say: overlay.say, draw, quality: () => (degraded ? 'low' : 'high'),
+    say: overlay.say, draw, showGround: visible => { stage.ground.visible = visible; stage.gridLines.visible = visible && grid; draw(); }, quality: () => (degraded ? 'low' : 'high'),
   };
 }
 

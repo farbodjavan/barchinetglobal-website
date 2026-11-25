@@ -1,0 +1,40 @@
+/* Architectural drawing styles for plan-kit.mjs (pk-). Line weights are in metres of drawing space. */
+.pk-plan{display:block;width:100%;height:auto;font-family:Inter,"Segoe UI",Arial,sans-serif;--pk-ink:#16282a;--pk-paper:#fbf9f2;--pk-accent:#b4572f;--pk-wash:#215f63}
+.pk-paper{fill:var(--pk-paper)}
+.pk-site{fill:none;stroke:var(--pk-ink);stroke-width:.03;stroke-dasharray:.5 .12 .08 .12}
+.pk-fill{fill:var(--pk-paper);stroke:none}
+.pk-wash{fill:var(--pk-wash);fill-opacity:0;stroke:none;transition:fill-opacity .15s}
+.pk-hatch{fill:none;stroke:var(--pk-ink);stroke-width:.022;stroke-opacity:.42}
+.pk-dot{fill:var(--pk-ink);fill-opacity:.4}
+.pk-poche-bg{fill:#2b3d3e}.pk-poche-line{stroke:#0c1a1b;stroke-width:.05}
+.pk-walls{stroke:var(--pk-ink);stroke-width:.06;stroke-linejoin:miter}
+.pk-column{fill:var(--pk-ink);stroke:var(--pk-ink);stroke-width:.04}
+.pk-furniture{fill:none;stroke:var(--pk-ink);stroke-width:.022;stroke-linejoin:round}
+.pk-furniture .pk-above{stroke-dasharray:.22 .12;stroke-width:.025;stroke-opacity:.75}
+.pk-furniture .pk-arrow{stroke-width:.025}
+.pk-tree circle{stroke-width:.02}.pk-tree path{stroke-width:.012;stroke-opacity:.55}
+.pk-window path{fill:none;stroke:var(--pk-ink);stroke-width:.028}
+.pk-window .pk-gap,.pk-door .pk-gap{stroke:var(--pk-paper);stroke-width:.3;stroke-linecap:butt}
+.pk-door path{fill:none;stroke:var(--pk-ink);stroke-width:.045}
+.pk-door .pk-swing{stroke-width:.018;stroke-dasharray:.1 .06}
+.pk-dim path{fill:none;stroke:var(--pk-ink);stroke-width:.016}
+.pk-dim .pk-tick{stroke-width:.05}
+.pk-dim text{font-size:.3px;fill:var(--pk-ink);font-weight:500;letter-spacing:.01em}
+.pk-name{font-size:.3px;font-weight:700;letter-spacing:.08em;fill:var(--pk-ink);paint-order:stroke;stroke:var(--pk-paper);stroke-width:.12px}
+.pk-area{font-size:.25px;fill:#4a5d5e;paint-order:stroke;stroke:var(--pk-paper);stroke-width:.1px}
+.pk-tag circle{fill:var(--pk-paper);stroke:var(--pk-ink);stroke-width:.025}.pk-tag text{font-size:.26px;font-weight:700;fill:var(--pk-ink)}
+.pk-note{font-size:.26px;fill:var(--pk-ink);font-style:italic}
+.pk-note.marked{fill:var(--pk-accent);font-weight:700;font-style:normal}
+.pk-grid path{stroke:var(--pk-accent);stroke-width:.014;stroke-dasharray:.6 .1 .1 .1;fill:none}
+.pk-grid circle{fill:var(--pk-paper);stroke:var(--pk-accent);stroke-width:.025}.pk-grid text{font-size:.28px;font-weight:700;fill:var(--pk-accent)}
+.pk-section path{stroke:var(--pk-ink);stroke-width:.04;stroke-dasharray:.7 .14 .1 .14;fill:none}
+.pk-section circle{fill:var(--pk-ink)}.pk-section text{fill:var(--pk-paper);font-size:.3px;font-weight:700}
+.pk-north circle{fill:none;stroke:var(--pk-ink);stroke-width:.025}.pk-north path{fill:var(--pk-paper);stroke:var(--pk-ink);stroke-width:.025}.pk-north .pk-north-solid{fill:var(--pk-ink)}.pk-north text{font-size:.36px;font-weight:700;fill:var(--pk-ink)}
+.pk-scale .pk-bar-a{fill:var(--pk-ink)}.pk-scale .pk-bar-b{fill:var(--pk-paper)}.pk-scale rect{stroke:var(--pk-ink);stroke-width:.02}.pk-scale text{font-size:.26px;fill:var(--pk-ink)}
+.pk-title{font-size:.3px;font-weight:700;letter-spacing:.1em;fill:var(--pk-ink)}
+.pk-pick{cursor:pointer;outline:none}
+.pk-pick:hover .pk-wash{fill-opacity:.1}
+.pk-on .pk-wash{fill-opacity:.2}
+.pk-pick:focus-visible .pk-wash{fill-opacity:.16;stroke:#ba671c;stroke-width:.09}
+@media(prefers-reduced-motion:reduce){.pk-wash{transition:none}}
+@media print{.pk-plan{--pk-paper:#fff}}
