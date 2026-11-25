@@ -48,3 +48,5 @@
 }
 .bgc-footer .analytics-settings{display:block;max-width:1264px;margin:10px auto 0;padding:6px 0;color:#9fb3ac;font-size:12px;text-align:left;width:100%}
 .bgc-footer .analytics-policy-link{display:none}
+a.skip[style]:focus{left:12px!important;top:12px;z-index:100;background:#fff;color:#102c31;padding:12px 14px;border-radius:4px}
+video:focus-visible{outline:3px solid #ba671c;outline-offset:3px}
