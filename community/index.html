@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Barchinet Community: pick a building on the campus, read its research question and a first task, and ask to join. Joining is always free.">
+<link rel="canonical" href="https://barchinetglobal.com/community/">
+<meta name="theme-color" content="#102c31">
+<title>Community: open research projects — Barchinet</title>
+<link rel="icon" href="/assets/barchinet-symbol.svg" type="image/svg+xml">
+<link rel="preload" href="/community/fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="/community/campus-data.js">
+<link rel="modulepreload" href="/community/campus-stage.js">
+<link rel="modulepreload" href="/community/community-data.js">
+<link rel="stylesheet" href="/community/community.css">
+<script defer src="/assets/analytics.js?v=20261104"></script>
+<script>
+  // Decide on motion before first paint: on, unless the visitor asked for reduced motion or switched it off here.
+  (function () { var off = false; try { off = localStorage.getItem('bg-motion') === 'off'; } catch (e) {}
+    if (!off && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('moving'); })();
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <a class="brand" href="/" aria-label="Barchinet Global home"><img src="/assets/barchinet-global-logo.svg" alt="Barchinet Global" width="900" height="230"></a>
+  <button class="menu-button" type="button" aria-expanded="false" aria-controls="navigation">Menu <span class="menu-lines" aria-hidden="true"></span></button>
+  <nav id="navigation" aria-label="Main navigation">
+    <a href="/">Home</a><a href="/workspace/">Workspace</a><a href="/community/" aria-current="page">Community</a><a href="/tools/">Tools</a><a href="/education/research-labs/">Research Labs</a><a href="/research/">Research</a><a href="/future-habitats/">Future Habitats</a><a href="/about/">About / Contact</a><span class="nav-divider" aria-hidden="true"></span><a href="/releases/" class="nav-secondary">Project updates</a><a href="/membership" class="nav-secondary">Sign in</a>
+  </nav>
+</header>
+
+<main id="main">
+<!-- 1. Opening: the campus photograph -->
+<section class="hero" id="campus" aria-labelledby="page-title">
+  <div class="plate-wrap">
+    <div class="stage" id="stage">
+      <div class="plate"><div class="plate-inner">
+        <img id="hero-picture" src="/community/img/campus-hero-1200.jpg" srcset="/community/img/campus-hero-1200.jpg 1200w, /community/img/campus-hero.jpg 2400w" sizes="(min-width: 700px) 150vw, 180vw" width="2400" height="1500" fetchpriority="high" alt="The Barchinet campus, a rendered aerial photograph: Barchinet hall in the middle, buildings around it, and open plots for future buildings on a street grid beyond. Numbered markers point to the projects open to join; they are also listed in View as list.">
+      </div></div>
+      <div class="grade" aria-hidden="true"></div>
+      <ul class="notes" aria-label="Projects on the campus"></ul>
+      <div class="stage-state" id="stage-state">
+        <p class="ss-loading" id="ss-loading">Loading the open projects…</p>
+      </div>
+    </div>
+
+    <div class="title-block">
+      <p class="tb-meta"><span>Community</span></p>
+      <h1 id="page-title">Every building is a research project. Pick one and join in.</h1>
+      <div class="tb-foot">
+        <p class="tb-free">Joining is always free. <span id="stage-note">Choose a numbered building to open its project.</span></p>
+        <div class="actions" id="hero-actions"><button type="button" class="btn btn-primary" data-pick>Pick a building</button><a class="text-link" href="#contribution">See what a contribution looks like</a></div>
+      </div>
+    </div>
+
+    <div class="controls" role="group" aria-label="Campus view">
+      <div class="light" role="group" aria-labelledby="light-label">
+        <span class="light-label" id="light-label">Light</span>
+        <button type="button" class="seg" data-light="auto" aria-pressed="true">Auto</button><button type="button" class="seg" data-light="morning" aria-pressed="false">Morning</button><button type="button" class="seg" data-light="day" aria-pressed="false">Day</button><button type="button" class="seg" data-light="sunset" aria-pressed="false">Sunset</button><button type="button" class="seg" data-light="night" aria-pressed="false">Night</button>
+      </div>
+      <div class="bar-tools">
+        <button type="button" class="seg tool" id="list-toggle" aria-pressed="false" aria-controls="campus-list">View as list</button>
+        <button type="button" class="seg tool" id="motion-toggle" aria-pressed="true"><span class="switch" aria-hidden="true"></span>Motion</button>
+      </div>
+    </div>
+
+    <ol class="campus-list" id="campus-list" aria-label="Public projects, as a list" hidden></ol>
+    <ul class="key" id="key" aria-label="Numbered projects on the campus"></ul>
+
+    <section class="sheet" id="sheet" aria-labelledby="sheet-title" hidden>
+      <div class="sheet-pic" id="sheet-pic"></div>
+      <div class="sheet-body">
+        <p class="sheet-kicker" id="sheet-kicker"></p>
+        <h2 id="sheet-title" tabindex="-1"><span class="num" id="sheet-n" aria-hidden="true"></span><span id="sheet-name">Project</span></h2>
+        <dl class="facts" id="sheet-facts"></dl>
+        <div class="actions" id="sheet-actions"></div>
+        <div class="sheet-nav">
+          <button type="button" class="btn-line" id="sheet-prev">Previous project</button>
+          <button type="button" class="btn-line" id="sheet-next">Next project</button>
+          <button type="button" class="btn-line close" id="sheet-close">Close</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="plate-foot">
+    <div class="pf-caption">
+      <p><span class="fig">Fig. 1</span> The Barchinet campus, a work-in-progress render. New projects add new buildings.</p>
+      <p class="grade-note">Morning, sunset and night are a colour grade over the daytime render, not final renders.</p>
+    </div>
+    <p class="pf-deck">Barchinet Global is an architecture platform where architecture students, research teams and university teachers work on research together. Look at the projects first; you only need an account when you join. <strong>Joining is always free.</strong></p>
+  </div>
+</section>
+
+<!-- 2. What a contribution looks like -->
+<section class="section" id="contribution" aria-labelledby="contribution-title">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">A made-up example: a hillside library study</p>
+      <h2 class="display" id="contribution-title">One task, from the first line to a published page.</h2>
+      <p class="lede">This is what working on a project looks like: a task with a clear question, your drawing, a review that tells you what to do next, and the finished piece with your name on it.</p>
+    </div>
+
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <defs><pattern id="earth" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#102c31" stroke-width=".55" stroke-opacity=".6"/></pattern></defs>
+    </svg>
+
+    <ol class="plates">
+      <li class="plate-step">
+        <h3><span class="step-n">1</span>The task</h3>
+        <p class="step-sub">A clear question, sized to start with.</p>
+        <figure class="drawing"><svg viewBox="0 0 480 300" role="img" aria-label="Site plan drawing: contour lines of a steep slope, the dashed site boundary, existing trees and section line A–A across the slope."><rect x="6" y="6" width="468" height="288" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><path d="M12 44C140 30 300 60 468 38" fill="none" stroke="#102c31" stroke-width="1.0"/><rect x="146" y="32" width="26" height="10" fill="#fdfcf8"/><text x="159" y="40" font-size="7" text-anchor="middle" fill="#102c31" font-weight="400" font-family="Inter, Arial, sans-serif">+30.0</text><path d="M12 66C140 52 300 82 468 60" fill="none" stroke="#5b6b6c" stroke-width="0.5"/><path d="M12 88C140 74 300 104 468 82" fill="none" stroke="#5b6b6c" stroke-width="0.5"/><path d="M12 110C140 96 300 126 468 104" fill="none" stroke="#102c31" stroke-width="1.0"/><rect x="146" y="98" width="26" height="10" fill="#fdfcf8"/><text x="159" y="106" font-size="7" text-anchor="middle" fill="#102c31" font-weight="400" font-family="Inter, Arial, sans-serif">+24.0</text><path d="M12 132C140 118 300 148 468 126" fill="none" stroke="#5b6b6c" stroke-width="0.5"/><path d="M12 154C140 140 300 170 468 148" fill="none" stroke="#5b6b6c" stroke-width="0.5"/><path d="M12 176C140 162 300 192 468 170" fill="none" stroke="#102c31" stroke-width="1.0"/><rect x="146" y="164" width="26" height="10" fill="#fdfcf8"/><text x="159" y="172" font-size="7" text-anchor="middle" fill="#102c31" font-weight="400" font-family="Inter, Arial, sans-serif">+18.0</text><path d="M12 198C140 184 300 214 468 192" fill="none" stroke="#5b6b6c" stroke-width="0.5"/><path d="M12 220C140 206 300 236 468 214" fill="none" stroke="#5b6b6c" stroke-width="0.5"/><path d="M12 242C140 228 300 258 468 236" fill="none" stroke="#102c31" stroke-width="1.0"/><rect x="146" y="230" width="26" height="10" fill="#fdfcf8"/><text x="159" y="238" font-size="7" text-anchor="middle" fill="#102c31" font-weight="400" font-family="Inter, Arial, sans-serif">+12.0</text><path d="M90 64L404 54L424 236L112 244Z" fill="none" stroke="#102c31" stroke-width="1" stroke-dasharray="12 3 2 3 2 3"/><circle cx="120" cy="90" r="9" fill="#fdfcf8" stroke="#5b6b6c" stroke-width=".6"/><path d="M118 90h4M120 88v4" stroke="#5b6b6c" stroke-width=".6"/><circle cx="140" cy="200" r="7" fill="#fdfcf8" stroke="#5b6b6c" stroke-width=".6"/><path d="M138 200h4M140 198v4" stroke="#5b6b6c" stroke-width=".6"/><circle cx="380" cy="90" r="8" fill="#fdfcf8" stroke="#5b6b6c" stroke-width=".6"/><path d="M378 90h4M380 88v4" stroke="#5b6b6c" stroke-width=".6"/><circle cx="396" cy="200" r="10" fill="#fdfcf8" stroke="#5b6b6c" stroke-width=".6"/><path d="M394 200h4M396 198v4" stroke="#5b6b6c" stroke-width=".6"/><circle cx="102" cy="150" r="6" fill="#fdfcf8" stroke="#5b6b6c" stroke-width=".6"/><path d="M100 150h4M102 148v4" stroke="#5b6b6c" stroke-width=".6"/><path d="M250 50V244" stroke="#102c31" stroke-width="1.6" stroke-dasharray="16 4 3 4"/><path d="M250 40H268" stroke="#102c31" stroke-width="1.6"/><path d="M268 35l9 5-9 5z" fill="#102c31"/><text x="240" y="44" font-size="10" text-anchor="middle" fill="#102c31" font-weight="600" font-family="Inter, Arial, sans-serif">A</text><path d="M250 254H268" stroke="#102c31" stroke-width="1.6"/><path d="M268 249l9 5-9 5z" fill="#102c31"/><text x="240" y="258" font-size="10" text-anchor="middle" fill="#102c31" font-weight="600" font-family="Inter, Arial, sans-serif">A</text><g font-family="Inter, Arial, sans-serif"><circle cx="40" cy="44" r="14" fill="none" stroke="#102c31" stroke-width=".6"/><path d="M40 30L46 54L40 49Z" fill="#102c31"/><path d="M40 30L34 54L40 49Z" fill="none" stroke="#102c31" stroke-width=".6"/><text x="40" y="24" font-size="8" text-anchor="middle" fill="#102c31" font-weight="600" >N</text><g fill="#102c31"><rect x="24" y="268" width="20" height="4"/><rect x="64" y="268" width="20" height="4"/></g><rect x="24" y="268" width="80" height="4" fill="none" stroke="#102c31" stroke-width=".5"/><text x="24" y="282" font-size="7" text-anchor="middle" fill="#102c31" font-weight="400" >0</text><text x="64" y="282" font-size="7" text-anchor="middle" fill="#102c31" font-weight="400" >20</text><text x="104" y="282" font-size="7" text-anchor="middle" fill="#102c31" font-weight="400" >40 m</text></g><g font-family="Inter, Arial, sans-serif"><text x="330" y="72" font-size="7.5" text-anchor="start" fill="#5b6b6c" font-weight="400" >Site boundary</text></g><g font-family="Inter, Arial, sans-serif"><rect x="278" y="254" width="190" height="34" fill="#fdfcf8" stroke="#102c31" stroke-width=".8"/><path d="M278 269.5H468M430 254V288" stroke="#102c31" stroke-width=".5" fill="none"/><text x="283" y="265" font-size="8.5" text-anchor="start" fill="#102c31" font-weight="600" >Site plan</text><text x="425" y="265" font-size="8" text-anchor="end" fill="#102c31" font-weight="400" >1:500</text><text x="283" y="281" font-size="7.2" text-anchor="start" fill="#5b6b6c" font-weight="400" >Example study, illustration</text><text x="449" y="281" font-size="8" text-anchor="middle" fill="#102c31" font-weight="600" >A-01</text><text x="449" y="264.5" font-size="6.5" text-anchor="middle" fill="#5b6b6c" font-weight="400" >No.</text></g></svg></figure>
+        <div class="note-block"><p class="nb-label">Task from the example study</p><p>Draw one section through the slope and show a way to stack the reading floors.</p></div>
+      </li>
+      <li class="plate-step">
+        <h3><span class="step-n">2</span>Your drawing</h3>
+        <p class="step-sub">By hand or in the browser 3D Design Studio, submitted in the workspace.</p>
+        <figure class="drawing"><svg viewBox="0 0 480 300" role="img" aria-label="Section A–A, first version: three reading floors step down the slope, with cut slabs and walls in solid black, levels and dimensions."><rect x="6" y="6" width="468" height="288" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><path d="M70 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="70" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="70" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >1</text><path d="M190 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="190" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="190" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >2</text><path d="M310 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="310" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="310" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >3</text><path d="M430 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="430" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="430" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >4</text><path d="M14 61.3L466 212.0V226H14Z" fill="url(#earth)"/><path d="M14 61.3L466 212.0" stroke="#102c31" stroke-width="1.5"/><rect x="70" y="77" width="120" height="43" fill="#fdfcf8"/><rect x="194" y="117" width="116" height="43" fill="#fdfcf8"/><rect x="314" y="157" width="116" height="43" fill="#fdfcf8"/><path d="M110 109h28M114 109v11M134 109v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M80 120V90h14V120M80 110h14M80 100h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M234 149h28M238 149v11M258 149v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M204 160V130h14V160M204 150h14M204 140h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M354 189h28M358 189v11M378 189v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M324 200V170h14V200M324 190h14M324 180h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M186 77V120M189 77V120" stroke="#102c31" stroke-width=".6"/><path d="M306 117V160M309 117V160" stroke="#102c31" stroke-width=".6"/><path d="M426 157V200M429 157V200" stroke="#102c31" stroke-width=".6"/><g fill="#102c31"><rect x="66" y="72" width="128" height="5"/><rect x="66" y="120" width="128" height="6"/><rect x="66" y="72" width="5" height="54"/><rect x="190" y="112" width="124" height="5"/><rect x="190" y="160" width="124" height="6"/><rect x="190" y="117" width="5" height="49"/><rect x="310" y="152" width="124" height="5"/><rect x="310" y="200" width="124" height="6"/><rect x="310" y="157" width="5" height="49"/><rect x="427" y="206" width="7" height="12"/></g><g font-family="Inter, Arial, sans-serif"><path d="M194 120H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 114h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 114v6l-4-6z" fill="#102c31"/><text x="452" y="118.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >+7.20</text><path d="M314 160H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 154h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 154v6l-4-6z" fill="#102c31"/><text x="452" y="158.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >+3.60</text><path d="M434 200H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 194h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 194v6l-4-6z" fill="#102c31"/><text x="452" y="198.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >±0.00</text><path d="M64 77H40M64 120H40" stroke="#5b6b6c" stroke-width=".4"/><path d="M44 72V126" stroke="#102c31" stroke-width=".5"/><path d="M41 80l6-6M41 123l6-6" stroke="#102c31" stroke-width=".9"/><text x="40" y="99" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" transform="rotate(-90 40 99)">3.60</text><path d="M64 240H436" stroke="#102c31" stroke-width=".5"/><path d="M67 243L73 237M70 234V245" stroke="#102c31" stroke-width=".9"/><path d="M187 243L193 237M190 234V245" stroke="#102c31" stroke-width=".9"/><path d="M307 243L313 237M310 234V245" stroke="#102c31" stroke-width=".9"/><path d="M427 243L433 237M430 234V245" stroke="#102c31" stroke-width=".9"/><text x="130.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="250.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="370.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="18" y="50" font-size="7.5" text-anchor="start" fill="#5b6b6c" font-weight="400" >Existing ground</text></g><g font-family="Inter, Arial, sans-serif"><rect x="278" y="254" width="190" height="34" fill="#fdfcf8" stroke="#102c31" stroke-width=".8"/><path d="M278 269.5H468M430 254V288" stroke="#102c31" stroke-width=".5" fill="none"/><text x="283" y="265" font-size="8.5" text-anchor="start" fill="#102c31" font-weight="600" >Section A–A, first version</text><text x="425" y="265" font-size="8" text-anchor="end" fill="#102c31" font-weight="400" >1:200</text><text x="283" y="281" font-size="7.2" text-anchor="start" fill="#5b6b6c" font-weight="400" >Example study, illustration</text><text x="449" y="281" font-size="8" text-anchor="middle" fill="#102c31" font-weight="600" >A-02</text><text x="449" y="264.5" font-size="6.5" text-anchor="middle" fill="#5b6b6c" font-weight="400" >No.</text></g></svg></figure>
+        <div class="note-block"><p class="nb-label">Submitted in the workspace</p><p>Section A, first version, sent to the project’s reviewers.</p><p class="state"><span class="state-mark wait" aria-hidden="true"></span>Status: waiting for review</p></div>
+      </li>
+      <li class="plate-step">
+        <h3><span class="step-n">3</span>The review</h3>
+        <p class="step-sub">A comment with a clear next step.</p>
+        <figure class="drawing"><svg viewBox="0 0 480 300" role="img" aria-label="The same section with a revision cloud around the back of the lowest floor, marked 1."><rect x="6" y="6" width="468" height="288" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><path d="M70 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="70" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="70" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >1</text><path d="M190 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="190" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="190" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >2</text><path d="M310 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="310" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="310" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >3</text><path d="M430 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="430" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="430" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >4</text><path d="M14 61.3L466 212.0V226H14Z" fill="url(#earth)"/><path d="M14 61.3L466 212.0" stroke="#102c31" stroke-width="1.5"/><rect x="70" y="77" width="120" height="43" fill="#fdfcf8"/><rect x="194" y="117" width="116" height="43" fill="#fdfcf8"/><rect x="314" y="157" width="116" height="43" fill="#fdfcf8"/><path d="M110 109h28M114 109v11M134 109v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M80 120V90h14V120M80 110h14M80 100h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M234 149h28M238 149v11M258 149v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M204 160V130h14V160M204 150h14M204 140h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M354 189h28M358 189v11M378 189v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M324 200V170h14V200M324 190h14M324 180h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M186 77V120M189 77V120" stroke="#102c31" stroke-width=".6"/><path d="M306 117V160M309 117V160" stroke="#102c31" stroke-width=".6"/><path d="M426 157V200M429 157V200" stroke="#102c31" stroke-width=".6"/><g fill="#102c31"><rect x="66" y="72" width="128" height="5"/><rect x="66" y="120" width="128" height="6"/><rect x="66" y="72" width="5" height="54"/><rect x="190" y="112" width="124" height="5"/><rect x="190" y="160" width="124" height="6"/><rect x="190" y="117" width="5" height="49"/><rect x="310" y="152" width="124" height="5"/><rect x="310" y="200" width="124" height="6"/><rect x="310" y="157" width="5" height="49"/><rect x="427" y="206" width="7" height="12"/></g><g font-family="Inter, Arial, sans-serif"><path d="M194 120H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 114h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 114v6l-4-6z" fill="#102c31"/><text x="452" y="118.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >+7.20</text><path d="M314 160H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 154h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 154v6l-4-6z" fill="#102c31"/><text x="452" y="158.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >+3.60</text><path d="M434 200H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 194h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 194v6l-4-6z" fill="#102c31"/><text x="452" y="198.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >±0.00</text><path d="M64 77H40M64 120H40" stroke="#5b6b6c" stroke-width=".4"/><path d="M44 72V126" stroke="#102c31" stroke-width=".5"/><path d="M41 80l6-6M41 123l6-6" stroke="#102c31" stroke-width=".9"/><text x="40" y="99" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" transform="rotate(-90 40 99)">3.60</text><path d="M64 240H436" stroke="#102c31" stroke-width=".5"/><path d="M67 243L73 237M70 234V245" stroke="#102c31" stroke-width=".9"/><path d="M187 243L193 237M190 234V245" stroke="#102c31" stroke-width=".9"/><path d="M307 243L313 237M310 234V245" stroke="#102c31" stroke-width=".9"/><path d="M427 243L433 237M430 234V245" stroke="#102c31" stroke-width=".9"/><text x="130.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="250.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="370.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="18" y="50" font-size="7.5" text-anchor="start" fill="#5b6b6c" font-weight="400" >Existing ground</text></g><path d="M374.0 178.0A6.8 6.8 0 0 1 371.4 188.7A7.3 7.3 0 0 1 364.0 197.8A7.8 7.8 0 0 1 353.0 203.9A8.2 8.2 0 0 1 340.0 206.0A8.2 8.2 0 0 1 327.0 203.9A7.8 7.8 0 0 1 316.0 197.8A7.3 7.3 0 0 1 308.6 188.7A6.8 6.8 0 0 1 306.0 178.0A6.8 6.8 0 0 1 308.6 167.3A7.3 7.3 0 0 1 316.0 158.2A7.8 7.8 0 0 1 327.0 152.1A8.2 8.2 0 0 1 340.0 150.0A8.2 8.2 0 0 1 353.0 152.1A7.8 7.8 0 0 1 364.0 158.2A7.3 7.3 0 0 1 371.4 167.3A6.8 6.8 0 0 1 374.0 178.0Z" fill="none" stroke="#8a5a14" stroke-width="1.2"/><path d="M366 156L392 118" stroke="#8a5a14" stroke-width=".8"/><path d="M392 100l11 19h-22z" fill="#fdfcf8" stroke="#8a5a14" stroke-width="1.1"/><text x="392" y="116" font-size="9" text-anchor="middle" fill="#8a5a14" font-weight="700" font-family="Inter, Arial, sans-serif">1</text><g font-family="Inter, Arial, sans-serif"><rect x="278" y="254" width="190" height="34" fill="#fdfcf8" stroke="#102c31" stroke-width=".8"/><path d="M278 269.5H468M430 254V288" stroke="#102c31" stroke-width=".5" fill="none"/><text x="283" y="265" font-size="8.5" text-anchor="start" fill="#102c31" font-weight="600" >Section A–A, review mark 1</text><text x="425" y="265" font-size="8" text-anchor="end" fill="#102c31" font-weight="400" >1:200</text><text x="283" y="281" font-size="7.2" text-anchor="start" fill="#5b6b6c" font-weight="400" >Example study, illustration</text><text x="449" y="281" font-size="8" text-anchor="middle" fill="#102c31" font-weight="600" >A-02</text><text x="449" y="264.5" font-size="6.5" text-anchor="middle" fill="#5b6b6c" font-weight="400" >No.</text></g></svg></figure>
+        <div class="note-block"><p class="nb-label">Reviewer, on mark 1</p><p>Clear section, and the floors follow the slope well. The back of the lowest floor gets no daylight.</p><p><b>Next step:</b> try a light well behind it and redraw that floor.</p><p class="state"><span class="state-mark revise" aria-hidden="true"></span>Status: revise, one next step</p></div>
+      </li>
+      <li class="plate-step">
+        <h3><span class="step-n">4</span>Accepted and published</h3>
+        <p class="step-sub">Each project has its own reviewers. Barchinet makes the final decision on what is accepted.</p>
+        <figure class="drawing article">
+          <p class="a-title">Stepping a library down a slope</p>
+          <svg viewBox="0 0 480 300" role="img" aria-label="The revised section: a rooflight and light well now bring daylight to the back of the lowest floor."><rect x="6" y="6" width="468" height="288" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><path d="M70 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="70" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="70" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >1</text><path d="M190 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="190" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="190" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >2</text><path d="M310 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="310" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="310" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >3</text><path d="M430 36V250" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="12 3 2 3"/><circle cx="430" cy="27" r="8" fill="#fdfcf8" stroke="#102c31" stroke-width=".6"/><text x="430" y="30" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >4</text><path d="M14 61.3L466 212.0V226H14Z" fill="url(#earth)"/><path d="M14 61.3L466 212.0" stroke="#102c31" stroke-width="1.5"/><rect x="70" y="77" width="120" height="43" fill="#fdfcf8"/><rect x="194" y="117" width="116" height="43" fill="#fdfcf8"/><rect x="314" y="157" width="116" height="43" fill="#fdfcf8"/><path d="M110 109h28M114 109v11M134 109v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M80 120V90h14V120M80 110h14M80 100h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M234 149h28M238 149v11M258 149v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M204 160V130h14V160M204 150h14M204 140h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M354 189h28M358 189v11M378 189v11" stroke="#5b6b6c" stroke-width=".7" fill="none"/><path d="M324 200V170h14V200M324 190h14M324 180h14" stroke="#5b6b6c" stroke-width=".5" fill="none"/><path d="M186 77V120M189 77V120" stroke="#102c31" stroke-width=".6"/><path d="M306 117V160M309 117V160" stroke="#102c31" stroke-width=".6"/><path d="M426 157V200M429 157V200" stroke="#102c31" stroke-width=".6"/><g fill="#102c31"><rect x="66" y="72" width="128" height="5"/><rect x="66" y="120" width="128" height="6"/><rect x="66" y="72" width="5" height="54"/><rect x="190" y="112" width="124" height="5"/><rect x="190" y="160" width="124" height="6"/><rect x="190" y="117" width="5" height="49"/><rect x="310" y="152" width="8" height="5"/><rect x="338" y="152" width="96" height="5"/><rect x="314" y="140" width="4" height="12"/><rect x="338" y="140" width="4" height="12"/><rect x="310" y="200" width="124" height="6"/><rect x="310" y="157" width="5" height="49"/><rect x="427" y="206" width="7" height="12"/></g><path d="M314 140L342 136" stroke="#102c31" stroke-width=".8"/><path d="M318 141.5L338 138.6" stroke="#102c31" stroke-width=".5"/><g stroke="#8a5a14" stroke-width=".9" stroke-dasharray="4 3" fill="none"><path d="M262 64L322 196M276 62L330 196M290 60L338 196"/></g><text x="256" y="58" font-size="7.5" text-anchor="start" fill="#8a5a14" font-weight="400" font-family="Inter, Arial, sans-serif">Daylight to the back of the lowest floor</text><g font-family="Inter, Arial, sans-serif"><path d="M194 120H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 114h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 114v6l-4-6z" fill="#102c31"/><text x="452" y="118.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >+7.20</text><path d="M314 160H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 154h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 154v6l-4-6z" fill="#102c31"/><text x="452" y="158.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >+3.60</text><path d="M434 200H446" stroke="#5b6b6c" stroke-width=".4" stroke-dasharray="2 2"/><path d="M442 194h8l-4 6z" fill="#fdfcf8" stroke="#102c31" stroke-width=".7"/><path d="M446 194v6l-4-6z" fill="#102c31"/><text x="452" y="198.5" font-size="7.5" text-anchor="start" fill="#102c31" font-weight="400" >±0.00</text><path d="M64 77H40M64 120H40" stroke="#5b6b6c" stroke-width=".4"/><path d="M44 72V126" stroke="#102c31" stroke-width=".5"/><path d="M41 80l6-6M41 123l6-6" stroke="#102c31" stroke-width=".9"/><text x="40" y="99" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" transform="rotate(-90 40 99)">3.60</text><path d="M64 240H436" stroke="#102c31" stroke-width=".5"/><path d="M67 243L73 237M70 234V245" stroke="#102c31" stroke-width=".9"/><path d="M187 243L193 237M190 234V245" stroke="#102c31" stroke-width=".9"/><path d="M307 243L313 237M310 234V245" stroke="#102c31" stroke-width=".9"/><path d="M427 243L433 237M430 234V245" stroke="#102c31" stroke-width=".9"/><text x="130.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="250.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="370.0" y="237" font-size="8" text-anchor="middle" fill="#102c31" font-weight="400" >9.80</text><text x="18" y="50" font-size="7.5" text-anchor="start" fill="#5b6b6c" font-weight="400" >Existing ground</text></g><g font-family="Inter, Arial, sans-serif"><rect x="278" y="254" width="190" height="34" fill="#fdfcf8" stroke="#102c31" stroke-width=".8"/><path d="M278 269.5H468M430 254V288" stroke="#102c31" stroke-width=".5" fill="none"/><text x="283" y="265" font-size="8.5" text-anchor="start" fill="#102c31" font-weight="600" >Section A–A, revised</text><text x="425" y="265" font-size="8" text-anchor="end" fill="#102c31" font-weight="400" >1:200</text><text x="283" y="281" font-size="7.2" text-anchor="start" fill="#5b6b6c" font-weight="400" >Example study, illustration</text><text x="449" y="281" font-size="8" text-anchor="middle" fill="#102c31" font-weight="600" >A-03</text><text x="449" y="264.5" font-size="6.5" text-anchor="middle" fill="#5b6b6c" font-weight="400" >No.</text></g></svg>
+          <p class="credit"><b>Section drawing:</b> Your name here</p>
+        </figure>
+        <div class="note-block"><p class="nb-label">Published in the project’s articles</p><p>The accepted drawing carries your name.</p><p class="state"><span class="state-mark ok" aria-hidden="true"></span>Status: accepted</p></div>
+      </li>
+    </ol>
+    <p class="ill-note">Illustrations of a made-up example. Real projects set their own tasks.</p>
+  </div>
+</section>
+
+<!-- 3. Open projects -->
+<section class="section rule-top" id="projects" aria-labelledby="projects-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="display" id="projects-title">Open projects</h2>
+      <p class="lede">Each one starts from a research question. Read the question and an example first task before you make an account.</p>
+      <p class="privacy-note">Only projects whose owners mark them public appear here. Member names and profiles are not shown: profiles stay off unless a member switches theirs on.</p>
+    </div>
+    <div class="p-index">
+      <figure class="p-figure" aria-hidden="true">
+        <div class="keyplan" id="keyplan"><img src="/community/img/campus-hero-1200.jpg" alt="" width="1200" height="750" loading="lazy"></div>
+        <figcaption class="p-caption" id="p-caption"></figcaption>
+      </figure>
+      <ol class="p-list" id="p-list"></ol>
+    </div>
+    <div class="p-state" id="p-state"><p class="ss-loading">Loading the open projects…</p></div>
+  </div>
+</section>
+
+<!-- 4. What you keep -->
+<section class="section keep on-dark" id="keep" aria-labelledby="keep-title">
+  <div class="wrap keep-grid">
+    <h2 class="big" id="keep-title">Your part stays yours.</h2>
+    <div>
+      <ul class="keep-list">
+        <li><h3>You own what you contribute.</h3><p>The drawings, models, text and data you contribute stay yours.</p></li>
+        <li><h3>Barchinet may use it too.</h3><p>You give Barchinet Inc. a permanent, worldwide, royalty-free, non-exclusive licence to use your contribution. Non-exclusive means you can still use your own work anywhere else, for example in your own research.</p></li>
+        <li><h3>Your accepted work carries your name.</h3><p>Barchinet names you on the project for contributions it accepts, unless you ask not to be named. You may show and cite your contributions in a portfolio, CV, coursework or thesis.</p></li>
+        <li><h3>Joining is always free.</h3><p>There is no fee to join or to take part.</p></li>
+      </ul>
+      <p class="terms-line">These are provisional contributor terms, version 0.1. <a class="text-link" href="/contributor-terms.html">Read the contributor terms</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- 5. How joining works -->
+<section class="section" id="joining" aria-labelledby="joining-title">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="display" id="joining-title">How joining works</h2>
+      <p class="lede">Three steps. The project you pick stays with you the whole way, through sign-in, sign-up and approval.</p>
+    </div>
+    <ol class="route">
+      <li><span class="step-n big-n">1</span><h3>Pick a building</h3><p>Choose a project on the campus or in the list, and press Join this project.</p><p class="carry"><span class="mark" aria-hidden="true" hidden></span><span>The project you pick</span></p></li>
+      <li><span class="step-n big-n">2</span><h3>Sign in or make an account</h3><p>You must be 18 or older. A confirmed university email is approved automatically; other accounts are approved by Barchinet.</p><p class="carry"><span class="mark" aria-hidden="true" hidden></span><span>Still the project you pick</span></p></li>
+      <li><span class="step-n big-n">3</span><h3>Land in that project</h3><p>You arrive at the project you picked, with its join request open. Send it, and you start on the tasks once you are accepted.</p><p class="carry"><span class="mark" aria-hidden="true" hidden></span><span>At the project you picked</span></p></li>
+    </ol>
+    <div class="after">
+      <h3>After you ask to join</h3>
+      <p>Barchinet reads your request and accepts or declines it. Once you are in, each project has its own reviewers for the work you submit, and Barchinet makes the final decision on what is accepted.</p>
+    </div>
+    <p class="free-line">Joining is always free.</p>
+  </div>
+</section>
+
+<!-- 6. For teachers and research teams -->
+<section class="section rule-top" id="teachers" aria-labelledby="teach-title">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="kicker">For university teachers and research teams</p>
+      <h2 class="display" id="teach-title">Use a project in your course, or bring a study of your own.</h2>
+    </div>
+    <div class="teach-grid">
+      <div>
+        <h3 class="col-title">What your students do and keep</h3>
+        <ul class="ruled-list">
+          <li><b>Real tasks on a research question.</b><p>Students work in the signed-in workspace: project tasks, reviews, resources, articles, publishing and a browser 3D Design Studio.</p></li>
+          <li><b>Work they can show.</b><p>They own the part they contribute. Accepted work names them on the project, unless they ask not to be named, and they may cite it in a portfolio, CV, coursework or thesis.</p></li>
+          <li><b>Clear review.</b><p>Each project has its own reviewers. Barchinet makes the final decision on what is accepted.</p></li>
+          <li><b>Privacy, adults only.</b><p>Every contributor is 18 or older. Member names and profiles are not shown on public pages, and profiles stay off unless a member switches theirs on.</p></li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="col-title">Put a project on your course page</h3>
+        <div class="course-page" role="img" aria-label="Example of a course page: Week 6, sections on steep sites, with an example link to a Community project.">
+          <p class="course-bar">Your course page</p>
+          <div class="course-body">
+            <p class="c-title">Week 6: sections on steep sites</p>
+            <p>This term we take part in a research project on Barchinet. Read the project, then join it.</p>
+            <p class="share"><code id="share-example">barchinetglobal.com/community/#project-your-project</code><small>Example link</small></p>
+          </div>
+        </div>
+        <ul class="ruled-list">
+          <li><b>One share link per public project.</b><p>Students who open it see that project first. Join this project keeps it through sign-in, sign-up and approval, so they land in it.</p></li>
+          <li><b>A course or a study of your own.</b><p>If you teach or run a research team and want to run your work here, talk to us first.</p></li>
+        </ul>
+      </div>
+    </div>
+    <div class="teach-cta">
+      <p>Bring a course or a study to Barchinet.</p>
+      <a class="btn btn-primary" href="/about/#contact">Talk to us about a course or a study</a>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Questions -->
+<section class="section rule-top" id="questions" aria-labelledby="faq-title">
+  <div class="wrap faq-grid">
+    <div class="section-head">
+      <h2 class="display" id="faq-title">Questions</h2>
+      <p class="lede">Short answers before you ask to join.</p>
+    </div>
+    <div class="faq" id="faq">
+      <div class="faq-item"><h3><button type="button" class="faq-q" aria-expanded="false" aria-controls="a1">Is it free?<span class="sign" aria-hidden="true"></span></button></h3><div class="faq-a" id="a1" hidden><p><strong>Always.</strong> Joining is always free.</p></div></div>
+      <div class="faq-item"><h3><button type="button" class="faq-q" aria-expanded="false" aria-controls="a2">Who owns my work?<span class="sign" aria-hidden="true"></span></button></h3><div class="faq-a" id="a2" hidden><p><strong>You do.</strong> You own the part you contribute. Barchinet Inc. receives a permanent, worldwide, royalty-free, non-exclusive licence to use it, so you can still use your work anywhere else. These are provisional terms, version 0.1.</p></div></div>
+      <div class="faq-item"><h3><button type="button" class="faq-q" aria-expanded="false" aria-controls="a3">Do I need experience?<span class="sign" aria-hidden="true"></span></button></h3><div class="faq-a" id="a3" hidden><p>Each project here shows a “Good for” level and an example first task, so you can judge before you ask to join.</p></div></div>
+      <div class="faq-item"><h3><button type="button" class="faq-q" aria-expanded="false" aria-controls="a4">How much time does it take?<span class="sign" aria-hidden="true"></span></button></h3><div class="faq-a" id="a4" hidden><p>Each project sets its own time; you see it before you ask to join.</p></div></div>
+      <div class="faq-item"><h3><button type="button" class="faq-q" aria-expanded="false" aria-controls="a5">Who can see my name?<span class="sign" aria-hidden="true"></span></button></h3><div class="faq-a" id="a5" hidden><p>Not visitors to this page: member names and profiles are not shown here, and your profile stays off unless you switch it on. For work of yours that is accepted, Barchinet names you on the project unless you ask not to be named.</p></div></div>
+      <div class="faq-item"><h3><button type="button" class="faq-q" aria-expanded="false" aria-controls="a6">Why must I be 18?<span class="sign" aria-hidden="true"></span></button></h3><div class="faq-a" id="a6" hidden><p>Contributors accept the contributor terms themselves. They are an agreement between you and Barchinet Inc., and you must be 18 or older to accept them.</p></div></div>
+      <div class="faq-item"><h3><button type="button" class="faq-q" aria-expanded="false" aria-controls="a7">What happens after I ask to join?<span class="sign" aria-hidden="true"></span></button></h3><div class="faq-a" id="a7" hidden><p>You sign in or make an account and land in the project you picked. A confirmed university email is approved automatically; other accounts are approved by Barchinet. Barchinet reads your request and accepts or declines it. Each project has its own reviewers for the work you submit, and Barchinet makes the final decision on what is accepted.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. Who is behind this -->
+<section class="section-s rule-top" aria-labelledby="behind-title">
+  <div class="wrap behind">
+    <h2 class="display-s" id="behind-title">Who is behind this</h2>
+    <div>
+      <p>Barchinet Global is an architecture platform made by Barchinet Inc. Its community is where architecture students, research teams and university teachers work on research projects together.</p>
+      <a class="text-link" href="/about/#contact">Contact Barchinet</a>
+    </div>
+  </div>
+</section>
+
+<!-- 9. Final action -->
+<section class="final on-dark" aria-labelledby="final-title">
+  <div class="wrap final-inner">
+    <div class="final-text">
+      <h2 id="final-title">Pick a building.</h2>
+      <p>Read a project’s question and first task, then ask to join the one that fits you. Joining is always free.</p>
+      <div class="actions" id="final-actions"><button type="button" class="btn btn-light" data-pick>Pick a building</button><button type="button" class="btn btn-quiet" data-pick="list">View projects as a list</button><a class="btn btn-light" data-join-community href="/membership?mode=signup&amp;next=%2Fworkspace%2Fprojects%2F%3Ftab%3Daccess" hidden>Join the community</a><a class="btn btn-quiet" data-contact href="/about/#contact" hidden>Contact Barchinet</a></div>
+    </div>
+    <figure class="final-fig">
+      <div class="final-pic"><img src="/community/img/campus-hero-1200.jpg" width="1200" height="750" loading="lazy" alt="The Barchinet campus seen from above, with Barchinet hall at the centre, the project buildings around it and open plots beyond."></div>
+      <figcaption>Fig. 2 The campus, work-in-progress render.</figcaption>
+    </figure>
+  </div>
+</section>
+</main>
+
+<footer class="bgc-footer on-dark">
+  <div class="bgc-footer-grid">
+    <div class="bgc-footer-brand"><a href="/" aria-label="Barchinet Global home"><img src="/assets/barchinet-global-logo.svg" alt="Barchinet Global" width="900" height="230" loading="lazy"></a><p>A habitat design ecosystem, from Earth to space</p></div>
+    <nav aria-label="Explore"><h2>Explore</h2><ul><li><a href="/workspace/">Workspace</a></li><li><a href="/community/">Community</a></li><li><a href="/tools/">Tools</a></li><li><a href="/education/research-labs/">Research Labs</a></li><li><a href="/research/">Research</a></li><li><a href="/future-habitats/">Future Habitats</a></li></ul></nav>
+    <nav aria-label="Company"><h2>Company</h2><ul><li><a href="/about/">About</a></li><li><a href="/about/#contact">Contact</a></li><li><a href="/releases/">Project updates</a></li><li><a href="/contributor-terms.html">Contributor terms</a></li><li><a href="/persian-pattern/">Persian Pattern</a></li></ul></nav>
+    <nav aria-label="Privacy"><h2>Privacy</h2><ul><li><a href="/website-privacy.html">Website privacy</a></li><li><a href="/privacy.html">App privacy policies</a></li></ul></nav>
+  </div>
+  <div class="bgc-footer-base"><p>© 2026 Barchinet Inc.</p><p>Research Labs prototypes use synthetic sample data.</p></div>
+</footer>
+
+<dialog class="join" id="join" aria-labelledby="join-title">
+  <div class="join-pic" id="join-pic"></div>
+  <div class="join-body">
+    <h2 id="join-title">Join this project</h2>
+    <ol>
+      <li>Sign in, or make an account. You must be 18 or older.</li>
+      <li>A confirmed university email is approved automatically; other accounts are approved by Barchinet.</li>
+      <li id="join-land">You land at this project’s join request; Barchinet reads it and answers.</li>
+    </ol>
+    <p class="small">Joining is always free. You accept the provisional contributor terms when you ask for work access to a project: you own your part, and Barchinet Inc. gets a non-exclusive licence to use it.</p>
+    <div class="actions"><a class="btn btn-primary" href="/membership" id="join-signin">Sign in</a><a class="btn btn-quiet" href="/membership?mode=signup" id="join-signup">Make an account</a><button type="button" class="btn-line" data-close>Not now</button></div>
+  </div>
+</dialog>
+
+<p class="status" id="status" role="status" aria-live="polite"></p>
+<script type="module" src="/community/community.js"></script>
+</body>
+</html>
