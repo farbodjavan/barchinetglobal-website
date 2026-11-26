@@ -23,6 +23,8 @@ const memberCheck = signedIn().then((value) => { member = value; if (value) upda
 initMenu();
 
 // ---- Shared pieces of a project ----------------------------------------------------------------------------
+// Only what the project's owner wrote is shown: an empty text leaves no heading behind, and with no texts at all the
+// list is left out (hidden), so a new project shows its name, its Research Labs page and whether it is open to join.
 function facts(p, { question = true } = {}) {
   const dl = make('dl', 'facts');
   const row = (cls, term, text) => { const d = make('div', cls); d.append(make('dt', '', term), make('dd', '', text)); dl.append(d); };
@@ -30,20 +32,38 @@ function facts(p, { question = true } = {}) {
   if (p.summary) row('', 'About the project', p.summary);
   if (p.task) row('', 'An example first task', p.task);
   if (p.level) row('meta', 'Level', p.level);
-  row('meta', 'Time', p.time || 'Set by each project, shown before you ask to join');
+  if (p.time) row('meta', 'Time', p.time);
+  dl.hidden = !dl.childElementCount;
   return dl;
 }
+// A project on the campus is either open to join (the join button) or not yet (said in words, with no button).
+function joinState(p) {
+  if (p.joinable) return null;
+  return make('p', 'join-closed', 'Not open to join yet');
+}
+// More projects than buildings: the project is listed, and its building follows when the campus grows.
+const waitingNote = (p) => (placed(p) ? null : make('p', 'plot-note', 'Building coming as the campus grows'));
 function actions(p) {
   const wrap = make('div', 'actions');
-  const join = make('button', 'btn btn-primary', 'Join this project'); join.type = 'button';
-  join.setAttribute('aria-label', 'Join ' + p.title);
-  join.addEventListener('click', () => openJoin(p, join));
+  // Open to join: "Join this project" first, the Research Labs page as a quiet link last. Not open yet: the Research
+  // Labs page is the main action, and there is no join button.
+  const lab = p.lab ? make('a', p.joinable ? 'text-link' : 'btn btn-primary', 'See this project on Research Labs') : null;
+  if (lab) { lab.href = p.lab; lab.setAttribute('aria-label', 'See this project on Research Labs: ' + p.title); }
+  if (p.joinable) {
+    const join = make('button', 'btn btn-primary', 'Join this project'); join.type = 'button';
+    join.setAttribute('aria-label', 'Join ' + p.title);
+    join.addEventListener('click', () => openJoin(p, join));
+    wrap.append(join);
+  } else if (lab) wrap.append(lab);
   const copy = make('button', 'btn btn-quiet', 'Copy share link'); copy.type = 'button';
   copy.setAttribute('aria-label', 'Copy share link for ' + p.title);
   copy.addEventListener('click', () => copyLink(p, wrap));
-  wrap.append(join, copy);
+  wrap.append(copy);
+  if (p.joinable && lab) wrap.append(lab);
   return wrap;
 }
+// The parts of a project shown under its name, in every view.
+const details = (p, options) => [waitingNote(p), facts(p, options), joinState(p), actions(p)].filter(Boolean);
 // Copy the stable link; when the clipboard is not available, show the link itself, selected, to copy by hand.
 async function copyLink(p, wrap) {
   const url = shareUrl(p);
@@ -118,7 +138,9 @@ function choose(p, from, { focus = true } = {}) {
   $('sheet-kicker').textContent = 'Project ' + p.n + ' of ' + projects.length;
   setCrop(sheetCrop, p.plot, pictureAlt(p), { w: 0.24, aspect: 2 });
   $('sheet-facts').replaceWith(Object.assign(facts(p), { id: 'sheet-facts' }));
-  sheet.querySelector('.share-fallback')?.remove();
+  sheet.querySelectorAll('.share-fallback, .join-closed, .plot-note').forEach((n) => n.remove());
+  const closed = joinState(p); if (closed) $('sheet-facts').after(closed);
+  const note = waitingNote(p); if (note) $('sheet-title').after(note);
   $('sheet-actions').replaceWith(Object.assign(actions(p), { id: 'sheet-actions' }));
   $('sheet-close').setAttribute('aria-label', 'Close ' + p.title);
   $('sheet-prev').hidden = $('sheet-next').hidden = projects.length < 2;
@@ -272,7 +294,7 @@ function render() {
   $('campus-list').replaceChildren(...projects.map((p) => {
     const li = make('li'); li.id = 'list-' + p.slug;
     const h = make('h2'); const n = make('span', 'num', String(p.n)); n.setAttribute('aria-hidden', 'true'); h.append(n, p.title);
-    li.append(h, facts(p), actions(p));
+    li.append(h, ...details(p));
     return li;
   }));
 
@@ -289,7 +311,7 @@ function render() {
     const li = make('li', 'p-item'); li.id = anchorFor(p);
     const num = make('span', 'p-num', String(p.n)); num.setAttribute('aria-hidden', 'true');
     const body = make('div', 'p-body');
-    body.append(make('h3', '', p.title), facts(p), actions(p));
+    body.append(make('h3', '', p.title), ...details(p));
     const thumb = buildingCrop(p.plot, pictureAlt(p).replace(' on the campus render', ''), { w: 0.2, aspect: 4 / 3 }); thumb.classList.add('p-thumb');
     li.append(num, body, thumb);
     li.addEventListener('pointerenter', () => activate(p)); li.addEventListener('focusin', () => activate(p));
@@ -300,7 +322,7 @@ function render() {
     const i = projects.indexOf(p);
     keyMarks.forEach((m, k) => m?.classList.toggle('is-on', k === i));
     items.forEach((li, k) => li.classList.toggle('is-active', k === i));
-    $('p-caption').replaceChildren(make('span', 'fig', 'Key plan'), make('b', '', p.n + '  ' + p.title), make('span', '', placed(p) ? ', ' + p.building + '.' : ', building not on the picture yet.'));
+    $('p-caption').replaceChildren(make('span', 'fig', 'Key plan'), make('b', '', p.n + '  ' + p.title), make('span', '', placed(p) ? ', ' + p.building + '.' : ', building coming as the campus grows.'));
   }
   activate(projects[0]);
 
@@ -319,8 +341,8 @@ function render() {
     $('p-list').after(more);
   }
 
-  // How joining works: follow the first project through the three steps.
-  const first = projects[0];
+  // How joining works: follow the first project open to join (or the first project) through the three steps.
+  const first = projects.find((p) => p.joinable) ?? projects[0];
   const carries = [...document.querySelectorAll('#joining .carry')];
   ['', 'Still ', 'At '].forEach((prefix, index) => {
     const mark = carries[index]?.querySelector('.mark');

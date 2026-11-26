@@ -1,11 +1,14 @@
-// The Community page's projects come from the public list the Worker serves: only projects their owner switched on,
-// and only their public fields. Every value is checked and treated as plain text; the page never builds HTML from it.
+// The Community page's projects come from the public list the Worker serves: Research Labs projects by default and
+// the projects the owner added, and only their public fields. The texts are empty until the owner writes them. Every value is checked and treated as plain text; the page never builds HTML from it.
 import { plots } from './campus-data.js';
 
 export const apiPath = '/community/api/projects';
 const idPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const text = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
+// A project's Research Labs page: only a same-site path under /education/research-labs/ is ever used as a link.
+const labPattern = /^\/education\/research-labs\/[a-z0-9][a-z0-9/-]*$/;
+export const labPage = (value) => (typeof value === 'string' && value.length <= 300 && labPattern.test(value) ? value : '');
 
 export async function loadProjects() {
   const response = await fetch(apiPath, {
@@ -25,6 +28,7 @@ export async function loadProjects() {
       id: entry.id, slug: entry.slug, title: text(entry.title, 120), question: text(entry.question, 200),
       task: text(entry.first_task, 400), level: text(entry.level, 120), time: text(entry.time, 160),
       summary: text(entry.summary, 400), plot, building: plot === null ? '' : plots[plot].building, lead: plot === null ? undefined : plots[plot].lead,
+      lab: labPage(entry.lab_page), joinable: entry.joinable !== false,
     });
   }
   return projects.map((project, index) => ({ ...project, n: index + 1 }));

@@ -449,3 +449,8 @@ a { color: inherit; }
 .p-caption b { white-space: pre-wrap; }
 /* With a project sheet open on a wide screen, the title band keeps its text and actions clear of the sheet. */
 @media (min-width: 1000px) { .has-sheet .title-block { padding-right: calc(min(420px, max(360px, 30vw)) + var(--s5)); } }
+
+/* A project that is on the campus but not open to join yet, and a project waiting for its building. */
+.join-closed { display: inline-flex; align-items: center; gap: var(--s2); justify-self: start; font-size: var(--t-s); font-weight: 600; color: var(--ink); }
+.join-closed::before { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--muted); flex: none; }
+.plot-note { font-size: var(--t-xs); color: var(--muted); letter-spacing: .01em; }
