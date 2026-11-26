@@ -40,7 +40,7 @@ function leader(dx, dy) {
 
 export function mountCampus(stage, { projects = [], frame, kind = 'button', hrefFor, onChoose, onStatus, occluders = () => [] }) {
   const plate = stage.querySelector('.plate-inner'), list = stage.querySelector('.notes');
-  const ui = { motion: true, selected: null, visible: true, size: { w: 1, h: 1 }, base: null, compact: false, light: 'auto' };
+  const ui = { motion: true, selected: null, visible: true, size: { w: 1, h: 1 }, base: null, compact: false, light: 'day' };
 
   // ---- Callouts ----------------------------------------------------------------------------------------------
   // Drawn from the projects the page loaded; the picture is shown (with Barchinet hall only) before they arrive,
@@ -190,7 +190,7 @@ export function mountCampus(stage, { projects = [], frame, kind = 'button', href
     stage.dataset.light = actual;
     return actual;
   }
-  setLight('auto');
+  setLight('day'); // real renders for other times of day are not made yet, so the page opens in daylight
   build(projects);
 
   return {
