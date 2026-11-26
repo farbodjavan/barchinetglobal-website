@@ -90,33 +90,27 @@ async function copyLink(p, wrap) {
 }
 
 // ---- The campus ----------------------------------------------------------------------------------------------
-const titleBand = document.querySelector('.title-block');
 const SHEET_W = () => Math.min(420, Math.max(360, innerWidth * 0.3));
 const campus = mountCampus(stage, {
   projects: [],
   frame(w, h) {
-    // Fit the buildings and their labels (about 0.13 to 0.80 of the picture's height) into the part of the
-    // photograph that the title band leaves free.
-    if (wide.matches) {
-      const band = titleBand.offsetHeight, free = h - band;
-      return { width: (free - 30) / 0.67 * 1.6, point: [0.5, 0.13], at: [w / 2, 18], zoom: 1.35, selAt: [(w - SHEET_W()) / 2, free * 0.52] };
-    }
-    if (w < 700) return { width: w / 0.64, point: [0.5, 0.5], at: [w / 2, h / 2], zoom: 1.35, compact: true };
-    return { width: w * 1.08, point: [0.5, 0.47], at: [w / 2, h / 2], zoom: 1.4 };
+    // The picture is fitted whole by the stage; this says how a chosen building is shown, and when markers only.
+    if (wide.matches) return { zoom: 1.35, selAt: [(w - SHEET_W()) / 2, h * 0.5] };
+    if (w < 700) return { zoom: 1.35, compact: true };
+    return { zoom: 1.4 };
   },
   occluders: () => blocks(),
   onChoose: (p, el) => choose(p, el),
   onStatus: (text) => status(text),
 });
-// Panels laid over the photograph: callouts beneath them are hidden. Measured once, again after a change.
+// The project sheet, laid over the photograph on wide screens: callouts beneath it are hidden. Measured once, again
+// after a change. (The title band and the view controls sit under the photograph, never over it.)
 let blockCache = null;
 function blocks() {
-  if (!wide.matches) return [];
+  if (!wide.matches || sheet.hidden) return [];
   if (!blockCache) {
-    const s = stage.getBoundingClientRect();
-    const rel = (el) => { const r = el.getBoundingClientRect(); return { left: r.left - s.left, right: r.right - s.left, top: r.top - s.top, bottom: r.bottom - s.top }; };
-    blockCache = [rel(titleBand), rel(document.querySelector('.controls'))];
-    if (!sheet.hidden) blockCache.push(rel(sheet));
+    const s = stage.getBoundingClientRect(), r = sheet.getBoundingClientRect();
+    blockCache = [{ left: r.left - s.left, right: r.right - s.left, top: r.top - s.top, bottom: r.bottom - s.top }];
   }
   return blockCache;
 }

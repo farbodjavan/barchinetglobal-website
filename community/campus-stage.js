@@ -1,6 +1,7 @@
 // The campus photograph as the page opening. One rendered photograph, treated like a plate in a publication:
-// a very slow camera drift (Ken Burns), a soft parallax on the pointer, an eased move toward a chosen building,
-// and drawing callouts (numbered marker, thin leader, compact label) that are real buttons or links.
+// always shown whole (fitted, never cropped), a very slow drift and a soft parallax on the pointer that use only
+// the spare room beside the fitted picture, an eased move toward a chosen building (closing returns to the whole picture), and
+// drawing callouts (numbered marker, thin leader, compact label) that are real buttons or links.
 // Time of day is a colour grade over the photograph until a render exists for each light.
 // Shared by the Community page and the home page section.
 import { plots, hall, inPicture, cropFor, daylightNow, heroImage } from './campus-data.js';
@@ -46,15 +47,17 @@ export function mountCampus(stage, { projects = [], frame, kind = 'button', href
   // Drawn from the projects the page loaded; the picture is shown (with Barchinet hall only) before they arrive,
   // and stays that way when there are none.
   let notes = [];
-  const hallLi = make('li', 'note-item hall to-left'); hallLi.setAttribute('aria-hidden', 'true');
-  hallLi.style.setProperty('--lx', '-52px'); hallLi.style.setProperty('--ly', '-30px');
-  hallLi.append(leader(-40, -30), make('span', 'mark dot'), make('span', 'note hall-note', 'Barchinet hall'));
+  // The hall's label leaves its dot down and to the right, over the open square, clear of the project markers.
+  const HALL = [44, 40];
+  const hallLi = make('li', 'note-item hall'); hallLi.setAttribute('aria-hidden', 'true');
+  hallLi.style.setProperty('--lx', HALL[0] + 12 + 'px'); hallLi.style.setProperty('--ly', HALL[1] + 'px');
+  hallLi.append(leader(HALL[0], HALL[1]), make('span', 'mark dot'), make('span', 'note hall-note', 'Barchinet hall'));
   const hallAt = inPicture(hall.x, hall.y, hall.top - 0.6);
   function build(list_) {
     notes.forEach((n) => n.li.remove());
     notes = list_.filter((p) => plots[p.plot]).map(note);
     list.replaceChildren(...notes.map((n) => n.li), hallLi);
-    if (ui.base) checkDensity();
+    if (ui.base) { spread(); checkDensity(); }
     wake();
   }
   function note(p) {
@@ -76,43 +79,79 @@ export function mountCampus(stage, { projects = [], frame, kind = 'button', href
     [el, mark].forEach((n) => { n.addEventListener('pointerenter', on(true)); n.addEventListener('pointerleave', on(false)); });
     el.addEventListener('focus', on(true)); el.addEventListener('blur', on(false));
     li.append(leader(dx, dy), mark, el);
-    return { p, li, el, at: inPicture(pl.x, pl.y, pl.top - 0.35), dx: dx + s * 12, dy, left: s < 0, size: null };
+    // In the markers-only view, a name shown on hover or focus opens toward the middle of the picture.
+    const at = inPicture(pl.x, pl.y, pl.top - 0.35);
+    li.classList.toggle('tip-left', at[0] > 0.5);
+    return { p, li, el, at, dx: dx + s * 12, dy, lead: [dx, dy], left: s < 0, size: null };
   }
 
   // ---- Camera ------------------------------------------------------------------------------------------------
-  // `frame` says where the picture sits: its width, and which point of it goes where on the stage.
-  // The picture always covers the stage, so its edges are never seen.
-  const KB = 1.03; // the drift never scales below this, which leaves room for drift and parallax inside the cover
-  const cover = (W, H, x, y) => {
-    const { w, h } = ui.size;
-    return [Math.min(0, Math.max(w - W, x)), Math.min(0, Math.max(h - H, y))];
-  };
+  // `frame` gives the zoom toward a chosen building, where that building goes on the stage, and whether the stage is
+  // small enough for markers only. The picture itself is always fitted whole into the stage and centred: full width
+  // where the height allows, otherwise as tall as the stage. Only a chosen building zooms in (and crops) until closed.
+  // A position along one axis: inside the stage when the picture is smaller, covering it when larger.
+  const place = (len, size, v) => (size <= len ? Math.min(len - size, Math.max(0, v)) : Math.min(0, Math.max(len - size, v)));
   function layout() {
     const { w, h } = ui.size;
     const f = frame(w, h);
-    const W0 = Math.max(f.width ?? w, w, h * ASPECT);
+    const W0 = Math.min(w, h * ASPECT);
     ui.base = { W: W0, H: W0 / ASPECT, f };
     plate.style.width = W0 + 'px'; plate.style.height = W0 / ASPECT + 'px';
+    stage.parentElement?.style.setProperty('--stage-h', h + 'px');
     ui.compact = !!f.compact;
     stage.classList.toggle('is-compact', ui.compact);
+    spread();
     aim(true);
     checkDensity();
   }
-  // Many projects: when labels would overlap (or there are simply many), show only the numbered markers and
-  // reveal a label on hover, focus or selection.
+  // Markers only (small screens): every marker is a target of at least 44 px. Where two buildings stand closer than
+  // that on the picture, their markers are moved apart by the few pixels needed, so no target covers another.
+  const GAP = 48;
+  function spread() {
+    const b = ui.base;
+    notes.forEach((n) => { n.nudge = [0, 0]; });
+    if (!b || !ui.compact) return;
+    const pts = notes.map((n) => [n.at[0] * b.W, n.at[1] * b.H]);
+    for (let round = 0; round < 30; round += 1) {
+      let moved = false;
+      for (let i = 0; i < notes.length; i += 1) for (let k = i + 1; k < notes.length; k += 1) {
+        const a = pts[i], c = pts[k], dx = c[0] - a[0], dy = c[1] - a[1];
+        const px = GAP - Math.abs(dx), py = GAP - Math.abs(dy);
+        if (px <= 0 || py <= 0) continue;
+        moved = true;
+        // Push apart along the axis that needs the smaller move.
+        if (px <= py) { const m = (px / 2 + 0.1) * (Math.sign(dx) || 1); a[0] -= m; c[0] += m; } else { const m = (py / 2 + 0.1) * (Math.sign(dy) || 1); a[1] -= m; c[1] += m; }
+      }
+      if (!moved) break;
+    }
+    notes.forEach((n, i) => { n.nudge = [pts[i][0] - n.at[0] * b.W, pts[i][1] - n.at[1] * b.H]; });
+  }
+  // Labels are shown only when every one of them fits: inside the picture's frame with room for the drift, clear of
+  // each other, of the other markers, of the leaders and of the hall's label. Otherwise (or with many projects) only
+  // the numbered markers are shown and a label appears on hover, focus or selection.
   const DENSE_AT = 10;
+  const ROOM = 10; // labels keep this much clear of the picture's edge
   function checkDensity() {
     const b = ui.base; if (!b || ui.compact) { stage.classList.remove('is-dense'); return; }
     let dense = notes.length >= DENSE_AT;
-    if (!dense) {
+    if (!dense && notes.length) {
       stage.classList.remove('is-dense');
-      const boxes = notes.map((n) => {
-        const x = b.f.at[0] + (n.at[0] - b.f.point[0]) * b.W, y = b.f.at[1] + (n.at[1] - b.f.point[1]) * b.H;
-        const lx = x + parseFloat(n.li.style.getPropertyValue('--lx')), ly = y + parseFloat(n.li.style.getPropertyValue('--ly'));
-        const wd = n.el.offsetWidth + 8, ht = n.el.offsetHeight + 6, left = n.li.classList.contains('to-left') ? lx - wd : lx;
-        return { l: left, r: left + wd, t: ly - ht / 2, b: ly + ht / 2 };
-      });
-      dense = boxes.some((a, i) => boxes.some((c, k) => k > i && a.l < c.r && c.l < a.r && a.t < c.b && c.t < a.b));
+      const { w, h } = ui.size, X = (w - b.W) / 2, Y = (h - b.H) / 2;
+      const spot = ([fx, fy]) => [X + fx * b.W, Y + fy * b.H];
+      const label = ([x, y], dx, dy, el, left) => {
+        const wd = el.offsetWidth + 6, ht = el.offsetHeight + 6, lx = x + dx, ly = y + dy, l = left ? lx - wd : lx;
+        return { l, r: l + wd, t: ly - ht / 2, b: ly + ht / 2 };
+      };
+      const labels = notes.map((n) => label(spot(n.at), n.dx, n.dy, n.el, n.left));
+      const hallBox = label(spot(hallAt), HALL[0] + 12, HALL[1], hallLi.querySelector('.hall-note'), false);
+      const marks = notes.map((n) => { const [x, y] = spot(n.at); return { l: x - 15, r: x + 15, t: y - 15, b: y + 15 }; });
+      const hit = (a, c) => a.l < c.r && c.l < a.r && a.t < c.b && c.t < a.b;
+      // Points along each leader, from the marker to the label.
+      const leads = notes.map((n) => { const [x, y] = spot(n.at); return [0.35, 0.55, 0.75, 0.95].map((k) => ({ l: x + n.lead[0] * k - 1, r: x + n.lead[0] * k + 1, t: y + n.lead[1] * k - 1, b: y + n.lead[1] * k + 1 })); });
+      const inside = (a) => a.l >= X + ROOM && a.r <= X + b.W - ROOM && a.t >= Y + ROOM && a.b <= Y + b.H - ROOM;
+      dense = [...labels, hallBox].some((a) => !inside(a))
+        || labels.some((a, i) => labels.some((c, k) => k > i && hit(a, c)) || hit(a, hallBox)
+          || marks.some((m, k) => k !== i && hit(a, m)) || leads.some((pts, k) => k !== i && pts.some((pt) => hit(a, pt))));
     }
     stage.classList.toggle('is-dense', dense);
     notes.forEach((n) => { n.size = null; });
@@ -121,14 +160,14 @@ export function mountCampus(stage, { projects = [], frame, kind = 'button', href
   function aim(jump) {
     const b = ui.base; if (!b) return;
     const { f } = b;
-    let s = 1, pt = f.point, at = f.at;
+    let s = 1, pt = [0.5, 0.5], at = [ui.size.w / 2, ui.size.h / 2];
     if (ui.selected && plots[ui.selected.plot]) {
       const pl = plots[ui.selected.plot];
       const [gx, gy] = inPicture(pl.x, pl.y, 0.2), [, ty] = inPicture(pl.x, pl.y, pl.top);
-      s = f.zoom ?? 1.4; pt = [gx, (gy + ty) / 2]; at = f.selAt ?? f.at;
+      s = f.zoom ?? 1.4; pt = [gx, (gy + ty) / 2]; at = f.selAt ?? at;
     }
-    const W = b.W * s, H = b.H * s;
-    const [x, y] = cover(W, H, at[0] - pt[0] * W, at[1] - pt[1] * H);
+    const W = b.W * s, H = b.H * s, { w, h } = ui.size;
+    const x = ui.selected ? place(w, W, at[0] - pt[0] * W) : (w - W) / 2, y = ui.selected ? place(h, H, at[1] - pt[1] * H) : (h - H) / 2;
     cam.tx = x; cam.ty = y; cam.ts = s;
     if (jump || !ui.motion) { cam.x = x; cam.y = y; cam.s = s; }
     wake();
@@ -138,23 +177,26 @@ export function mountCampus(stage, { projects = [], frame, kind = 'button', href
   const running = () => ui.motion && ui.visible && !document.hidden;
   function tick(now) {
     raf = 0;
-    const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now;
+    const dt = Math.min(0.1, (now - (last || now)) / 1000); last = now;
     const k = ui.motion ? 1 - Math.exp(-dt / 0.42) : 1, kp = ui.motion ? 1 - Math.exp(-dt / 0.6) : 1;
     cam.x += (cam.tx - cam.x) * k; cam.y += (cam.ty - cam.y) * k; cam.s += (cam.ts - cam.s) * k;
     cam.px += (cam.tpx - cam.px) * kp; cam.py += (cam.tpy - cam.py) * kp;
-    // Ken Burns: a slow breath of scale and a slower pan, about a minute per cycle.
+    // A slow drift, about a minute and a half per cycle, and the pointer parallax. The picture keeps its fitted size;
+    // they move it only within the spare room beside it (where the stage is wider or taller than the picture, at most
+    // 9 px across and 6 px up and down), so the whole campus always stays in view. Without spare room it stays still.
     const t = ui.motion ? (now - t0) / 1000 : 0;
     const quiet = ui.selected ? 0.35 : 1;
-    const kb = KB + (ui.motion ? 0.035 * quiet * (1 - Math.cos(t * 2 * Math.PI / 64)) / 2 : 0);
-    const panX = ui.motion ? Math.sin(t * 2 * Math.PI / 90) * 7 * quiet : 0, panY = ui.motion ? Math.sin(t * 2 * Math.PI / 76) * 3 * quiet : 0;
     const { w, h } = ui.size, b = ui.base; if (!b) return;
-    const X = w / 2 + (cam.x - w / 2) * kb + panX + cam.px * 9, Y = h / 2 + (cam.y - h / 2) * kb + panY + cam.py * 5, S = cam.s * kb;
+    const S = cam.s;
+    const roomX = Math.min(9, Math.max(0, w - S * b.W) / 2), roomY = Math.min(6, Math.max(0, h - S * b.H) / 2);
+    const driftX = ui.motion ? 0.6 * Math.sin(t * 2 * Math.PI / 90) * quiet + 0.4 * cam.px : 0, driftY = ui.motion ? 0.6 * Math.sin(t * 2 * Math.PI / 76) * quiet + 0.4 * cam.py : 0;
+    const X = place(w, S * b.W, cam.x + driftX * roomX), Y = place(h, S * b.H, cam.y + driftY * roomY);
     plate.style.transform = 'translate3d(' + X.toFixed(2) + 'px,' + Y.toFixed(2) + 'px,0) scale(' + S.toFixed(5) + ')';
-    const put = (li, [fx, fy]) => { const x = X + S * fx * b.W, y = Y + S * fy * b.H; li.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; return [x, y]; };
+    const put = (li, [fx, fy], [nx, ny] = [0, 0]) => { const x = X + S * fx * b.W + nx, y = Y + S * fy * b.H + ny; li.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)'; return [x, y]; };
     const blocks = occluders();
     const labelled = !ui.compact && !stage.classList.contains('is-dense');
     notes.forEach((n) => {
-      const [x, y] = put(n.li, n.at);
+      const [x, y] = put(n.li, n.at, n.nudge);
       // Hide a callout (and take it out of the tab order) when its marker or label would sit under a panel or
       // off the photograph. The chosen project always stays.
       const boxes = [{ l: x - 14, r: x + 14, t: y - 14, b: y + 14 }];
@@ -168,12 +210,13 @@ export function mountCampus(stage, { projects = [], frame, kind = 'button', href
       n.li.classList.toggle('is-away', out);
     });
     put(hallLi, hallAt);
-    { const [hx, hy] = hallAt; const x = X + S * hx * b.W, y = Y + S * hy * b.H; hallLi.classList.toggle('is-away', !!ui.selected || ui.compact || stage.classList.contains('is-dense') || blocks.some((r) => x - 170 < r.right && x > r.left && y - 50 < r.bottom && y > r.top)); }
+    { const [hx, hy] = hallAt; const x = X + S * hx * b.W, y = Y + S * hy * b.H; hallLi.classList.toggle('is-away', !!ui.selected || ui.compact || stage.classList.contains('is-dense') || blocks.some((r) => x < r.right && x + 190 > r.left && y < r.bottom && y + 60 > r.top)); }
     const settling = Math.abs(cam.tx - cam.x) + Math.abs(cam.ty - cam.y) + Math.abs(cam.ts - cam.s) * 500 + Math.abs(cam.tpx - cam.px) * 10 + Math.abs(cam.tpy - cam.py) * 10 > 0.2;
     if (settling || running()) raf = requestAnimationFrame(tick); else last = 0;
   }
   function wake() { if (!raf) raf = requestAnimationFrame(tick); }
   new ResizeObserver(([e]) => { ui.size = { w: e.contentRect.width, h: e.contentRect.height }; layout(); }).observe(stage);
+  document.fonts?.ready.then(() => { if (ui.base) checkDensity(); });
   new IntersectionObserver(([e]) => { ui.visible = e.isIntersecting; wake(); }).observe(stage);
   document.addEventListener('visibilitychange', wake);
   stage.addEventListener('pointermove', (event) => {

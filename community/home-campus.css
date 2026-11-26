@@ -32,8 +32,12 @@
 .cc-home .mark {display: inline-grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--night); border-radius: 50%; background: var(--paper); color: var(--night); font: 400 .9375rem/1 var(--serif); font-variant-numeric: lining-nums; flex: none;}
 .cc-home {background: var(--paper);}
 .cc-home .plate-wrap {position: relative;}
-.cc-home .stage {--stage-h: clamp(600px, calc(100svh - 104px), 1080px); position: relative; height: var(--stage-h); overflow: hidden; isolation: isolate; background: #0f2a2f; touch-action: pan-y;}
+.cc-home .stage {position: relative; display: grid; width: 100%; aspect-ratio: 16 / 10; max-height: var(--fit-h); overflow: clip; isolation: isolate; background: #31473c; touch-action: pan-y;}
 .cc-home .plate {position: absolute; inset: 0; overflow: hidden;}
+.cc-home .plate::before {content: ""; position: absolute; inset: -48px; background: url('img/campus-hero-1200.jpg') center / cover no-repeat; filter: blur(28px) saturate(.8) brightness(.78); transition: filter 1.4s var(--ease);}
+.cc-home [data-light="morning"] .plate::before {filter: blur(28px) saturate(.7) brightness(.82) sepia(.16);}
+.cc-home [data-light="sunset"] .plate::before {filter: blur(28px) saturate(.9) brightness(.7) sepia(.32) hue-rotate(-14deg);}
+.cc-home [data-light="night"] .plate::before {filter: blur(28px) saturate(.5) brightness(.36);}
 .cc-home .plate-inner {position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform;}
 .cc-home .plate-inner > img {width: 100%; height: 100%; transition: filter 1.4s var(--ease);}
 .cc-home .grade {position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.4s var(--ease);}
@@ -72,7 +76,7 @@
 .cc-home .controls {display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); background: var(--night); color: var(--paper); font-size: var(--t-xs);}
 .cc-home .light, .cc-home .bar-tools {display: flex; flex-wrap: wrap; align-items: center;}
 .cc-home .light-label {margin-right: var(--s3); color: var(--on-dark);}
-.cc-home .seg {min-height: 36px; padding: 0 12px; border: 1px solid rgba(247, 246, 240, .35); border-radius: 0; background: transparent; color: var(--paper); font-size: var(--t-xs); font-weight: 500; cursor: pointer;}
+.cc-home .seg {min-height: 44px; padding: 0 12px; border: 1px solid rgba(247, 246, 240, .35); border-radius: 0; background: transparent; color: var(--paper); font-size: var(--t-xs); font-weight: 500; cursor: pointer;}
 .cc-home .light .seg + .seg {margin-left: -1px;}
 .cc-home .seg:hover {border-color: var(--paper); position: relative;}
 .cc-home .seg[aria-pressed="true"] {background: var(--paper); color: var(--night); border-color: var(--paper); position: relative;}
@@ -93,17 +97,18 @@
 .cc-home .key button[aria-pressed="true"] .mark {background: var(--night); color: var(--paper);}
 .cc-home .key button[aria-pressed="true"]::after {content: "Open"; margin-left: auto; font-size: .75rem; color: var(--muted); font-weight: 400;}
 @media (min-width: 1000px) {
-.cc-home .title-block {position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--s7); align-items: end; padding: 18px var(--gutter) 20px; border-top: 1px solid var(--night);}
+.cc-home .plate-wrap {display: flex; flex-direction: column;}
+.cc-home .title-block {grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--s7); align-items: end; padding: 22px var(--gutter) 26px;}
 .cc-home .tb-meta {grid-column: 1 / -1;}
 .cc-home .tb-foot {grid-template-columns: 1fr; justify-items: start;}
-.cc-home .controls {position: absolute; left: var(--gutter); top: 20px; z-index: 3; padding: 6px 6px 6px 14px;}
+.cc-home .controls {justify-content: space-between; min-height: 56px; padding: 6px var(--gutter);}
 }
 @media (max-width: 999px) {
 .cc-home, .cc-home .plate-wrap {display: flex; flex-direction: column;}
 .cc-home .plate-wrap {display: contents;}
 .cc-home .title-block {display: contents;}
 .cc-home .tb-meta {order: 1; margin: var(--s4) var(--gutter) var(--s4);}
-.cc-home .stage {order: 3; --stage-h: clamp(420px, 66vw, 660px);}
+.cc-home .stage {order: 3;}
 .cc-home .controls {order: 4; padding: 10px var(--gutter);}
 .cc-home .key {order: 6;}
 .cc-home .tb-foot {order: 8; margin: var(--s6) var(--gutter) 0;}
@@ -112,8 +117,7 @@
 }
 @media (max-width: 699px) {
 .cc-home .key {display: block;}
-.cc-home .stage {--stage-h: 97.6vw;}
-.cc-home .seg {min-height: 44px; padding: 0 10px;}
+.cc-home .seg {padding: 0 10px;}
 .cc-home .light-label {width: 100%; margin-bottom: 4px;}
 }
 @media (max-width: 360px) {
@@ -128,11 +132,12 @@
 .cc-home .note-item > .mark {min-width: 22px; width: auto; border-radius: 11px;}
 .cc-home .is-compact .note-item > .mark {min-width: 28px; border-radius: 14px;}
 .cc-home .is-dense .lead {display: none;}
-.cc-home .is-dense .note {left: 0; top: 0; width: 36px; height: 36px; min-height: 0; padding: 0; transform: translate(-50%, -50%); border: 0; background: transparent;}
+.cc-home .is-dense .note {left: 0; top: 0; width: 44px; height: 44px; min-height: 0; padding: 0; transform: translate(-50%, -50%); border: 0; background: transparent;}
 .cc-home .is-dense .note-item.is-on > .note, .cc-home .is-dense .note-item.is-chosen > .note {background: transparent;}
-.cc-home .is-dense .note-name {position: absolute; left: 30px; top: 50%; transform: translateY(-50%); padding: 7px 10px; border: 1px solid var(--night); background: var(--paper); color: var(--night); white-space: nowrap; opacity: 0; clip-path: inset(50%);}
+.cc-home .is-dense .note-name {position: absolute; left: 34px; top: 50%; transform: translateY(-50%); padding: 7px 10px; border: 1px solid var(--night); background: var(--paper); color: var(--night); white-space: nowrap; opacity: 0; clip-path: inset(50%);}
 .cc-home .is-dense .note-item.is-on .note-name, .cc-home .is-dense .note-item.is-chosen .note-name {opacity: 1; clip-path: none;}
 .cc-home .is-dense .note-item.is-chosen .note-name {background: var(--night); color: var(--paper);}
+.cc-home .is-dense .tip-left .note-name {left: auto; right: 34px;}
 .cc-home .is-dense .note-item {z-index: 0;}
 .cc-home .is-dense .note-item.is-on, .cc-home .is-dense .note-item.is-chosen {z-index: 2;}
 .cc-home .is-compact .note-name {clip-path: none; opacity: 1;}
@@ -144,29 +149,21 @@
 .cc-home .status {left: auto; right: 20px; top: 124px; bottom: auto; transform: none;}
 }
 .cc-home .is-compact .note {width: 46px; height: 46px;}
-.cc-home .stage-state {position: absolute; left: 50%; top: 44%; z-index: 3; transform: translate(-50%, -50%); width: min(34rem, calc(100% - 32px));}
+.cc-home .stage-state {position: relative; z-index: 3; grid-area: 1 / 1; place-self: center; width: min(34rem, calc(100% - 32px)); margin-block: 16px;}
 .cc-home .stage-state:empty {display: none;}
-@media (min-width: 1000px) {
-.cc-home .stage-state {top: 40%;}
-}
-@media (max-width: 699px) {
-.cc-home .stage-state {top: 50%;}
-}
 .cc-home .key button span:last-child {overflow-wrap: anywhere;}
-@media (min-width: 1000px) {
-.cc-home .has-sheet .title-block {padding-right: calc(min(420px, max(360px, 30vw)) + var(--s5));}
-}
 
 /* ---- Home page only (from the approved home-section design) ----------------------------------------------- */
-.cc-home { position: relative; background: var(--paper); color: var(--ink); font: 400 var(--t-m)/1.6 var(--sans); border-top: 1px solid var(--night); }
+/* The picture fits whole: as wide as the section, or as tall as a screen leaves room for with its control strip. */
+.cc-home { --fit-h: max(200px, calc(100svh - 24px)); position: relative; background: var(--paper); color: var(--ink); font: 400 var(--t-m)/1.6 var(--sans); border-top: 1px solid var(--night); }
 .cc-home .title-block h2 { font: 400 clamp(2.1rem, 1rem + 1.9vw, 3rem)/1 var(--serif); letter-spacing: -.015em; color: var(--night); text-wrap: balance; margin: 0; }
-.cc-home .stage { --stage-h: clamp(600px, 88svh, 1000px); }
+@media (min-width: 1000px) { .cc-home { --fit-h: max(240px, calc(100svh - 56px - 24px)); } }
 .cc-home .pf-main { display: grid; gap: var(--s5); }
 .cc-home .steps-mini { display: grid; gap: 0; max-width: 38rem; margin: 0; padding: 0; list-style: none; counter-reset: s; font-size: var(--t-s); color: var(--ink); border-bottom: 1px solid var(--rule); }
 .cc-home .steps-mini li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: var(--s2); align-items: baseline; padding: 8px 0; border-top: 1px solid var(--rule); }
 .cc-home .steps-mini li::before { content: counter(s); font: 400 1.25rem/1 var(--serif); color: var(--bronze); }
 .cc-home .key a { display: flex; align-items: center; gap: var(--s3); min-height: 52px; border-bottom: 1px solid var(--rule); color: var(--night); font-size: var(--t-s); font-weight: 500; text-decoration: none; }
-.cc-home .stage-state { position: absolute; left: 50%; top: 40%; z-index: 3; transform: translate(-50%, -50%); width: min(30rem, calc(100% - 32px)); }
+.cc-home .stage-state { width: min(30rem, calc(100% - 32px)); }
 .cc-home .stage-state:empty { display: none; }
 .cc-home .cc-state { display: grid; gap: var(--s2); padding: var(--s5); border: 1px solid var(--night); background: var(--paper); color: var(--ink); }
 .cc-home .cc-state p { font-size: var(--t-s); margin: 0; }
@@ -175,11 +172,8 @@
 .cc-home .status { top: auto; }
 @media (max-width: 999px) {
   .cc-home .title-block h2 { order: 2; margin: 0 var(--gutter) var(--s5); }
-  .cc-home .stage { --stage-h: clamp(420px, 66vw, 660px); }
 }
 @media (max-width: 699px) {
-  .cc-home .stage { --stage-h: 97.6vw; }
-  .cc-home .stage-state { top: 50%; }
   .cc-home .cc-state { padding: var(--s4); }
   .cc-home .cc-state strong { font-size: var(--t-l); }
   .cc-home .cc-state p { font-size: var(--t-xs); }
@@ -188,3 +182,6 @@
 .cc-home .text-link { font-size: var(--t-m); }
 .cc-home #cc-motion[aria-pressed="true"] { background: transparent; color: var(--paper); border-color: rgba(247, 246, 240, .35); }
 .cc-home #cc-motion[aria-pressed="true"]:hover { border-color: var(--paper); }
+/* Touch screens: the labels on the picture are 44 px tall targets too. */
+@media (pointer: coarse) { .cc-home .note { min-height: 44px; } }
+html:not(.moving) .cc-home .plate::before { transition: none; }

@@ -12,11 +12,11 @@ export const heroImage = { src: '/community/img/campus-hero.jpg', small: '/commu
 export const plots = [
   { x: -5, y: 5, top: 3.6, lead: [44, -10], building: 'a white building that steps back in terraces' },
   { x: 0, y: 5.4, top: 1.8, lead: [40, -46], building: 'an L-shaped brick block around a yard' },
-  { x: 5, y: 5, top: 3.4, building: 'a pair of dark towers with balconies' },
+  { x: 5, y: 5, top: 3.4, lead: [40, -14], building: 'a pair of dark towers with balconies' },
   { x: -5.4, y: 0, top: 1.6, lead: [-34, -46], building: 'a cluster of small pitched-roof houses' },
   { x: 5.4, y: 0, top: 2.7, lead: [46, 30], building: 'a glass dome on a round base' },
   { x: -5, y: -5, top: 2.2, lead: [-36, -50], building: 'a pale block with tall fins' },
-  { x: 0, y: -5.4, top: 2.9, building: 'a round tower with bronze bands' },
+  { x: 0, y: -5.4, top: 2.9, lead: [-40, 40], building: 'a round tower with bronze bands' },
   { x: 5, y: -5, top: 1.6, lead: [-44, 34], building: 'a low building with a planted roof' },
 ];
 export const hall = { x: 0, y: 0, top: 3.0 };

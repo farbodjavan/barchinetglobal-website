@@ -87,18 +87,26 @@ a { color: inherit; }
 /* Marker: the numbered bubble used on the photograph, the key plan, the key and the joining steps. */
 .mark { display: inline-grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--night); border-radius: 50%; background: var(--paper); color: var(--night); font: 400 .9375rem/1 var(--serif); font-variant-numeric: lining-nums; flex: none; }
 
-/* ---- Opening: the photograph, full-bleed, nearly the whole first screen ------------------------------------- */
-.hero { background: var(--paper); }
+/* ---- Opening: the photograph, whole, as large as the first screen allows ------------------------------------ */
+/* The stage keeps the picture's own 16:10 shape: full width where the height allows, otherwise as tall as the
+   screen leaves room for (under the header, above the view controls), with the picture centred. The picture is
+   never cropped; where the stage is wider than the picture, a soft, dimmed continuation of its own edges fills
+   the sides. --fit-h is the most height the picture may take. */
+.hero { --fit-h: max(200px, calc(100svh - 24px)); background: var(--paper); }
 .plate-wrap { position: relative; }
-.stage { --stage-h: clamp(600px, calc(100svh - 104px), 1080px); position: relative; height: var(--stage-h); overflow: hidden; isolation: isolate; background: #0f2a2f; touch-action: pan-y; }
+.stage { position: relative; display: grid; width: 100%; aspect-ratio: 16 / 10; max-height: var(--fit-h); overflow: clip; isolation: isolate; background: #31473c; touch-action: pan-y; }
 .plate { position: absolute; inset: 0; overflow: hidden; }
+.plate::before { content: ""; position: absolute; inset: -48px; background: url('img/campus-hero-1200.jpg') center / cover no-repeat; filter: blur(28px) saturate(.8) brightness(.78); transition: filter 1.4s var(--ease); }
+[data-light="morning"] .plate::before { filter: blur(28px) saturate(.7) brightness(.82) sepia(.16); }
+[data-light="sunset"] .plate::before { filter: blur(28px) saturate(.9) brightness(.7) sepia(.32) hue-rotate(-14deg); }
+[data-light="night"] .plate::before { filter: blur(28px) saturate(.5) brightness(.36); }
 .plate-inner { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
 .plate-inner > img { width: 100%; height: 100%; transition: filter 1.4s var(--ease); }
 .grade { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.4s var(--ease); }
 .grade::after { content: ""; position: absolute; inset: 0; background: #fff; mix-blend-mode: soft-light; opacity: 0; }
 .moving .grade::after { animation: exposure 22s ease-in-out infinite alternate; }
 @keyframes exposure { from { opacity: 0; } to { opacity: .07; } }
-:not(.moving) > body .plate-inner > img, :not(.moving) > body .grade { transition: none; }
+:not(.moving) > body .plate-inner > img, :not(.moving) > body .grade, :not(.moving) > body .plate::before { transition: none; }
 
 /* Time of day as a grade over the daytime render (not final renders). */
 [data-light="morning"] .plate-inner > img { filter: brightness(1.04) contrast(.95) saturate(.88) sepia(.16) hue-rotate(-6deg); }
@@ -144,7 +152,7 @@ a { color: inherit; }
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); background: var(--night); color: var(--paper); font-size: var(--t-xs); }
 .light, .bar-tools { display: flex; flex-wrap: wrap; align-items: center; }
 .light-label { margin-right: var(--s3); color: var(--on-dark); }
-.seg { min-height: 36px; padding: 0 12px; border: 1px solid rgba(247, 246, 240, .35); border-radius: 0; background: transparent; color: var(--paper); font-size: var(--t-xs); font-weight: 500; cursor: pointer; }
+.seg { min-height: 44px; padding: 0 12px; border: 1px solid rgba(247, 246, 240, .35); border-radius: 0; background: transparent; color: var(--paper); font-size: var(--t-xs); font-weight: 500; cursor: pointer; }
 .light .seg + .seg { margin-left: -1px; }
 .seg:hover { border-color: var(--paper); position: relative; }
 .seg[aria-pressed="true"] { background: var(--paper); color: var(--night); border-color: var(--paper); position: relative; }
@@ -199,15 +207,15 @@ a { color: inherit; }
 .is-list #stage-note { display: none; }
 
 @media (min-width: 1000px) {
-  .title-block { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--s7); align-items: end; padding: 18px var(--gutter) 20px; border-top: 1px solid var(--night); }
+  /* The picture and its control strip fill the first screen under the header; the title band follows at once. */
+  .hero { --fit-h: max(240px, calc(100svh - 72px - 56px)); }
+  .plate-wrap { display: flex; flex-direction: column; }
+  .title-block { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: var(--s7); align-items: end; padding: 22px var(--gutter) 26px; }
   .tb-meta { grid-column: 1 / -1; }
   .tb-foot { grid-template-columns: 1fr; justify-items: start; }
-  .controls { position: absolute; left: var(--gutter); top: 20px; z-index: 3; padding: 6px 6px 6px 14px; }
-  .is-list .title-block, .is-list .controls { position: static; }
-  .is-list .title-block { border-top: 0; }
-  .is-list .controls { display: inline-flex; margin: 0 var(--gutter); }
-  .sheet { position: absolute; top: 0; right: 0; height: var(--stage-h); z-index: 4; width: min(420px, max(360px, 30vw)); overflow-y: auto; border-top: 0; border-left: 1px solid var(--night); overscroll-behavior: contain; }
-  .sheet { --stage-h: clamp(600px, calc(100svh - 104px), 1080px); }
+  .controls { justify-content: space-between; min-height: 56px; padding: 6px var(--gutter); }
+  .is-list .controls { display: inline-flex; align-self: flex-start; min-height: 0; margin: 0 var(--gutter); padding: 6px 6px 6px 14px; }
+  .sheet { position: absolute; top: 0; right: 0; height: var(--stage-h, var(--fit-h)); z-index: 4; width: min(420px, max(360px, 30vw)); overflow-y: auto; border-top: 0; border-left: 1px solid var(--night); overscroll-behavior: contain; }
   .sheet-body { padding: var(--s5) var(--s6) var(--s6); }
 }
 @media (max-width: 999px) {
@@ -216,7 +224,7 @@ a { color: inherit; }
   .title-block { display: contents; }
   .tb-meta { order: 1; margin: var(--s4) var(--gutter) var(--s4); }
   .title-block h1 { order: 2; margin: 0 var(--gutter) var(--s5); font-size: clamp(2.25rem, 1.4rem + 3.4vw, 3.25rem); }
-  .stage { order: 3; --stage-h: clamp(420px, 66vw, 660px); }
+  .stage { order: 3; }
   .controls { order: 4; padding: 10px var(--gutter); }
   .campus-list { order: 5; grid-template-columns: 1fr 1fr; }
   .key { order: 6; }
@@ -227,9 +235,8 @@ a { color: inherit; }
 }
 @media (max-width: 699px) {
   .key { display: block; }
-  .stage { --stage-h: 97.6vw; }
   .campus-list { grid-template-columns: 1fr; }
-  .seg { min-height: 44px; padding: 0 10px; }
+  .seg { padding: 0 10px; }
   .light-label { width: 100%; margin-bottom: 4px; }
   .facts { grid-template-columns: 1fr; }
   .facts > div.meta { grid-column: 1 / -1; }
@@ -397,11 +404,12 @@ a { color: inherit; }
 .p-more { margin-top: var(--s5); }
 /* Dense: markers only; a label appears on hover, focus or selection. */
 .is-dense .lead { display: none; }
-.is-dense .note { left: 0; top: 0; width: 36px; height: 36px; min-height: 0; padding: 0; transform: translate(-50%, -50%); border: 0; background: transparent; }
+.is-dense .note { left: 0; top: 0; width: 44px; height: 44px; min-height: 0; padding: 0; transform: translate(-50%, -50%); border: 0; background: transparent; }
 .is-dense .note-item.is-on > .note, .is-dense .note-item.is-chosen > .note { background: transparent; }
-.is-dense .note-name { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); padding: 7px 10px; border: 1px solid var(--night); background: var(--paper); color: var(--night); white-space: nowrap; opacity: 0; clip-path: inset(50%); }
+.is-dense .note-name { position: absolute; left: 34px; top: 50%; transform: translateY(-50%); padding: 7px 10px; border: 1px solid var(--night); background: var(--paper); color: var(--night); white-space: nowrap; opacity: 0; clip-path: inset(50%); }
 .is-dense .note-item.is-on .note-name, .is-dense .note-item.is-chosen .note-name { opacity: 1; clip-path: none; }
 .is-dense .note-item.is-chosen .note-name { background: var(--night); color: var(--paper); }
+.is-dense .tip-left .note-name { left: auto; right: 34px; }
 .is-dense .note-item { z-index: 0; } .is-dense .note-item.is-on, .is-dense .note-item.is-chosen { z-index: 2; }
 .is-compact .note-name { clip-path: none; opacity: 1; }
 .note-item > .mark.dot { min-width: 8px; padding: 0; border-radius: 50%; }
@@ -416,7 +424,7 @@ a { color: inherit; }
 
 /* ---- Live data: loading, no public projects yet, and a failed load --------------------------------------------- */
 /* Over the photograph: a plain panel in the middle of the campus. With no projects the picture stays, with no markers. */
-.stage-state { position: absolute; left: 50%; top: 44%; z-index: 3; transform: translate(-50%, -50%); width: min(34rem, calc(100% - 32px)); }
+.stage-state { position: relative; z-index: 3; grid-area: 1 / 1; place-self: center; width: min(34rem, calc(100% - 32px)); margin-block: 16px; }
 .stage-state:empty { display: none; }
 .ss-loading { display: inline-block; padding: 10px 16px; background: var(--night); color: var(--paper); font-size: var(--t-s); }
 .state-card { display: grid; gap: var(--s3); padding: var(--s5) var(--s5) var(--s5); border: 1px solid var(--night); background: var(--paper); color: var(--ink); }
@@ -431,9 +439,7 @@ a { color: inherit; }
 .is-empty #stage-note, .is-error #stage-note, .is-empty .controls #list-toggle, .is-error .controls #list-toggle { display: none; }
 .carry .mark[hidden] { display: none; }
 .join-error { font-size: var(--t-s); color: var(--night); }
-@media (min-width: 1000px) { .stage-state { top: 40%; } }
 @media (max-width: 699px) {
-  .stage-state { top: 50%; }
   .state-card { padding: var(--s4); gap: var(--s2); }
   .state-card h2, .state-card h3 { font-size: var(--t-l); }
   .stage-state .state-card p { font-size: var(--t-xs); }
@@ -447,10 +453,11 @@ a { color: inherit; }
 /* Project text comes from the owner's settings: long words wrap instead of widening the page. */
 .p-body h3, .sheet h2, .campus-list h2, .facts dd, .join h2, .key button span:last-child, .p-caption b { overflow-wrap: anywhere; }
 .p-caption b { white-space: pre-wrap; }
-/* With a project sheet open on a wide screen, the title band keeps its text and actions clear of the sheet. */
-@media (min-width: 1000px) { .has-sheet .title-block { padding-right: calc(min(420px, max(360px, 30vw)) + var(--s5)); } }
 
 /* A project that is on the campus but not open to join yet, and a project waiting for its building. */
 .join-closed { display: inline-flex; align-items: center; gap: var(--s2); justify-self: start; font-size: var(--t-s); font-weight: 600; color: var(--ink); }
 .join-closed::before { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--muted); flex: none; }
 .plot-note { font-size: var(--t-xs); color: var(--muted); letter-spacing: .01em; }
+
+/* Touch screens: the labels on the picture are 44 px tall targets too. */
+@media (pointer: coarse) { .note { min-height: 44px; } }

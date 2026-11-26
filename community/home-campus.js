@@ -8,22 +8,13 @@ const $ = (id) => document.getElementById(id);
 const make = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
 const section = $('community-section');
 if (section) {
-  const wide = matchMedia('(min-width: 1000px)');
-  const stage = $('cc-stage'), titleBand = section.querySelector('.title-block');
+  const stage = $('cc-stage');
   const status = statusWriter('cc-status');
   const hrefFor = (p) => '/community/#' + anchorFor(p);
   const campus = mountCampus(stage, {
     projects: [], kind: 'link', hrefFor,
-    frame(w, h) {
-      if (wide.matches) { const free = h - titleBand.offsetHeight; return { width: (free - 30) / 0.67 * 1.6, point: [0.5, 0.13], at: [w / 2, 18] }; }
-      if (w < 700) return { width: w / 0.64, point: [0.5, 0.5], at: [w / 2, h / 2], compact: true };
-      return { width: w * 1.08, point: [0.5, 0.47], at: [w / 2, h / 2] };
-    },
-    occluders: () => {
-      if (!wide.matches) return [];
-      const s = stage.getBoundingClientRect();
-      return [titleBand, section.querySelector('.controls')].map((el) => { const r = el.getBoundingClientRect(); return { left: r.left - s.left, right: r.right - s.left, top: r.top - s.top, bottom: r.bottom - s.top }; });
-    },
+    // The picture is fitted whole by the stage; on small stages only the numbered markers are shown.
+    frame: (w) => ({ compact: w < 700 }),
     onStatus: (text) => status(text),
   });
   initMotion($('cc-motion'), (on) => campus.setMotion(on), status);
