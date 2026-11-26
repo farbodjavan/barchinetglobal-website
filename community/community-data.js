@@ -3,6 +3,9 @@
 import { plots } from './campus-data.js';
 
 export const apiPath = '/community/api/projects';
+// The Barchinet Campus page lives on its own host; sign-in, joining and the rest of the site stay on the main host.
+export const mainSite = 'https://barchinetglobal.com';
+export const campusSite = 'https://campus.barchinetglobal.com';
 const idPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const text = (value, max) => (typeof value === 'string' ? value.trim().slice(0, max) : '');
@@ -34,9 +37,10 @@ export async function loadProjects() {
   return projects.map((project, index) => ({ ...project, n: index + 1 }));
 }
 
-// Share links: /community/#project-<slug>. Stable because the slug is kept by the server once made.
+// Share links: https://campus.barchinetglobal.com/#project-<slug>. Stable because the slug is kept by the server once
+// made. (Old links to barchinetglobal.com/community/#project-<slug> are redirected there, and keep the #project-<slug>.)
 export const anchorFor = (project) => 'project-' + project.slug;
-export const shareUrl = (project) => location.origin + '/community/#' + anchorFor(project);
+export const shareUrl = (project) => campusSite + '/#' + anchorFor(project);
 export function slugFromHash(hash) {
   const match = /^#project-([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(hash);
   return match && match[1].length <= 60 ? match[1] : null;
@@ -49,7 +53,7 @@ export function joinDestination(project) {
 }
 export function membershipHref(project, mode) {
   const query = new URLSearchParams({ ...(mode === 'signup' ? { mode: 'signup' } : {}), next: joinDestination(project) });
-  return '/membership?' + query;
+  return mainSite + '/membership?' + query;
 }
 
 // Signed-in, approved members skip the sign-in step. Any failure simply means "show the sign-in choices".

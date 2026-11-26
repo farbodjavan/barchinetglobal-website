@@ -4,7 +4,7 @@
 import { inPicture, plots, daylightNow } from './campus-data.js';
 import { mountCampus, buildingCrop, setCrop } from './campus-stage.js';
 import { initMenu, initMotion, statusWriter } from './site.js';
-import { anchorFor, joinDestination, loadProjects, membershipHref, shareUrl, signedIn, slugFromHash } from './community-data.js';
+import { anchorFor, joinDestination, loadProjects, mainSite, membershipHref, shareUrl, slugFromHash } from './community-data.js';
 
 const $ = (id) => document.getElementById(id);
 const make = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
@@ -14,11 +14,12 @@ const moving = () => document.documentElement.classList.contains('moving');
 const LIGHT_NAMES = { morning: 'Morning', day: 'Day', sunset: 'Sunset', night: 'Night' };
 const status = statusWriter('status');
 const placed = (p) => !!plots[p.plot];
-const communityJoin = '/membership?' + new URLSearchParams({ mode: 'signup', next: joinDestination(null) });
+const communityJoin = mainSite + '/membership?' + new URLSearchParams({ mode: 'signup', next: joinDestination(null) });
 
 let projects = [];
-let member = false;
-const memberCheck = signedIn().then((value) => { member = value; if (value) updateJoinLinks(); return value; });
+// The membership session belongs to the main host and is never sent to this page's host, so this page cannot tell a
+// signed-in member: joining always goes through sign-in on the main site, which sends a member straight on.
+const member = false;
 
 initMenu();
 
@@ -48,7 +49,7 @@ function actions(p) {
   // Open to join: "Join this project" first, the Research Labs page as a quiet link last. Not open yet: the Research
   // Labs page is the main action, and there is no join button.
   const lab = p.lab ? make('a', p.joinable ? 'text-link' : 'btn btn-primary', 'See this project on Research Labs') : null;
-  if (lab) { lab.href = p.lab; lab.setAttribute('aria-label', 'See this project on Research Labs: ' + p.title); }
+  if (lab) { lab.href = mainSite + p.lab; lab.setAttribute('aria-label', 'See this project on Research Labs: ' + p.title); }
   if (p.joinable) {
     const join = make('button', 'btn btn-primary', 'Join this project'); join.type = 'button';
     join.setAttribute('aria-label', 'Join ' + p.title);
@@ -197,11 +198,6 @@ document.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('clic
 let joinOrigin = null;
 const joinCrop = buildingCrop(null, '', { w: 0.26, aspect: 16 / 7 }); $('join-pic').append(joinCrop);
 async function openJoin(p, from) {
-  // A signed-in, approved member goes straight to the project's join panel in the workspace.
-  if (member || await Promise.race([memberCheck, new Promise((resolve) => setTimeout(() => resolve(false), 1500))])) {
-    location.assign(joinDestination(p));
-    return;
-  }
   joinOrigin = from;
   $('join-title').textContent = 'Join ' + p.title;
   setCrop(joinCrop, p.plot, '', { w: 0.26, aspect: 16 / 7 });
@@ -236,9 +232,9 @@ function card({ heading, level = 'h2', text, error = false, retry = false }) {
     again.addEventListener('click', () => { again.disabled = true; void start(); });
     links.append(again);
   }
-  const join = make('a', retry ? 'btn btn-quiet' : 'btn btn-primary', 'Join the community'); join.href = member ? joinDestination(null) : communityJoin;
+  const join = make('a', retry ? 'btn btn-quiet' : 'btn btn-primary', 'Join the community'); join.href = communityJoin;
   join.dataset.joinCommunity = '';
-  const contact = make('a', 'text-link', 'Contact Barchinet'); contact.href = '/about/#contact';
+  const contact = make('a', 'text-link', 'Contact Barchinet'); contact.href = mainSite + '/about/#contact';
   links.append(join, contact);
   box.append(make(level, '', heading), ...text.map((line) => make('p', '', line)), links);
   return box;

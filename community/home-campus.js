@@ -1,8 +1,8 @@
-// The campus section of the home page: the same photograph and callouts as the Community page, as links to each
-// project there. Projects come from the public list; with none yet, the picture stays and says so honestly.
+// The campus section of the home page: the same photograph and callouts as the Barchinet Campus page, as links to each
+// project there (on campus.barchinetglobal.com). Projects come from the public list; with none yet, the picture stays and says so honestly.
 import { mountCampus } from './campus-stage.js';
 import { initMotion, statusWriter } from './site.js';
-import { anchorFor, joinDestination, loadProjects, signedIn } from './community-data.js';
+import { anchorFor, campusSite, joinDestination, loadProjects, signedIn } from './community-data.js';
 
 const $ = (id) => document.getElementById(id);
 const make = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
@@ -10,7 +10,7 @@ const section = $('community-section');
 if (section) {
   const stage = $('cc-stage');
   const status = statusWriter('cc-status');
-  const hrefFor = (p) => '/community/#' + anchorFor(p);
+  const hrefFor = (p) => campusSite + '/#' + anchorFor(p);
   const campus = mountCampus(stage, {
     projects: [], kind: 'link', hrefFor,
     // The picture is fitted whole by the stage; on small stages only the numbered markers are shown.
