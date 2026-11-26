@@ -45,7 +45,7 @@ a { color: inherit; }
 .nav-divider { width: 1px; height: 18px; margin: 0 6px; background: var(--rule); }
 .menu-button { display: none; min-height: 44px; padding: 0 14px; border: 1px solid var(--night); border-radius: 0; background: transparent; cursor: pointer; font-size: .875rem; }
 .menu-lines { display: inline-block; width: 16px; height: 7px; border-block: 1px solid currentColor; }
-@media (max-width: 1180px) {
+@media (max-width: 1300px) {
   .menu-button { display: inline-flex; align-items: center; gap: 10px; }
   .site-header { flex-wrap: wrap; }
   .site-header nav { display: none; flex-basis: 100%; flex-direction: column; align-items: stretch; gap: 0; padding-bottom: var(--s3); }

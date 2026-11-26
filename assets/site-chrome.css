@@ -22,7 +22,7 @@
 /* Main-site header: secondary links sit apart from the primary set. */
 .site-header nav .nav-secondary{color:var(--muted,#52686a)}
 .site-header nav .nav-divider{width:1px;height:18px;background:var(--line,#cbd4cf)}
-@media(max-width:1180px){.site-header nav .nav-divider{display:none}}
+@media(max-width:1300px){.site-header nav .nav-divider{display:none}}
 
 .bgc-footer{margin-top:0;padding:56px max(20px,4%) 34px;background:var(--bgc-dark);color:#d5dfda;font-size:14px;text-align:left}
 .bgc-footer-grid{display:grid;grid-template-columns:minmax(220px,1.5fr) repeat(3,minmax(140px,1fr));gap:36px 40px;max-width:1264px;margin:0 auto}
@@ -37,8 +37,8 @@
 @media(max-width:820px){.bgc-footer{padding-top:40px}.bgc-footer-grid{grid-template-columns:1fr 1fr;gap:30px 24px}.bgc-footer-brand{grid-column:1/-1}.bgc-footer li a{min-height:44px}}
 @media print{.bgc-bar,.bgc-footer{display:none}}
 .site-header nav a{white-space:nowrap}
-/* Nine destinations need the menu button earlier than the original 899px breakpoint. */
-@media(max-width:1180px){
+/* Nine destinations (with "Barchinet Campus") need the menu button earlier than the original 899px breakpoint. */
+@media(max-width:1300px){
   .site-header{flex-wrap:wrap}
   .site-header .menu-button{display:block;min-height:44px;background:transparent;border:1px solid #a6b9b0;border-radius:4px;padding:9px 13px;font-size:13px;color:var(--ink,#173337)}
   .site-header nav{display:none;width:100%;padding:8px 0 14px;gap:0}
