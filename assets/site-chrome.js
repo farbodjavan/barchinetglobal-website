@@ -1,6 +1,7 @@
 /* Shared Barchinet Global chrome. No tracking and no storage. It asks the site only two things: whether the visitor is
-   signed in (/membership/status, the same check the sign-in page makes), so the header can say "My workspace" instead
-   of "Sign in", and, on Research Labs pages, the public Barchinet Campus project list, to link a project to its building.
+   signed in (/membership/status, the same check the sign-in page makes), so the header's right-hand "Sign in" can be
+   replaced by "My account" (the menu has one "Workspace" item, never a second one), and, on Research Labs pages, the
+   public Barchinet Campus project list, to link a project to its building.
    - Pages that already carry the main site header (.site-header with #navigation) keep it (static nav and footer).
    - Every other public page (Research Labs apps, policy pages) gets the slim global bar and the same footer, so a
      visitor can always get back to the rest of the site.
@@ -75,22 +76,25 @@
     if (path.startsWith('/education/research-labs/')) campusLinks(nav, signedIn);
   }
 
-  // Signed in with an approved membership: "Sign in" becomes "My workspace", in this bar or in the main site header,
-  // and "Workspace" (menu and footer) goes straight to the workspace instead of through sign-in.
+  // Signed in (a member, an owner, or a guest account): "Sign in" is replaced by "My account", in this bar or in the
+  // main site header; it opens the sign-in page, which shows the account and Sign out. For a member, "Workspace" (menu
+  // and footer) goes straight to the workspace instead of through sign-in. A guest account has no workspace, so its
+  // "Workspace" keeps going through the sign-in page, which explains that.
   // Any failure leaves "Sign in", which still works (the sign-in page sends a signed-in member on).
+  // Resolves to 'member', 'guest' or false.
   async function account() {
     try {
       const response = await fetch('/membership/status', { credentials: 'same-origin', redirect: 'error', signal: AbortSignal.timeout(8000) });
       if (!response.ok) return false;
-      const { signedIn } = await response.json();
-      if (signedIn !== true) return false;
-      document.querySelectorAll('a[data-bgc-workspace]').forEach(link => { link.href = workspace; });
+      const { signedIn, guest } = await response.json();
+      const role = signedIn === true ? 'member' : guest === true ? 'guest' : false;
+      if (!role) return false;
+      if (role === 'member') document.querySelectorAll('a[data-bgc-workspace]').forEach(link => { link.href = workspace; });
       document.querySelectorAll('a[data-bgc-account], .site-header nav a[href="/membership"]').forEach(link => {
-        link.href = workspace;
-        link.textContent = 'My workspace';
-        if (path.startsWith(workspace)) link.setAttribute('aria-current', 'page');
+        link.href = '/membership';
+        link.textContent = 'My account';
       });
-      return true;
+      return role;
     } catch { return false; }
   }
 
@@ -109,12 +113,14 @@
     if (!project) return;
     const title = typeof project.title === 'string' ? project.title.trim().slice(0, 120) : '';
     const join = '/workspace/projects/?tab=access&project=' + project.id;
-    const joinHref = await signedIn ? join : '/membership?' + new URLSearchParams({ next: join });
+    const role = await signedIn;
+    const joinHref = role === 'member' ? join : '/membership?' + new URLSearchParams({ next: join });
     const make = (tag, className, text) => { const node = document.createElement(tag); node.className = className; if (text) node.textContent = text; return node; };
     const see = make('a', 'bgc-campus-see', 'See it on Barchinet Campus');
     see.href = campus + '#project-' + project.slug;
     if (title) see.setAttribute('aria-label', 'See ' + title + ' on Barchinet Campus');
-    const joining = project.joinable === false ? null : make('a', 'bgc-campus-join', 'Join this project');
+    // Joining is for members: a guest account is not offered it.
+    const joining = project.joinable === false || role === 'guest' ? null : make('a', 'bgc-campus-join', 'Join this project');
     if (joining) { joining.href = joinHref; if (title) joining.setAttribute('aria-label', 'Join ' + title); }
     if (nav?.classList.contains('bgc-compact')) {
       // In a full-screen app the two links join the menu, under a heading, instead of taking space on the page.
