@@ -14,15 +14,19 @@
   const path = location.pathname;
   const campus = 'https://campus.barchinetglobal.com/';
   const workspace = '/workspace/projects/';
+  // The menu's "Workspace" opens the workspace. Signed out it opens sign-in first, which then continues to the workspace;
+  // once the visitor is known to be signed in, it goes straight there. (/workspace/ is the product page, linked from
+  // the pages that describe the product, not from the menu.)
+  const workspaceSignIn = '/membership?next=' + encodeURIComponent(workspace);
   // One list, in one order, on every page: the same items as the main site header.
   const links = [
-    ['/', 'Home'], ['/workspace/', 'Workspace'], [campus, 'Barchinet Campus'], ['/tools/', 'Tools'],
+    ['/', 'Home'], [workspaceSignIn, 'Workspace'], [campus, 'Barchinet Campus'], ['/tools/', 'Tools'],
     ['/education/research-labs/', 'Research Labs'], ['/research/', 'Research'], ['/future-habitats/', 'Future Habitats'],
     ['/about/', 'About / Contact'], ['/releases/', 'Project updates'], ['/membership', 'Sign in'],
   ];
   const current = href => (href === '/' ? path === '/' : href.startsWith('/') && path.startsWith(href)) ? ' aria-current="page"' : '';
-  const linkItems = links.map(([href, label]) => `<li><a href="${href}"${current(href)}${label === 'Sign in' ? ' data-bgc-account' : ''}>${label}</a></li>`).join('');
-  const footerHtml = `<div class="bgc-footer-grid"><div class="bgc-footer-brand"><a href="/" aria-label="Barchinet Global home"><img src="/assets/barchinet-global-logo.svg" alt="Barchinet Global" width="900" height="230" loading="lazy"></a><p>A habitat design ecosystem, from Earth to space</p></div><nav aria-label="Explore"><h2>Explore</h2><ul><li><a href="/workspace/">Workspace</a></li><li><a href="https://campus.barchinetglobal.com/">Barchinet Campus</a></li><li><a href="/tools/">Tools</a></li><li><a href="/education/research-labs/">Research Labs</a></li><li><a href="/research/">Research</a></li><li><a href="/future-habitats/">Future Habitats</a></li></ul></nav><nav aria-label="Company"><h2>Company</h2><ul><li><a href="/about/">About</a></li><li><a href="/about/#contact">Contact</a></li><li><a href="/releases/">Project updates</a></li><li><a href="/contributor-terms.html">Contributor terms</a></li><li><a href="/persian-pattern/">Persian Pattern</a></li></ul></nav><nav aria-label="Privacy"><h2>Privacy</h2><ul><li><a href="/website-privacy.html">Website privacy</a></li><li><a href="/privacy.html">App privacy policies</a></li></ul></nav></div><div class="bgc-footer-base"><p>© 2026 Barchinet Inc.</p><p>Research Labs prototypes use synthetic sample data.</p></div>`;
+  const linkItems = links.map(([href, label]) => `<li><a href="${href}"${label === 'Workspace' ? ' data-bgc-workspace' : current(href)}${label === 'Sign in' ? ' data-bgc-account' : ''}>${label}</a></li>`).join('');
+  const footerHtml = `<div class="bgc-footer-grid"><div class="bgc-footer-brand"><a href="/" aria-label="Barchinet Global home"><img src="/assets/barchinet-global-logo.svg" alt="Barchinet Global" width="900" height="230" loading="lazy"></a><p>A habitat design ecosystem, from Earth to space</p></div><nav aria-label="Explore"><h2>Explore</h2><ul><li><a href="${workspaceSignIn}" data-bgc-workspace>Workspace</a></li><li><a href="https://campus.barchinetglobal.com/">Barchinet Campus</a></li><li><a href="/tools/">Tools</a></li><li><a href="/education/research-labs/">Research Labs</a></li><li><a href="/research/">Research</a></li><li><a href="/future-habitats/">Future Habitats</a></li></ul></nav><nav aria-label="Company"><h2>Company</h2><ul><li><a href="/about/">About</a></li><li><a href="/about/#contact">Contact</a></li><li><a href="/releases/">Project updates</a></li><li><a href="/contributor-terms.html">Contributor terms</a></li><li><a href="/persian-pattern/">Persian Pattern</a></li></ul></nav><nav aria-label="Privacy"><h2>Privacy</h2><ul><li><a href="/website-privacy.html">Website privacy</a></li><li><a href="/privacy.html">App privacy policies</a></li></ul></nav></div><div class="bgc-footer-base"><p>© 2026 Barchinet Inc.</p><p>Research Labs prototypes use synthetic sample data.</p></div>`;
 
   // A disclosure: the button shows and hides the list; Escape closes it and returns focus to the button.
   function disclosure(container, toggle, outside) {
@@ -71,7 +75,8 @@
     if (path.startsWith('/education/research-labs/')) campusLinks(nav, signedIn);
   }
 
-  // Signed in with an approved membership: "Sign in" becomes "My workspace", in this bar or in the main site header.
+  // Signed in with an approved membership: "Sign in" becomes "My workspace", in this bar or in the main site header,
+  // and "Workspace" (menu and footer) goes straight to the workspace instead of through sign-in.
   // Any failure leaves "Sign in", which still works (the sign-in page sends a signed-in member on).
   async function account() {
     try {
@@ -79,6 +84,7 @@
       if (!response.ok) return false;
       const { signedIn } = await response.json();
       if (signedIn !== true) return false;
+      document.querySelectorAll('a[data-bgc-workspace]').forEach(link => { link.href = workspace; });
       document.querySelectorAll('a[data-bgc-account], .site-header nav a[href="/membership"]').forEach(link => {
         link.href = workspace;
         link.textContent = 'My workspace';
