@@ -11,12 +11,13 @@
 .bgc-links a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;color:#cdd9d3;border-bottom:2px solid transparent;white-space:nowrap}
 .bgc-links a:hover{color:#fff}
 .bgc-links a[aria-current]{color:#fff;border-bottom-color:var(--bgc-gold)}
-.bgc-toggle{display:none;margin-left:auto;min-height:36px;padding:0 12px;border:1px solid #47625f;border-radius:999px;background:transparent;color:inherit;font:inherit;cursor:pointer}
-@media(max-width:860px){
+.bgc-toggle{display:none;margin-left:auto;min-height:44px;padding:0 12px;border:1px solid #47625f;border-radius:999px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+/* Ten destinations: the menu button takes over below the width where they fit on one line. */
+@media(max-width:1180px){
   .bgc-toggle{display:inline-flex;align-items:center;gap:8px}
   .bgc-links{display:none;flex-basis:100%;flex-direction:column;align-items:stretch;gap:0;margin:0 0 10px;border-top:1px solid #2c4a4c}
   .bgc-bar.bgc-open .bgc-links{display:flex}
-  .bgc-links a{min-height:46px;padding:0 4px;border-bottom:1px solid #223f42}
+  .bgc-links a{display:flex;min-height:46px;padding:0 4px;border-bottom:1px solid #223f42}
   .bgc-links a[aria-current]{border-bottom-color:#223f42;box-shadow:inset 3px 0 0 var(--bgc-gold);padding-left:12px}
 }
 /* Main-site header: secondary links sit apart from the primary set. */
@@ -50,3 +51,35 @@
 .bgc-footer .analytics-policy-link{display:none}
 a.skip[style]:focus{left:12px!important;top:12px;z-index:100;background:#fff;color:#102c31;padding:12px 14px;border-radius:4px}
 video:focus-visible{outline:3px solid #ba671c;outline-offset:3px}
+
+/* Full-screen apps (html[data-chrome=compact]): one small menu button with the same destinations. */
+.bgc-compact{--bgc-dark:#102c31;--bgc-gold:#dfc29d;position:relative;z-index:2147483000;font:500 13px/1.4 Inter,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none;text-align:left}
+.bgc-compact *{box-sizing:border-box}
+.bgc-compact.bgc-float{position:fixed;left:max(12px,env(safe-area-inset-left));bottom:max(12px,env(safe-area-inset-bottom))}
+.bgc-compact.bgc-in-slot{display:inline-block}
+.bgc-compact-toggle{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid #47625f;border-radius:999px;background:var(--bgc-dark);color:#f1f5f2;font:inherit;cursor:pointer;box-shadow:0 6px 18px #0d24282e;white-space:nowrap}
+.bgc-compact-toggle img{width:16px;height:16px;filter:brightness(0) invert(1)}
+.bgc-compact-toggle:focus-visible,.bgc-compact-panel a:focus-visible{outline:3px solid #f0a35a;outline-offset:3px}
+.bgc-compact-panel{display:none;position:absolute;left:0;bottom:calc(100% + 8px);width:min(280px,calc(100vw - 24px));max-height:min(80vh,640px);overflow:auto;padding:6px;border-radius:14px;background:var(--bgc-dark);color:#e8eee9;box-shadow:0 18px 40px #0d242859}
+.bgc-compact.bgc-open .bgc-compact-panel{display:block}
+.bgc-compact-list{list-style:none;margin:0;padding:0}
+.bgc-compact-panel a{display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:8px;color:#dce6e1;text-decoration:none}
+.bgc-compact-panel a:hover{background:#21444c;color:#fff}
+.bgc-compact-panel a[aria-current]{color:#fff;box-shadow:inset 3px 0 0 var(--bgc-gold)}
+.bgc-campus-group{margin-top:6px;padding-top:6px;border-top:1px solid #2c4a4c}
+.bgc-campus-group .bgc-campus-label{margin:6px 12px 2px;color:var(--bgc-gold);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+/* A Research Labs project on Barchinet Campus: its building and joining, just before the footer. */
+.bgc-campus{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:18px max(20px,4%);background:#e9efe9;border-top:1px solid #cbd4cf;color:#173337;font:500 14px/1.4 Inter,"Segoe UI",Arial,sans-serif;letter-spacing:0;text-transform:none}
+.bgc-campus .bgc-campus-label{margin:0 auto 0 0;font-weight:650}
+.bgc-campus a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border-radius:999px;text-decoration:none;font-weight:600}
+.bgc-campus .bgc-campus-see{border:1px solid #102c31;color:#102c31;background:#fff}
+.bgc-campus .bgc-campus-join{background:#102c31;color:#fff;border:1px solid #102c31}
+.bgc-campus a:focus-visible{outline:3px solid #ba671c;outline-offset:3px}
+@media(max-width:600px){.bgc-campus .bgc-campus-label{flex-basis:100%}.bgc-campus a{flex:1 1 auto;justify-content:center}}
+@media print{.bgc-compact,.bgc-campus{display:none}}
+/* In an app's own status bar (a data-bgc-slot), the button fits the bar on pointer screens; on touch screens it keeps
+   its 44 px target and the bar grows to hold it. */
+.bgc-compact.bgc-in-slot .bgc-compact-toggle{box-shadow:none}
+@media(pointer:fine){.bgc-compact.bgc-in-slot .bgc-compact-toggle{min-height:26px;padding:0 10px;font-size:12px;gap:6px}.bgc-compact.bgc-in-slot .bgc-compact-toggle img{width:13px;height:13px}}
+/* The logo link is a 44 px target on touch screens like the rest of the menu. */
+@media(max-width:1300px){.site-header .brand{display:inline-flex;align-items:center;min-height:44px}}
