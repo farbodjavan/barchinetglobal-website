@@ -1,0 +1,5 @@
+# Barchinet Campus (campus.barchinetglobal.com). Its page is listed in the main site map.
+User-agent: *
+Allow: /
+
+Sitemap: https://barchinetglobal.com/sitemap.xml

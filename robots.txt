@@ -1,0 +1,5 @@
+# Barchinet Global. The public pages are listed in the site map. Sign-in and the project workspaces answer with noindex.
+User-agent: *
+Allow: /
+
+Sitemap: https://barchinetglobal.com/sitemap.xml
